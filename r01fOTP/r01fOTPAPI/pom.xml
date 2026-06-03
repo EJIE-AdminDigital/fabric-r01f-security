@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<!-- ====================================================================== -->
+<!-- PARENT                                                                 -->
+<!-- ====================================================================== -->
+	<parent>
+		<groupId>r01.fabric.security.otp</groupId>
+		<artifactId>r01fOTP</artifactId>
+		<version>${revision}</version>
+	</parent>
+
+<!-- ====================================================================== -->
+<!-- ARTIFACT                                                               -->
+<!-- ====================================================================== -->
+	<groupId>r01.fabric.security.otp.api</groupId>
+	<name>r01fOTPAPI</name>
+	<artifactId>r01fOTPAPI</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>r01fOTPModelClasses</module>
+		<module>r01fOTPAPIClasses</module>
+		<module>r01fOTPAPIBootstrapGuiceClasses</module>
+		<module>r01fOTPAPIBootstrapSpringClasses</module>
+		
+	</modules>
+</project>

@@ -1,0 +1,37 @@
+package r01f.model.security.user;
+
+import lombok.experimental.Accessors;
+import r01f.model.search.SearchResultItemForModelObjectBase;
+import r01f.objectstreamer.annotations.MarshallField;
+
+@Accessors(prefix="_")
+public class SearchResultItemForUserBase<U extends User>
+	 extends SearchResultItemForModelObjectBase<U> {
+
+	private static final long serialVersionUID = 5613644249628044322L;
+/////////////////////////////////////////////////////////////////////////////////////////
+//	FIELDS
+/////////////////////////////////////////////////////////////////////////////////////////
+	@MarshallField(as="user")
+	protected U _user; 
+/////////////////////////////////////////////////////////////////////////////////////////
+//	CONSTRUCTOR
+/////////////////////////////////////////////////////////////////////////////////////////
+	public SearchResultItemForUserBase(final Class<U> userType) {
+		super(userType);
+	}
+	public SearchResultItemForUserBase(final U user) {
+		super(user);
+		_user = user;
+	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//	GET & SET
+/////////////////////////////////////////////////////////////////////////////////////////
+	public U getUser() {
+		return _user;
+	}
+	public void setUser(final U user) {
+		_user = user;
+		_setSearchResultItemDataFrom(user);
+	}
+}

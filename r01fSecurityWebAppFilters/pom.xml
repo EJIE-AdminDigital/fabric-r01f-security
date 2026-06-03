@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<!-- ====================================================================== -->
+<!-- PARENT                                                                 -->
+<!-- ====================================================================== -->
+	<parent>
+		<groupId>r01.fabric.security</groupId>
+		<artifactId>r01fSecurity</artifactId>
+		<version>${revision}</version>
+	</parent>
+<!-- ====================================================================== -->
+<!-- ARTIFACT                                                               -->
+<!-- ====================================================================== -->
+	<groupId>r01.fabric.security.webapp.filter</groupId>
+	<name>r01fSecurityWebAppFilters</name>
+	<artifactId>r01fSecurityWebAppFilters</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>r01fSecurityAuthorizationWebFilterClasses</module>
+		<module>r01fSecurityLoginWebFilterClasses</module>
+		<module>r01fSecurityJerseyWebFilterClasses</module>
+		<module>r01fSecurityAccessGrantedWebFilterClasses</module>
+	</modules>
+</project>

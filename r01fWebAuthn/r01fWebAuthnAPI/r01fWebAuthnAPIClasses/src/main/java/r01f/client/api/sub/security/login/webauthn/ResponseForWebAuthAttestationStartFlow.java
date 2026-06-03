@@ -1,0 +1,32 @@
+package r01f.client.api.sub.security.login.webauthn;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import r01f.model.security.SecurityObject;
+import r01f.objectstreamer.annotations.MarshallType;
+import r01f.types.StringBase64;
+
+/**
+ * When using [web attestation start flow]
+ */
+@MarshallType(as="responseForWebAuthAttestationStartFlow")
+@Accessors(prefix="_")
+public class ResponseForWebAuthAttestationStartFlow
+  implements SecurityObject {
+
+	private static final long serialVersionUID = -3134448127913644074L;
+/////////////////////////////////////////////////////////////////////////////////////////
+//	FIELDS
+/////////////////////////////////////////////////////////////////////////////////////////
+	@Getter @Setter StringBase64  _publicKeyCredentialCreateOptionAsBas64JSON;
+/////////////////////////////////////////////////////////////////////////////////////////
+//	CONSTRUCTOR & BUILDER
+/////////////////////////////////////////////////////////////////////////////////////////
+	public ResponseForWebAuthAttestationStartFlow() {
+		// default no-args constructor
+	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+}

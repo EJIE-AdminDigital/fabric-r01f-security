@@ -1,0 +1,11 @@
+package r01f.security.login.filter;
+
+public enum ApiKeyJWTAuthenticationError {
+	NOT_EXISTING_LOGIN,
+	NOT_VALID_JWT,
+	NOT_VERIFIED_JWT,
+	NULL_JWT_BEARER,
+	NOT_EXISTING_USER,
+	INVALID_KEY_OR_ALGORITHM,
+	INTERNAL;
+}

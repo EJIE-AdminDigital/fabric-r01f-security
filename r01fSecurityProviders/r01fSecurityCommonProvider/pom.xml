@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<!-- ====================================================================== -->
+<!-- PARENT                                                                 -->
+<!-- ====================================================================== -->
+	<parent>
+		<groupId>r01.fabric.security.providers</groupId>
+		<artifactId>r01fSecurityProviders</artifactId>
+		<version>${revision}</version>
+	</parent>
+<!-- ====================================================================== -->
+<!-- ARTIFACT                                                               -->
+<!-- ====================================================================== -->
+
+	<groupId>r01.fabric.security.providers.common</groupId>
+	<name>r01fSecurityCommonProvider</name>
+	<artifactId>r01fSecurityCommonProvider</artifactId>
+	<packaging>pom</packaging>
+
+<!-- ====================================================================== -->
+<!-- MODULES                                                                -->
+<!-- ====================================================================== -->
+	<modules>	
+		<module>r01fSecurityProviderBaseClasses</module>	
+		<module>r01fSecurityProviderBootstrapGuiceClasses</module>	
+		<module>r01fSecurityProviderBootstrapSpringClasses</module>			
+	</modules>
+
+</project>
+

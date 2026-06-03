@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<!-- ====================================================================== -->
+<!-- PARENT                                                                 -->
+<!-- ====================================================================== -->
+	<parent>
+		<groupId>r01.fabric.security.idbrokers</groupId>
+		<artifactId>r01fSecurityIdentityBrokers</artifactId>
+		<version>${revision}</version>
+	</parent>
+<!-- ====================================================================== -->
+<!-- ARTIFACT                                                               -->
+<!-- ====================================================================== -->
+	<name>r01fSecurityKeycloakIdBrokerClasses</name>
+	<artifactId>r01fSecurityKeycloakIdBrokerClasses</artifactId>
+
+<!-- ====================================================================== -->
+<!-- DEPENDENCIES                                                           -->
+<!-- ====================================================================== -->
+	<dependencies>
+	
+	   
+		<!-- ///////////////////////////////////////// -->
+		<!-- Keycloak                                  -->
+		<!-- ///////////////////////////////////////// -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>26.0.8</version>
+            <!-- Important to avoid problems with Jackason 3 !-->
+			
+        	
+        </dependency>
+
+		<!-- ///////////////////////////////////////// -->
+		<!-- R01F: Business Web Common Classes          -->
+		<!-- ///////////////////////////////////////// -->
+		<dependency>
+			<groupId>r01.fabric.businessservices.core</groupId>
+			<artifactId>r01fBusinessRESTServicesCoreClasses</artifactId>
+			<version>${r01f.businessservices.version}</version>
+		</dependency>
+		<!-- ///////////////////////////////////////// -->
+		<!-- R01F: Security                            -->
+		<!-- ///////////////////////////////////////// -->
+		<dependency>
+			<groupId>r01.fabric.security.api</groupId>
+			<artifactId>r01fSecurityAPIClasses</artifactId>
+			<version>${revision}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>r01.fabric.security.tokens</groupId>
+			<artifactId>r01fJWTClasses</artifactId>
+			<version>${revision}</version>
+		</dependency>
+		<!-- ///////////////////////////////////////// -->
+		<!-- ServletAPI                                -->
+		<!-- ///////////////////////////////////////// -->
+		<!-- [r01fWebProfileClasses] has SevletAPI as a dependency,
+			 ... BUT it's SCOPE is PROVIDED so it has to be defined
+			     here again -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>		<!-- BEWARE!!! -->
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-shade-plugin</artifactId>
+			<version>3.6.2</version>
+		</dependency>
+	</dependencies>
+
+<!-- ====================================================================== -->
+<!-- BUILD                                                                  -->
+<!-- ====================================================================== -->
+	<build>
+		
+		<!---
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							
+							
+							<shadedArtifactAttached>false</shadedArtifactAttached> <createDependencyReducedPom>true</createDependencyReducedPom>
+							<relocations>
+								<relocation>
+									<pattern>com.fasterxml.jackson</pattern>
+									<shadedPattern>internal.keycloak.jackson</shadedPattern>
+								</relocation>
+							</relocations>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		-->
+	</build>
+		
+	
+</project>
+
