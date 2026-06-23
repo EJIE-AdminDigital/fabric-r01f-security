@@ -1,9 +1,11 @@
 package r01f.security.keycloak.model.clients;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.debug.Debuggable;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
 import r01f.security.keycloak.model.KeycloakRequestResultBase;
@@ -14,12 +16,14 @@ import r01f.security.keycloak.model.KeycloakRequestedOperation;
  * A result object from a request.
  */
 @Accessors(prefix="_")
+@NoArgsConstructor
 public abstract class KeycloakClientRequestResultBase<SELF_TYPE extends KeycloakClientRequestResultBase<SELF_TYPE>>
      extends KeycloakRequestResultBase<SELF_TYPE>
 	implements Debuggable {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
+	@MarshallField(as="clientOid")
 	@Getter @Setter protected  KeycloakClientOID _clientOid;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR

@@ -1,23 +1,23 @@
-package r01f.core.security.rest.bootstrap;
+package r01f.core.security.providers.bootstrap.guice;
 
 import com.google.inject.Module;
 
 import r01f.services.ids.ServiceIDs.CoreAppCode;
 
 
-public class RESTSecurityProvidersSecretConfigModule
-    extends RESTSecurityProvidersSecretConfigModuleBase
+public class SecurityProvidersSecretConfigGuiceModule
+    extends SecurityProvidersSecretConfigGuiceModuleBase
 		implements Module {
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-    protected RESTSecurityProvidersSecretConfigModule(final CoreAppCode coreAppCode) {
+    protected SecurityProvidersSecretConfigGuiceModule(final CoreAppCode coreAppCode) {
 		super(coreAppCode);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 // CREATE
 /////////////////////////////////////////////////////////////////////////////////////////
-    public static RESTSecurityProvidersSecretConfigModule createFor(final  CoreAppCode coreAppCode ) {
-    	return new  RESTSecurityProvidersSecretConfigModule(coreAppCode);
+    public static SecurityProvidersSecretConfigGuiceModule createFor(final  CoreAppCode coreAppCode ) {
+    	return new  SecurityProvidersSecretConfigGuiceModule(coreAppCode);
     }
 }

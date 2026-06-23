@@ -1,7 +1,10 @@
 package r01f.security.keycloak.model.auth;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallField;
+import r01f.objectstreamer.annotations.MarshallType;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakClientID;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
@@ -30,18 +33,24 @@ The model encapsulates four critical pieces of information required by Keycloak 
  */
 
 @Accessors(prefix = "_")
+@MarshallType(as="keycloakUserAuthTokenRequest")
+@NoArgsConstructor
 public class KeycloakUserAuthTokenRequest
 		extends KeycloakUserAuthRequestBase {
     
 	// [ User Identity ]
-    @Getter private final KeycloakUserID _userId;
-    @Getter private final Password _userPassword;
-    
+    @MarshallField(as="userId")
+    @Getter private KeycloakUserID _userId;
+    @MarshallField(as="userPassword")
+    @Getter private Password _userPassword;
+
 
     // [ Client Application Identity ]
-    @Getter private final KeycloakClientID _clientId;
-    @Getter private final Password _clientPassword;  // Opcional, según el tipo de cliente
-    
+    @MarshallField(as="clientId")
+    @Getter private KeycloakClientID _clientId;
+    @MarshallField(as="clientPassword")
+    @Getter private Password _clientPassword;  // Opcional, según el tipo de cliente
+
 ////////////////////////////////////////////////////////////////////////
 /// CONSTRUCTOR
 ////////////////////////////////////////////////////////////////////////

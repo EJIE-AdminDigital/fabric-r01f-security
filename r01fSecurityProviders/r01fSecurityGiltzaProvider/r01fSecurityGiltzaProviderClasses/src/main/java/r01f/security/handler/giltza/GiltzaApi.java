@@ -20,10 +20,16 @@ import r01f.httpclient.HttpRequestBodyPublisherForURLEncodedForm;
 import r01f.httpclient.HttpRequestFormParameterForText;
 import r01f.httpclient.HttpResponseCode;
 import r01f.httpclient.HttpResponseResult;
+import r01f.httpclient.HttpSSLContextBuilder;
+import r01f.internal.Env;
 import r01f.mime.MimeTypes;
+import r01f.security.handler.giltza.GiltzaApi.GiltzaJSonFieldAccessor;
 import r01f.security.provider.SecurityProviderException;
 import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.user.giltza.GiltzaUserData;
+import r01f.security.user.giltza.GiltzaUserDataBuilder;
 import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.types.contact.EMail;
 import r01f.types.contact.PersonID;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
@@ -68,7 +74,7 @@ import r01f.util.types.Strings;
 			// Load Giltza SecurityProvideConfigData ( key | oauth2callback | authorizationCodeURI)
 			String key = _securityProviderSecretConfig.getProperty("key").asString();
 			Url oauth2callback =  _securityProviderSecretConfig.getProperty("oauth2callback").asUrl();
-			authorizationCodeURI = _securityProviderSecretConfig.getProperty("authorizationCodeURI").asUrl();
+			authorizationCodeURI = _securityProviderSecretConfig.getProperty("authorization-code-uri").asUrl();
 			String state = StringEncodeUtils.encodeBase64(finalTargetUri.asString()).toString();
 			// Compose required params for authorization code uri.
 			List<UrlQueryStringParam> queryRequiredParams  = Lists.newArrayList();
@@ -118,7 +124,7 @@ import r01f.util.types.Strings;
 	 * @return
 	 */
 	public SecurityToken getGiltzaAccessTokenUsing(final String authoritationCode) {
-		log.info(" _getGiltzaAccessTokenUsing {}",authoritationCode);
+		log.warn(" _getGiltzaAccessTokenUsing {}",authoritationCode);
 		HttpResponseResult accessTokenResponse = this.getGiltzaAccessTokenHttpResponseUsing(authoritationCode);
 		if (!accessTokenResponse.getCode().isIn(HttpResponseCode.OK)) {
 			String errorStream = accessTokenResponse.loadAsString();
@@ -143,7 +149,7 @@ import r01f.util.types.Strings;
 	 * @return
 	 */
 	public HttpResponseResult getGiltzaAccessTokenHttpResponseUsing(final String authorizationCode) {
-		Url accessTokenURI = _securityProviderSecretConfig.getProperty("accessTokenURI").asUrl();
+		Url accessTokenURI = _securityProviderSecretConfig.getProperty("access-token-uri").asUrl();
 		String key = _securityProviderSecretConfig.getProperty("key").asString();
 		String  secret = _securityProviderSecretConfig.getProperty("secret").asString();
 		Url oauth2callback =  _securityProviderSecretConfig.getProperty("oauth2callback").asUrl();
@@ -163,8 +169,7 @@ import r01f.util.types.Strings;
 												  		      .build())
 					  						 .build();
 	      // .. do the request
-			HttpResponse<InputStream> response = HttpClient.newBuilder()
-														   .build()
+			HttpResponse<InputStream> response =  _httpClient()
 														   .send(request,
 													             HttpResponse.BodyHandlers.ofInputStream());
 
@@ -185,24 +190,24 @@ import r01f.util.types.Strings;
 //	USER INFO
 /////////////////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Using an [access token] returned by goole gets the user info detailed by scopes.
+	 * Using an [access token] returned by giltza gets the user info detailed by scopes.
 	 * @param accessToken
 	 * @return
 	 */
 	public HttpResponseResult getGiltzaUserInfoHttpResponseUsing(final SecurityToken accessToken) {
-		Url userInfoUrl = _securityProviderSecretConfig.getProperty("userInfoURI").asUrl();
+		Url userInfoUrl = _securityProviderSecretConfig.getProperty("user-info-uri").asUrl();
 		try {
-			log.info("Get [Giltza user info] at {} (NO PROXY)",
+			log.warn("Get [Giltza user info] at {} (NO PROXY)",
 					  userInfoUrl);
 			 HttpRequest request = HttpRequest.newBuilder()
 												  .uri(userInfoUrl.asUri())
 												  .header("Authorization", "Bearer " + accessToken)
 												  .GET()
 											  .build();
-			 HttpResponse<InputStream> response = HttpClient.newBuilder()
-															.build()
+			 HttpResponse<InputStream> response =  _httpClient()
 																.send(request,
 																      HttpResponse.BodyHandlers.ofInputStream());
+			
 			return new HttpResponseResult(response);
 		} catch (final Throwable th) {
 			log.error("Could NOT access Giltza url at {} (using proxy={}): {}",
@@ -215,6 +220,21 @@ import r01f.util.types.Strings;
 					  											th.getLocalizedMessage()),
 					  						    th);
 		}
+	}
+	/**
+	 * Using an [access token] returned by giltza gets the user .
+	 * @param accessToken
+	 * @return
+	 */
+	public GiltzaUserData getGiltzaUserInfoUsing(final SecurityToken accessToken) {
+		HttpResponseResult result =  getGiltzaUserInfoHttpResponseUsing( accessToken);
+		if (result.isSuccess()) {
+			return _from(result.loadAsString());
+		} 
+		throw new SecurityProviderException(Throwables.message("Could NOT access Giltza USER info, error/data {}",
+					                                               result.loadAsString()));
+	    
+		
 	}
 	/**
 	 * Using an [access token] returned by goole gets the user email.
@@ -238,6 +258,53 @@ import r01f.util.types.Strings;
 		String dniAsString = this.fieldsAccessorFor(userInfoResponseStr)
 								   .getValueOfFieldNamed("dni");
 		return PersonID.forId(dniAsString);
+	}
+	
+	@SuppressWarnings("static-method")
+	private  HttpClient _httpClient() {
+		Env env = Env.guessFromSystemProps();
+		if (env.isNOT(Env.LOC)) {
+			return HttpClient.newBuilder()
+							 .build();
+		}
+		try {
+			log.warn(" >>> [Warn! ] Build ssl context for untrusted certs. Just for local environment  ");;
+			return HttpClient.newBuilder()
+			                 	.sslContext(HttpSSLContextBuilder.buildSSlContextForUnstrustedCerts())
+			                 .build();
+		} catch (final Throwable e) {
+			throw new SecurityProviderException(e.getLocalizedMessage());
+		}
+	}
+	
+	
+	private GiltzaUserData _from (final String userInfoResponseAsJson) {
+
+		GiltzaJSonFieldAccessor jsonFieldAccessor = this.fieldsAccessorFor(userInfoResponseAsJson);
+		EMail mail = (  jsonFieldAccessor.getValueOfFieldNamed("email") != null ) ?
+				                          EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email")):null;
+
+		String givenName = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
+				                                jsonFieldAccessor.getValueOfFieldNamed("given_name"):null;
+
+		String familyName =  jsonFieldAccessor.getValueOfFieldNamed("family_name") != null ?
+				                  jsonFieldAccessor.getValueOfFieldNamed("family_name") : null;
+
+		PersonID dni =   jsonFieldAccessor.getValueOfFieldNamed("dni") != null ?
+				                             PersonID.forId(jsonFieldAccessor.getValueOfFieldNamed("dni")) : null;
+
+		String displayName = Strings.customized("{} {}",
+												givenName,familyName);
+
+		// [N] - Return the giltzaUserData
+		GiltzaUserData giltzaUserData =
+				   GiltzaUserDataBuilder.forPersonId(dni)
+										 .givenName(givenName)
+										 .familiyName(familyName)
+										 .andDisplayName(displayName)
+										 .withMail(mail)
+									 .build();
+		return giltzaUserData;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	GiltzaJSonFieldAccessor
@@ -264,4 +331,7 @@ import r01f.util.types.Strings;
 			return value;
 		}
 	}
+	
+	
+	
 }

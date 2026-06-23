@@ -38,7 +38,9 @@ public class KeycloakToClientModelTransferDelegate {
     	KeycloakClientModel clientModel= new KeycloakClientModel();
         clientModel.setOid(KeycloakClientOID.forId(client.getId()));
         clientModel.setName(client.getName());
-        clientModel.setSecret(SecurityToken.forId(client.getSecret()));
+        if (client.getSecret() != null) {
+            clientModel.setSecret(SecurityToken.forId(client.getSecret()));
+        }
         clientModel.setClientId(KeycloakClientID.forId(client.getClientId()));
         clientModel.setEnabled(client.isEnabled());
         return clientModel;

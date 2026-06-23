@@ -98,7 +98,7 @@ public class KeycloakManagementServicesForUsersImpl
 	            newUserResource.resetPassword(passwordCred);
 		        return new KeycloakUserCreateResult(postRequest.getRealm(), model);
 		    }		    
-		   // log.error("Failed to create Keycloak user. HTTP Status: {}", response.getStatus());
+		     log.error("Failed to create Keycloak user. HTTP Status: {}", response.getStatus());
 		    return null;
 		    
 		} finally {

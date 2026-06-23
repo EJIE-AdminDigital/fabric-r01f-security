@@ -78,16 +78,16 @@ public abstract class SecurityProviderConfigBase {
 	}
 	private static void _debugProperties(final Properties props) {
 		if (props == null) {
-			log.debug("NO url vars");
+			log.warn("NO url vars");
 		} else {
-			if (log.isDebugEnabled()) {
-				log.debug("URL vars:");
-				Set<Entry<Object,Object>> entries = props.entrySet();
-				for (Entry<Object,Object> entry : entries) {
-					log.debug("\t-{} = {}",
-							 entry.getKey(),entry.getValue());
-				}
+			
+			log.warn("URL vars:");
+			Set<Entry<Object,Object>> entries = props.entrySet();
+			for (Entry<Object,Object> entry : entries) {
+				log.warn("\t-{} = {}",
+						 entry.getKey(),entry.getValue());
 			}
+		
 		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -31,5 +31,6 @@
 		<module>r01fSecurityUserPasswordProvider</module>
 		<module>r01fSecurityPairedPhoneProvider</module>		
 		<module>r01fSecuritySAMLProvider</module>
+		<module>r01fSecurityOAuthProviderClasses</module>
 	</modules>
 </project>

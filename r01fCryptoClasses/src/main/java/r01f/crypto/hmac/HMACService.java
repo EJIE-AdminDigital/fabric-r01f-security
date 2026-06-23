@@ -1,14 +1,14 @@
-package r01f.crypto.hashing;
+package r01f.crypto.hmac;
 
 import r01f.securitycontext.SecurityIDS.SecurityToken;
 
-public interface HashingService {
+public interface HMACService {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////
-	public 	HashBase64 createHMAC(final SecurityToken key,
+	public 	HMACBase64 createHMAC(final SecurityToken key,
 			                      final CharSequence  data);
-	public 	HashBase64 createHMAC(final SecurityToken key,
+	public 	HMACBase64 createHMAC(final SecurityToken key,
 			                      final byte[]  data);
 /////////////////////////////////////////////////////////////////////////////////////////
 //	INNER CLASS

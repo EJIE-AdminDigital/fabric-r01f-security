@@ -1,4 +1,4 @@
-package r01f.crypto.hashing;
+package r01f.crypto.hmac;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -13,17 +13,17 @@ import r01f.securitycontext.SecurityIDS.SecurityToken;
 import r01f.types.StringBase64;
 
 @Accessors(prefix="_")
-public  class HashingServiceImpl
-		extends HashingServiceBase
-	implements HashingService  {
+public  class HMACServiceImpl
+		extends HMACServiceBase
+	implements HMACService  {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public HashingServiceImpl() {
-		super(HashAlgorithm.HMAC_SHA256, 
+	public HMACServiceImpl() {
+		super(HMACAlgorithm.HMAC_SHA256, 
 			  StandardCharsets.UTF_8);
 	}
-	public HashingServiceImpl(final HashAlgorithm hashAlgorithm,
+	public HMACServiceImpl(final HMACAlgorithm hashAlgorithm,
 			                  final Charset charSet) {
 		super(hashAlgorithm, 
 			  charSet);
@@ -40,7 +40,7 @@ public  class HashingServiceImpl
 	 * @throws SignerServiceException
 	 */
 	@Override
-	public HashBase64 createHMAC(final SecurityToken key,
+	public HMACBase64 createHMAC(final SecurityToken key,
 						         final byte[] data) {
 		return createHMAC(key,new String(data));
 	}
@@ -53,7 +53,7 @@ public  class HashingServiceImpl
 	 * @throws SignerServiceException
 	 */
 	@Override
-	public HashBase64 createHMAC(final SecurityToken key,
+	public HMACBase64 createHMAC(final SecurityToken key,
 						         final CharSequence data) {
 		byte[]  textToHash = data.toString().getBytes(_charSet); //ensure charset
 		byte[] hashedBytes = null;
@@ -76,7 +76,7 @@ public  class HashingServiceImpl
 
 		String hashedBytesAsBase64 =  new String( Base64.getEncoder().encode(hashedBytes));
 		// Return hash as base 64 and meta-data ( algo,tst, etc....
-		return new HashBase64(StringBase64.fromBase64EncodedString(hashedBytesAsBase64),
+		return new HMACBase64(StringBase64.fromBase64EncodedString(hashedBytesAsBase64),
 							  _charSet,
 							  _hashAlgorithm,
 							  Instant.now().toEpochMilli());

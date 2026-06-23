@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.model.ModelObject;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakClientID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
 import r01f.securitycontext.SecurityIDS.SecurityToken;
@@ -21,17 +22,22 @@ public class KeycloakClientModel
 //   FIELDS
 //////////////////////////////////////////////////////////////////////////////
 	/** Unique identifier of the client asigned by KeyCloak */
+    @MarshallField(as="oid")
     @Getter @Setter private KeycloakClientOID _oid;    
 
     /** Identifier assigned to the client in Keycloak. */
+    @MarshallField(as="clientId")
     @Getter @Setter private KeycloakClientID _clientId;
 
     /** Name of the client. */
+    @MarshallField(as="name")
     @Getter @Setter private String _name;
 
     /** Secret key associated with the client for secure communication. */
+    @MarshallField(as="secret")
     @Getter @Setter private SecurityToken _secret;
 
     /** Indicates whether the client is enabled or disabled. */
+    @MarshallField(as="enabled")
     @Getter @Setter private boolean _enabled;
 }

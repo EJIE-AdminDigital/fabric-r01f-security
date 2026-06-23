@@ -1,6 +1,8 @@
 package r01f.security.keycloak.model.auth;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.model.ModelObject;
@@ -13,6 +15,8 @@ import r01f.securitycontext.SecurityIDS.SecurityToken;
  * It contains information such as access token, refresh token, expiration times, and more.
  */
 @Accessors(prefix="_")
+@AllArgsConstructor
+@NoArgsConstructor
 public class KeycloakAuthRequestResponse
         implements ModelObject {
 	private static final long serialVersionUID = 8705295055496765302L;

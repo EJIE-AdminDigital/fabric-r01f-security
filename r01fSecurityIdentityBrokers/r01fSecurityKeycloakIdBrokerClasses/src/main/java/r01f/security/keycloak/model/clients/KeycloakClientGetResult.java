@@ -1,18 +1,22 @@
 package r01f.security.keycloak.model.clients;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakRequestedOperation;
 
 
 @Accessors(prefix="_")
+@NoArgsConstructor
 public class KeycloakClientGetResult
 	 extends KeycloakClientRequestResultBase<KeycloakClientGetResult> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	final @Getter KeycloakClientModel _clientModel;
+	@MarshallField(as="clientModel")
+	@Getter KeycloakClientModel _clientModel;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR / BUILDER
 /////////////////////////////////////////////////////////////////////////////////////////

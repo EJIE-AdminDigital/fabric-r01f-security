@@ -3,19 +3,23 @@ package r01f.security.keycloak.model.clients;
 import java.util.Collection;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakRequestResultBase;
 import r01f.security.keycloak.model.KeycloakRequestedOperation;
 
 
 @Accessors(prefix="_")
+@NoArgsConstructor
 public class KeycloakClientFetchResult
 	 extends KeycloakRequestResultBase<KeycloakClientFetchResult> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	final @Getter Collection<KeycloakClientModel> _clientModels;
+	@MarshallField(as="clientModels")
+	@Getter Collection<KeycloakClientModel> _clientModels;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR / BUILDER
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,10 @@
 package r01f.security.keycloak.model.auth;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import r01f.debug.Debuggable;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakRequestBase;
 
@@ -11,14 +13,17 @@ import r01f.security.keycloak.model.KeycloakRequestBase;
  * A response object from an auth request.
  */
 @Accessors(prefix="_")
+@NoArgsConstructor
 public  class KeycloakUserAuthRequestResult
      extends KeycloakRequestBase<KeycloakUserAuthRequestResult>
 	implements Debuggable {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	@Getter KeycloakAuthRequestResponse  _response;	
-	@Getter final String _error; //  'invalid_grant', 'account_disabled', etc.
+	@MarshallField(as="response")
+	@Getter KeycloakAuthRequestResponse  _response;
+	@MarshallField(as="error")
+	@Getter String _error; //  'invalid_grant', 'account_disabled', etc.
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////

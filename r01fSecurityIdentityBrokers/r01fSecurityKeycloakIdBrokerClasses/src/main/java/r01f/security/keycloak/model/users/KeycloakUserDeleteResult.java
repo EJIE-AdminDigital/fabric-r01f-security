@@ -1,18 +1,22 @@
 package r01f.security.keycloak.model.users;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakRequestedOperation;
 
 
 @Accessors(prefix="_")
+@NoArgsConstructor
 public class KeycloakUserDeleteResult
 	 extends KeycloakUserRequestResultBase<KeycloakUserDeleteResult> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	final @Getter KeycloakUserModel _userModel;
+	@MarshallField(as="userModel")
+	@Getter KeycloakUserModel _userModel;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR / BUILDER
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -23,4 +27,3 @@ public class KeycloakUserDeleteResult
 		_userModel = userModel;
 	}
 }
-

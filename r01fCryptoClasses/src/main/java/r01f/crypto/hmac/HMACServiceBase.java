@@ -1,4 +1,4 @@
-package r01f.crypto.hashing;
+package r01f.crypto.hmac;
 
 import java.nio.charset.Charset;
 
@@ -8,11 +8,11 @@ import lombok.experimental.Accessors;
 
 @Accessors(prefix="_")
 @RequiredArgsConstructor
-public abstract class HashingServiceBase
-		   implements HashingService  {
+public abstract class HMACServiceBase
+		   implements HMACService  {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
-	@Getter final HashAlgorithm _hashAlgorithm;
+	@Getter final HMACAlgorithm _hashAlgorithm;
 	@Getter final Charset _charSet;
 }

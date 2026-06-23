@@ -22,6 +22,8 @@ public class KeycloakClientAPI {
 //	
 /////////////////////////////////////////////////////////////////////////////////////////	
 	private final Keycloak _keycloakClient;
+	private final Keycloak _keycloakClientAdmin;
+	private final Keycloak _keycloakClientUser;
 	@SuppressWarnings("unused")
 	private final KeycloakClientConfig _config;
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -42,12 +44,14 @@ public class KeycloakClientAPI {
 			Throwables.throwUnchecked(new IllegalArgumentException("In order to create instance of KeyCloack"+ ", a client config, must be provided"));
 		}
 		_config  = config;
-		_keycloakClient = _buildKeyCloakClient(config);
-	
+		_keycloakClientAdmin = _buildKeyCloakClientAdmin(config);
+		_keycloakClientUser = _buildKeyCloakClientUser(config);
+		_keycloakClient = _keycloakClientAdmin;
+
 		// build every sub-api	
-		_forClientManagement  = new KeycloakClientAPIDelegateForClientsManagementServices (config, _keycloakClient);
-		_forUserManagement  =  new KeycloakClientAPIDelegateForUsersManagementServices(config, _keycloakClient);
-		_forUserAuth  = new KeycloakClientAPIDelegateForUsersAuthServices(config,_keycloakClient,marshaller);
+		_forClientManagement  = new KeycloakClientAPIDelegateForClientsManagementServices (config, _keycloakClientAdmin);
+		_forUserManagement  =  new KeycloakClientAPIDelegateForUsersManagementServices(config, _keycloakClientUser);
+		_forUserAuth  = new KeycloakClientAPIDelegateForUsersAuthServices(config,_keycloakClientUser,marshaller);
 	 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //  SUB-APIs
@@ -58,53 +62,48 @@ public class KeycloakClientAPI {
 /////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings("resource")
 	protected static Keycloak _buildKeyCloakClient(final KeycloakClientConfig config) {
-		// Checks if client config is not null KeycloakClientConfig
+		return _buildKeyCloakClientAdmin(config);
+	}
+
+	@SuppressWarnings("resource")
+	protected static Keycloak _buildKeyCloakClientAdmin(final KeycloakClientConfig config) {
 		if (config == null) {
 			Throwables.throwUnchecked(new IllegalArgumentException("In order to create instance of Keycloack, a client config, must be provided"));
 		}
-
-		// Minimun data for builder ( credentials & KeyCloak EnDpoint )
-		 //..but don't call to build before checking the rest of parameters.
-		/*KeycloakBuilder keycloakBuilder = 	KeycloakBuilder.builder()
-				                                           .realm(config.getRealm().asString());
-		
-		if (config.getKeycloakClientId() != null 
-				&& config.getKeycloakClientSecret() != null ) {
-			keycloakBuilder.clientId(config.getKeycloakClientId().asString());
-			keycloakBuilder.clientSecret(config.getKeycloakClientSecret().asString());
-			
-		} else {
-			Throwables.throwUnchecked(new IllegalArgumentException("not valid client-id or secret"));
+		if (config.getAdmin() == null) {
+			Throwables.throwUnchecked(new IllegalArgumentException("In order to create instance of Keycloack admin, an admin section config must be provided"));
 		}
-		// ...next check endpoint (use the just created client builder)
-		if (config.getEndPoint() != null) {
-			URI endPoint = null;
-			try {
-				endPoint = config.getEndPoint().asUrl().toURI();
-			} catch (final MalformedURLException |  URISyntaxException e) {
-				Throwables.throwUnchecked(new IllegalArgumentException(e.getLocalizedMessage()));
-			}
-			keycloakBuilder.serverUrl(endPoint.toString());
-		};
-		
-		keycloakBuilder.scope("client_credentials");
-		//keycloakBuilder.grantType("openid");
-		// return keycloak client.
-		Keycloak kcClient = keycloakBuilder.build();
-		return kcClient;*/
-		
-		
+
 		Keycloak keyCloak =  KeycloakBuilder.builder()
-							                .serverUrl(config.getEndPoint().asString())
-							                .realm(config.getRealm().asString())
-							                .clientId(config.getKeycloakClientId().asString())
-							                .clientSecret(config.getKeycloakClientSecret().asString())
+							                .serverUrl(config.getUrl().getUrl())
+							                .realm(config.getAdmin().getRealm().asString())
+							                .clientId(config.getAdmin().getClientId().asString())
+							                .clientSecret(config.getAdmin().getClientSecret().asString())
 							                .grantType("client_credentials")
 							                .scope("openid")
 							               .build();
-		
-		
-		
+		return keyCloak;
+	}
+
+	@SuppressWarnings("resource")
+	protected static Keycloak _buildKeyCloakClientUser(final KeycloakClientConfig config) {
+		if (config == null) {
+			Throwables.throwUnchecked(new IllegalArgumentException("In order to create instance of Keycloack, a client config, must be provided"));
+		}
+		if (config.getUser() == null) {
+			// Fallback to admin if user config is not specified
+			return _buildKeyCloakClientAdmin(config);
+		}
+
+		Keycloak keyCloak =  KeycloakBuilder.builder()
+							                .serverUrl(config.getUrl().getUrl())
+							                .realm(config.getUser().getRealm().asString())
+							                .clientId(config.getUser().getClientId().asString())
+							                .clientSecret(config.getUser().getClientSecret().asString())
+							                .grantType("client_credentials")
+							                .scope("openid")
+							               .build();
+
 		return keyCloak;
 	}
 

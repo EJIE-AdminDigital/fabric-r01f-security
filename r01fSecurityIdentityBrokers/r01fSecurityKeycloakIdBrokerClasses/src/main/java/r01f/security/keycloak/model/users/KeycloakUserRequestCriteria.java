@@ -4,12 +4,15 @@
 package r01f.security.keycloak.model.users;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallPolymorphicTypeInfo;
+import r01f.objectstreamer.annotations.MarshallType;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakUserOID;
 
+@MarshallPolymorphicTypeInfo(typeIdPropertyName = "type")
 public interface  KeycloakUserRequestCriteria {
 	
 	@SuppressWarnings("unchecked")
@@ -30,25 +33,31 @@ public interface  KeycloakUserRequestCriteria {
 	}
 	public default KeycloakUserID getKeycloakUserId() {
 		if (byId()) {
-			return  this.getKeycloakUserId();
+			return  ((KeycloakUserGetRequestCriteriaByID)this).getClientId();
 		}
 		throw new IllegalArgumentException(" is not a valid id");
 	}	
 	
-	@RequiredArgsConstructor
+	@MarshallType(as="userGetRequestCriteriaByID", typeId="byID")
+	@NoArgsConstructor
+	@AllArgsConstructor
 	@Accessors(prefix="_")
 	public static class KeycloakUserGetRequestCriteriaByID 
 		implements KeycloakUserRequestCriteria {
 		
-		@Getter  final protected KeycloakUserID _clientId;;
+		@r01f.objectstreamer.annotations.MarshallField(as="clientId")
+		@lombok.Getter @lombok.Setter protected KeycloakUserID _clientId;
 	}
 	
-	@RequiredArgsConstructor
+	@MarshallType(as="userGetRequestCriteriaByOID", typeId="byOID")
+	@NoArgsConstructor
+	@AllArgsConstructor
 	@Accessors(prefix="_")
 	public static class KeycloakUserGetRequestCriteriaByOID 
 		implements KeycloakUserRequestCriteria {
 		
-		@Getter  final protected KeycloakUserOID _clientOid;;
+		@r01f.objectstreamer.annotations.MarshallField(as="clientOid")
+		@lombok.Getter @lombok.Setter protected KeycloakUserOID _clientOid;
 	}
 		
 	}

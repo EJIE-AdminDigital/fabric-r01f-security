@@ -1,4 +1,4 @@
-package r01f.crypto.hashing;
+package r01f.crypto.hmac;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,8 +8,8 @@ import r01f.enums.EnumWithCode;
 
 @Accessors(prefix="_")
 @RequiredArgsConstructor(access=AccessLevel.PRIVATE)
-public enum HashAlgorithm
-   implements EnumWithCode<String,HashAlgorithm>{
+public enum HMACAlgorithm
+   implements EnumWithCode<String,HMACAlgorithm>{
 
 	HMAC_SHA256("hmacSha256"),
 	HMAC_SHA512("hmacSha512"),
@@ -23,8 +23,8 @@ public enum HashAlgorithm
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-	public static final HashAlgorithm fromCode(final String code) {
-		return EnumWithCode.fromCode(code, HashAlgorithm.class)
+	public static final HMACAlgorithm fromCode(final String code) {
+		return EnumWithCode.fromCode(code, HMACAlgorithm.class)
 			                .orElse(null);
 	}
 }

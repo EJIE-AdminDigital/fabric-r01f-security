@@ -1,4 +1,4 @@
-package r01f.core.security.rest.bootstrap;
+package r01f.core.security.providers.bootstrap.guice;
 
 import java.nio.charset.Charset;
 
@@ -29,7 +29,7 @@ import r01f.xmlproperties.XMLPropertiesForApp;
 import r01f.xmlproperties.XMLPropertiesForAppComponent;
 
 
-public abstract class RESTSecurityProvidersSecretConfigModuleBase
+public abstract class SecurityProvidersSecretConfigGuiceModuleBase
 		   implements Module {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
@@ -39,11 +39,11 @@ public abstract class RESTSecurityProvidersSecretConfigModuleBase
 /////////////////////////////////////////////////////////////////////////////////////////
 //	 CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	protected RESTSecurityProvidersSecretConfigModuleBase(final CoreAppCode coreAppCode,final CoreModule coreModule) {
+	protected SecurityProvidersSecretConfigGuiceModuleBase(final CoreAppCode coreAppCode,final CoreModule coreModule) {
 		_coreAppCode = coreAppCode;
 		_coreModule = coreModule;
 	}
-	protected RESTSecurityProvidersSecretConfigModuleBase(final CoreAppCode coreAppCode) {
+	protected SecurityProvidersSecretConfigGuiceModuleBase(final CoreAppCode coreAppCode) {
 		this(coreAppCode,
 			 null);
 	}

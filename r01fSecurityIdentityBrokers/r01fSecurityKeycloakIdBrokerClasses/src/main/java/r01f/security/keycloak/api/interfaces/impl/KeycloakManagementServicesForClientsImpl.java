@@ -10,6 +10,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import r01f.security.keycloak.api.interfaces.KeycloakManagementServicesForClients;
 import r01f.security.keycloak.client.api.KeycloakClientConfig;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
@@ -30,7 +31,8 @@ import r01f.security.keycloak.model.clients.KeycloakToClientModelTransferDelegat
 import r01f.securitycontext.SecurityIDS.SecurityToken;
 
 
-public class KeycloakManagementServicesForClientsImpl 
+@Slf4j
+public class KeycloakManagementServicesForClientsImpl
 		extends KeycloakServicesBaseImpl 
 	implements KeycloakManagementServicesForClients {
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +134,7 @@ public class KeycloakManagementServicesForClientsImpl
 	            return new KeycloakClientCreateResult(postRequest.getRealm(), model);
 	        }
 	        
-	       // log.error("Failed to create Keycloak client. HTTP Status: {}", response.getStatus());
+	        log.error("Failed to create Keycloak client '{}'. HTTP Status: {}", model.getClientId(), response.getStatus());
 	        return null;
 	        
 	    } finally {
@@ -184,13 +186,14 @@ public class KeycloakManagementServicesForClientsImpl
 		ClientsResource clientsResource = _keycloakAdminRestAPI.realm(deleteRequest.getRealm().asString()).clients();
 		ClientResource  clientResource =  _clientResource(clientsResource,deleteRequest.getCriteria());
 		if (clientResource == null) {
-			//log.error(" not found element to delete");
+			log.warn("Client not found to delete for criteria: {}", deleteRequest.getCriteria());
+			return null;
 		}
+		ClientRepresentation representation = clientResource.toRepresentation();
 		clientResource.remove();
-    	KeycloakClientModel model =  KeycloakToClientModelTransferDelegate.keycloakClientRepresentationToClientModel(clientResource.toRepresentation());	;
+    	KeycloakClientModel model =  KeycloakToClientModelTransferDelegate.keycloakClientRepresentationToClientModel(representation);
 		return new KeycloakClientDeleteResult(deleteRequest.getRealm(),model);
-	
-	}	
+	}
 	
      protected KeycloakClientFetchResult _fetch(final KeycloakClientFetchRequest fetchRequest) {		
 	    Collection<ClientRepresentation> clientRepresentations = _keycloakAdminRestAPI.realm(fetchRequest.getRealm().getId())

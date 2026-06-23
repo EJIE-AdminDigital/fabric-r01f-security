@@ -1,4 +1,4 @@
-package r01f.crypto.hashing;
+package r01f.crypto.hmac;
 import java.nio.charset.Charset;
 
 import lombok.Getter;
@@ -9,7 +9,7 @@ import r01f.types.StringBase64;
 
 @Accessors(prefix="_")
 @MarshallType(as="hash")
-public final class HashBase64 { // Used this name HashBase64.
+public final class HMACBase64 { // Used this name HashBase64.
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
@@ -29,7 +29,7 @@ public final class HashBase64 { // Used this name HashBase64.
 	 * HashAlgorithm
 	 */
 	@MarshallField(as="hashAlgorithm")
-	@Getter final HashAlgorithm _hashAlgorithm;
+	@Getter final HMACAlgorithm _hashAlgorithm;
 
 	/**
 	 * Timestamp
@@ -39,7 +39,7 @@ public final class HashBase64 { // Used this name HashBase64.
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public HashBase64(final StringBase64 base64String,final Charset charset,final HashAlgorithm alg,final long tst ) {
+	public HMACBase64(final StringBase64 base64String,final Charset charset,final HMACAlgorithm alg,final long tst ) {
 		_value  = base64String;
 		_hashAlgorithm = alg;
 		_charset = charset;

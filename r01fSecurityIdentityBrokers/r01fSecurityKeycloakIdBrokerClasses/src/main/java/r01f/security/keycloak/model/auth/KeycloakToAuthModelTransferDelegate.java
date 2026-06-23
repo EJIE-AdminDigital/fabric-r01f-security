@@ -14,9 +14,9 @@ public class KeycloakToAuthModelTransferDelegate {
         KeycloakAuthRequestResponse target = new KeycloakAuthRequestResponse();
 
         // Mapping tokens to [String -> SecurityToken]
-        target.setAccessToken(SecurityToken.from(source.getToken()));
-        target.setRefreshToken(SecurityToken.from(source.getRefreshToken()));
-        target.setIdToken(SecurityToken.from(source.getIdToken()));
+        target.setAccessToken(source.getToken() != null ? SecurityToken.from(source.getToken()) : null);
+        target.setRefreshToken(source.getRefreshToken() != null ? SecurityToken.from(source.getRefreshToken()) : null);
+        target.setIdToken(source.getIdToken() != null ? SecurityToken.from(source.getIdToken()) : null);
 
         // Mapping expiration times and policies.
         target.setExpiresIn((int) source.getExpiresIn());

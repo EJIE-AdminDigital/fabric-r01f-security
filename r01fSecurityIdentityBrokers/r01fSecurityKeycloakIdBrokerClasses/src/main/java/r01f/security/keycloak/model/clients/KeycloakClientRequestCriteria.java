@@ -7,12 +7,15 @@ package r01f.security.keycloak.model.clients;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallPolymorphicTypeInfo;
+import r01f.objectstreamer.annotations.MarshallType;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakClientID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
 
 /**
  * 	Interface  for locate a client using and oid or id
  */
+@MarshallPolymorphicTypeInfo(typeIdPropertyName = "type")
 public interface  KeycloakClientRequestCriteria {
 	
 	@SuppressWarnings("unchecked")
@@ -33,25 +36,31 @@ public interface  KeycloakClientRequestCriteria {
 	}
 	public default KeycloakClientID getKeycloakClientId() {
 		if (byId()) {
-			return  ((KeycloakClientGetRequestCriteriaByID)this).getKeycloakClientId();
+			return  ((KeycloakClientGetRequestCriteriaByID)this).getClientId();
 		}
 		throw new IllegalArgumentException(" is not a valida id");
 	}	
 	
-	@RequiredArgsConstructor
+	@MarshallType(as="clientGetRequestCriteriaByID", typeId="byID")
+	@lombok.NoArgsConstructor
+	@lombok.AllArgsConstructor
 	@Accessors(prefix="_")
 	public static class KeycloakClientGetRequestCriteriaByID 
 		implements KeycloakClientRequestCriteria {
 		
-		@Getter  final protected KeycloakClientID _clientId;;
+		@r01f.objectstreamer.annotations.MarshallField(as="clientId")
+		@lombok.Getter @lombok.Setter protected KeycloakClientID _clientId;
 	}
 	
-	@RequiredArgsConstructor
+	@MarshallType(as="clientGetRequestCriteriaByOID", typeId="byOID")
+	@lombok.NoArgsConstructor
+	@lombok.AllArgsConstructor
 	@Accessors(prefix="_")
 	public static class KeycloakClientGetRequestCriteriaByOID 
 		implements KeycloakClientRequestCriteria {
 		
-		@Getter  final protected KeycloakClientOID _clientOid;;
+		@r01f.objectstreamer.annotations.MarshallField(as="clientOid")
+		@lombok.Getter @lombok.Setter protected KeycloakClientOID _clientOid;
 	}
 		
 	}

@@ -1,8 +1,10 @@
 package r01f.security.keycloak.model.users;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import r01f.objectstreamer.annotations.MarshallField;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakUserOID;
@@ -12,9 +14,11 @@ import r01f.security.keycloak.model.users.KeycloakUserRequestCriteria.KeycloakUs
 
 
 @Accessors(prefix="_")
+@NoArgsConstructor
 public class KeycloakUserDeleteRequest
 	 extends KeycloakRequestBase<KeycloakUserDeleteRequest> {
 	
+	@MarshallField(as="criteria")
 	@Getter @Setter protected KeycloakUserRequestCriteria  _criteria;
 /////////////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTOR
