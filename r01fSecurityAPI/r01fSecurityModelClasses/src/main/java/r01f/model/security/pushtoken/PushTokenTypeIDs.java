@@ -8,36 +8,49 @@ import lombok.experimental.Accessors;
 import r01f.annotations.Immutable;
 import r01f.enums.EnumWithCode;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.securitycontext.SecurityIDS.SecurityIDBase;
+import r01f.securitycontext.SecurityIDS.IsSecurityObjectID;
 
-public class PushTokenTypeIDs {
+@NoArgsConstructor(access=AccessLevel.PRIVATE)
+public abstract class PushTokenTypeIDs {
 ///////////////////////////////////////////////////////////////////////////////////
 // TYPE ID
 /////////////////////////////////////////////////////////////////////////////////
 	@Immutable
 	@MarshallType(as="phoneTokenTypeID")
-	@NoArgsConstructor
-	public static class PushTokenTypeID
-		extends SecurityIDBase {
-	
-		private static final long serialVersionUID = -2133539237433417021L;
-		
-		public PushTokenTypeID(final String typeAsString) {
-			super(typeAsString);
+	public record PushTokenTypeID(@Getter String id)
+	   implements IsSecurityObjectID {
+	   
+		public static PushTokenTypeID from(final String typeAsString) {
+			return new PushTokenTypeID(typeAsString);
 		}
 		public static PushTokenTypeID forId(final String typeAsString) {
 			return new PushTokenTypeID(typeAsString);
 		}
+		public static PushTokenTypeID valueOf(final String typeAsString) {
+			return new PushTokenTypeID(typeAsString);
+		}
+		public static PushTokenTypeID fromString(final String typeAsString) {
+			return new PushTokenTypeID(typeAsString);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
+		}
 	}
-	
-	
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////	
 	@Accessors(prefix="_")
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 	public enum PhoneTokenTypes
 	 implements EnumWithCode<PushTokenTypeID,PhoneTokenTypes> {
 
 		PHONE (PushTokenTypeID.forId("phone")),
-		
 		CLIENT_INSTALLATION_OID(PushTokenTypeID.forId("client-intallation-oid"));
 
 		@Getter private final PushTokenTypeID  _code;

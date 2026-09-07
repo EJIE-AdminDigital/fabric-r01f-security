@@ -140,7 +140,10 @@ public class JWTParserImpl
 														  .map(key -> {
 																		CustomClaim cc = new CustomClaim();
 																		cc.setName(key);
-																		cc.setValue((String)claimSet.getClaim(key));
+																		Object claimValue = claimSet.getClaim(key);
+																		cc.setValue(claimValue instanceof String
+																						? (String) claimValue
+																						: (claimValue != null ? claimValue.toString() : null));
 																		return cc;
 																})
 														  .collect(Collectors.toList());

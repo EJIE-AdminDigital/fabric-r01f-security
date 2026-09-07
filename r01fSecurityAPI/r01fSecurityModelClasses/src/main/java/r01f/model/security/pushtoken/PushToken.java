@@ -10,8 +10,8 @@ public interface PushToken
 	public SystemID getSystemId();
 	public void setSystemId(final SystemID id);
 	
-	public PushTokenID getPushTokenId();
-	public void setPushTokenId(final PushTokenID id);
+	public IsPushTokenID getPushTokenId();
+	public void setPushTokenId(final IsPushTokenID id);
 	
 	public SecurityToken getToken();
 	public void setToken(final SecurityToken token);

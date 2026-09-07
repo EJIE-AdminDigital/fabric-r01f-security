@@ -32,13 +32,17 @@ public class GiltzaUserData
 
  	@MarshallField(as="name",
  				   whenXml=@MarshallFieldAsXml(attr=true))
-    @Getter @Setter private String  _givenName;
+    @Getter @Setter private String  _name;
 
- 	@MarshallField(as="surname",
+ 	@MarshallField(as="surname1",
+ 					   whenXml=@MarshallFieldAsXml(attr=true))
+    @Getter @Setter private String  _surname1;
+
+ 	@MarshallField(as="surname2",
  				   whenXml=@MarshallFieldAsXml(attr=true))
-    @Getter @Setter private String  _familyName;
+    @Getter @Setter private String  _surname2;
 
- 	@MarshallField(as="displayName",
+	@MarshallField(as="displayName",
  				   whenXml=@MarshallFieldAsXml(attr=true))
     @Getter @Setter private String  _displayName;
 /////////////////////////////////////////////////////////////////////////////////////////

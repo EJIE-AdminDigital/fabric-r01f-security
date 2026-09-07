@@ -5,12 +5,12 @@ import lombok.experimental.Accessors;
 import r01f.aspects.interfaces.dirtytrack.ConvertToDirtyStateTrackable;
 import r01f.model.IndexableModelObject;
 import r01f.model.PersistableModelObjectBase;
-import r01f.securitycontext.SecurityOIDs.SecurityObjectOID;
+import r01f.securitycontext.SecurityOIDs.IsSecurityObjectOID;
 
 @ConvertToDirtyStateTrackable
 @NoArgsConstructor
 @Accessors(prefix="_")
-public abstract class PersistableSecurityObjectBase<O extends SecurityObjectOID,
+public abstract class PersistableSecurityObjectBase<O extends IsSecurityObjectOID,
 												    SELF_TYPE extends PersistableSecurityObjectBase<O,SELF_TYPE>>
 			  extends PersistableModelObjectBase<O,SELF_TYPE>
 		   implements PersistableSecurityObject<O>,			// is persistable

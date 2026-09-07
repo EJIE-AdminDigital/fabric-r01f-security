@@ -53,6 +53,7 @@ public abstract class SecurityContextAuthenticatedActorBuilder
 												    SecurityProviderID.SAML,
 												    SecurityProviderID.PAIRED_PHONE,
 												    SecurityProviderID.XLNETS,
+												    SecurityProviderID.IDENTITY_BROKER,
 												    SecurityProviderID.OSAKIDETZA_AZURE_AD)) throw new IllegalArgumentException("Use " + SecurityContextAuthenticatedActorForUser.class.getSimpleName() + " for USER-related providers: " +
 												  																			    CollectionUtils.toStringCommaSeparated(SecurityProviderID.USER_PASSWORD,
 												  																					  								   SecurityProviderID.GOOGLE,

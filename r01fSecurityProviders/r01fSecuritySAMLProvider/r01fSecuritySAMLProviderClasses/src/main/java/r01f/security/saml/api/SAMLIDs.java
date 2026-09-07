@@ -1,9 +1,9 @@
 package r01f.security.saml.api;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
-import r01f.guids.OIDBaseMutable;
 import r01f.guids.OIDTyped;
 import r01f.objectstreamer.annotations.MarshallType;
 
@@ -16,33 +16,16 @@ public abstract class SAMLIDs {
 					extends OIDTyped<String> {
 		// just a marker interface
 	}
-	/**
-	 * Base for every SAML id objects
-	 */
-	@Immutable
-	@NoArgsConstructor
-	public static abstract class SAMLIDBase
-						 extends OIDBaseMutable<String>
-					  implements IsSAMLID {
-		private static final long serialVersionUID = 4162366466990455545L;
-
-		public SAMLIDBase(final String id) {
-			super(id);
-		}
-	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	SAML Issuer Nick > a "sort" saml issuer nick like okta or something like that
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Immutable
 	@MarshallType(as="samlIdPId")
-	@NoArgsConstructor
-	public static class SAMLIdPID
-				extends SAMLIDBase {
+	public record SAMLIdPID(@Getter String id)
+	   implements IsSAMLID {
 
-		private static final long serialVersionUID = 9190261083110952566L;
-
-		public SAMLIdPID(final String oid) {
-			super(oid);
+		public static SAMLIdPID from(final String id) {
+			return new SAMLIdPID(id);
 		}
 		public static SAMLIdPID forId(final String id) {
 			return new SAMLIdPID(id);
@@ -50,21 +33,47 @@ public abstract class SAMLIDs {
 		public static SAMLIdPID valueOf(final String id) {
 			return SAMLIdPID.forId(id);
 		}
+		public static SAMLIdPID fromString(final String id) {
+			return SAMLIdPID.forId(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
+		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	The SAML issuer id > ussually an uri
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Immutable
 	@MarshallType(as="samlIssuerId")
-	@NoArgsConstructor
-	public static class SAMLIssuerID
-				extends SAMLIDBase {
-		private static final long serialVersionUID = -5818330851015602242L;
-		public SAMLIssuerID(final String oid) {
-			super(oid);
+	public record SAMLIssuerID(@Getter String id)
+	   implements IsSAMLID {
+
+		public static SAMLIssuerID from(final String id) {
+			return new SAMLIssuerID(id);
 		}
 		public static SAMLIssuerID forId(final String id) {
 			return new SAMLIssuerID(id);
+		}
+		public static SAMLIssuerID valueOf(final String id) {
+			return new SAMLIssuerID(id);
+		}
+		public static SAMLIssuerID fromString(final String id) {
+			return new SAMLIssuerID(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -72,15 +81,29 @@ public abstract class SAMLIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Immutable
 	@MarshallType(as="samlRelyingPartyId")
-	@NoArgsConstructor
-	public static class SAMLRelyingPartyID
-				extends SAMLIDBase {
-		private static final long serialVersionUID = -5818330851015602242L;
-		public SAMLRelyingPartyID(final String oid) {
-			super(oid);
+	public record SAMLRelyingPartyID(@Getter String id)
+	   implements IsSAMLID {
+		
+		public static SAMLRelyingPartyID from(final String id) {
+			return new SAMLRelyingPartyID(id);
 		}
 		public static SAMLRelyingPartyID forId(final String id) {
 			return new SAMLRelyingPartyID(id);
+		}
+		public static SAMLRelyingPartyID valueOf(final String id) {
+			return new SAMLRelyingPartyID(id);
+		}
+		public static SAMLRelyingPartyID fromString(final String id) {
+			return new SAMLRelyingPartyID(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 }

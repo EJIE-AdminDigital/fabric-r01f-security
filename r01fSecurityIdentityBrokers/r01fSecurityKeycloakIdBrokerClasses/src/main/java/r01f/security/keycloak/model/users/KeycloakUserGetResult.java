@@ -22,7 +22,7 @@ public class KeycloakUserGetResult
 /////////////////////////////////////////////////////////////////////////////////////////
 	public KeycloakUserGetResult(final KeycloakRealm realm,final KeycloakUserModel userModel) {
 		super(realm,
-			  userModel.getUserOid(),userModel.getUserId(),
+			  userModel.getOid(),userModel.getId(),
 			  KeycloakRequestedOperation.GET);
 		_userModel = userModel;
 	}

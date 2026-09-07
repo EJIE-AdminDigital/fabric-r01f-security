@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import r01f.model.PersistableModelObjectBase;
 import r01f.model.security.keystore.key.PublicKey;
 import r01f.model.security.keystore.oids.KeystoreOIDs.KeystoreOID;
-import r01f.model.security.keystore.oids.KeystoreOIDs.KeystoreObjectOID;
+import r01f.model.security.keystore.oids.KeystoreOIDs.IsKeystoreObjectOID;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
 /**
@@ -18,7 +18,7 @@ import r01f.objectstreamer.annotations.MarshallType;
 @NoArgsConstructor
 @Accessors(prefix="_")
 @MarshallType(as="keystore")
-public class KeystoreBase<O extends KeystoreObjectOID, SELF_TYPE extends KeystoreBase<O, SELF_TYPE>>
+public class KeystoreBase<O extends IsKeystoreObjectOID, SELF_TYPE extends KeystoreBase<O, SELF_TYPE>>
 	 extends PersistableModelObjectBase<KeystoreOID, SELF_TYPE>
   implements KeystorePersistableObject {
 

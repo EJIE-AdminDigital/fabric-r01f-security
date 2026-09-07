@@ -46,8 +46,8 @@ public abstract class LoginAuthFactorHandlerUsingOTPImplBase<U extends User & Ha
                                              	  final OTPService otpService ) {		
 		 super(coreCfg,
 			   userCrud);
-		_authFactorTaskServicesForOTPWithMail = new LoginAuthFactorTaskServicesUsingOTPByEMail(coreCfg.getCoreAppCode(),otpService);
-		_authFactorTaskServicesForOTPWithSMS =  new LoginAuthFactorTaskServicesUsingOTPBySMS(coreCfg.getCoreAppCode(),otpService);
+		_authFactorTaskServicesForOTPWithMail = new LoginAuthFactorTaskServicesUsingOTPByEMail(coreCfg.getCoreAppCode().asAppCode(),otpService);
+		_authFactorTaskServicesForOTPWithSMS =  new LoginAuthFactorTaskServicesUsingOTPBySMS(coreCfg.getCoreAppCode().asAppCode(),otpService);
 	}	
 /////////////////////////////////////////////////////////////////////////////////////////
 //	METHODS TO IMPLEMENT

@@ -25,7 +25,7 @@ public class SecurityNotifierConfigForVoice
 	public SecurityNotifierConfigForVoice(final CoreAppCode coreAppCode,
 										  final Path msgTemplatePath) {
 		super(NotifierType.VOICE,
-			  coreAppCode);
+			  coreAppCode.asAppCode());
 		_msgTemplatePath = msgTemplatePath;
 	}
 	public SecurityNotifierConfigForVoice(final XMLPropertiesForAppComponent props) {

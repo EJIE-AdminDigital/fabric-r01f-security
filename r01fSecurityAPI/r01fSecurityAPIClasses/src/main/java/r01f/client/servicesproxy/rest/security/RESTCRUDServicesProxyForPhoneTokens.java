@@ -4,7 +4,7 @@ import r01f.api.interfaces.security.pushtoken.CRUDServicesForPushToken;
 import r01f.guids.CommonOIDs.SystemID;
 import r01f.model.persistence.CRUDResult;
 import r01f.model.security.pushtoken.PushToken;
-import r01f.model.security.pushtoken.PushTokenID;
+import r01f.model.security.pushtoken.IsPushTokenID;
 import r01f.model.security.pushtoken.PushTokenOID;
 import r01f.objectstreamer.Marshaller;
 import r01f.securitycontext.SecurityContext;
@@ -31,7 +31,7 @@ public abstract class RESTCRUDServicesProxyForPhoneTokens<T extends PushToken>
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
 	public CRUDResult<T> loadBy(final SecurityContext securityContext,
-								final  PushTokenID id, 
+								final  IsPushTokenID id, 
 								final SystemID systemOid) {
 		throw new UnsupportedOperationException("Not implemented!!");
 	}

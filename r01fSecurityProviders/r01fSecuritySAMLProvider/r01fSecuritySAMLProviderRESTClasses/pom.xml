@@ -4,32 +4,32 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-<!-- ====================================================================== -->
-<!-- PROPERTIES                                                             -->
-<!-- ====================================================================== -->
+	<!-- ====================================================================== -->
+	<!-- PROPERTIES                                                             -->
+	<!-- ====================================================================== -->
 	<properties>
 		<!-- Dependencies versions -->
 		<!-- opensaml 4.0.1 requires JDK > 11 (for jdk8 use 3.4.6) -->
 		<opensaml.version>4.0.1</opensaml.version>
 	</properties>
 
-<!-- ====================================================================== -->
-<!-- PARENT                                                                 -->
-<!-- ====================================================================== -->
+	<!-- ====================================================================== -->
+	<!-- PARENT                                                                 -->
+	<!-- ====================================================================== -->
 	<parent>
 		<groupId>r01.fabric.security.providers.saml</groupId>
 		<artifactId>r01fSecuritySAMLProvider</artifactId>
 		<version>${revision}</version>
 	</parent>
-<!-- ====================================================================== -->
-<!-- ARTIFACT                                                               -->
-<!-- ====================================================================== -->
+	<!-- ====================================================================== -->
+	<!-- ARTIFACT                                                               -->
+	<!-- ====================================================================== -->
 	<name>r01fSecuritySAMLProviderRESTClasses</name>
 	<artifactId>r01fSecuritySAMLProviderRESTClasses</artifactId>
 
-<!-- ====================================================================== -->
-<!-- DEPENDENCIES                                                           -->
-<!-- ====================================================================== -->
+	<!-- ====================================================================== -->
+	<!-- DEPENDENCIES                                                           -->
+	<!-- ====================================================================== -->
 	<dependencies>
 		<!-- ///////////////////////////////////////// -->
 		<!-- R01F: Base Provider Classes               -->
@@ -86,46 +86,5 @@
 		</dependency>
 	</dependencies>
 
-<!-- ====================================================================== -->
-<!-- BUILD                                                                  -->
-<!-- ====================================================================== -->
-	<build>
-		<pluginManagement>
-			<plugins>
-				<!--
-				ECLIPSE (see main pom.xml for further info) ===================
-				This plugin has NO effects in maven build:
-					m2e ONLY runs some 'standard' goals of the maven pom.xml since the aim of m2e is NOT to be a complete CI tool
-					... in order to include 'non-standard' goals in m2e execution and avoid [plugin execution not covered by the eclipse m2e plugin project build lifecycle mapping]
-						the 'non-standard' plugin MUST be explicitly included in m2e execution
-				-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<!-- flatten plugin -->
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>flatten-maven-plugin</artifactId>
-										<versionRange>[1.1.0,)</versionRange>
-										<goals>
-											<goal>flatten</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 </project>
 

@@ -35,43 +35,58 @@ public class OTPServicesSubDelegateForValidation
 	public <R extends OTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
 			                                                                                          final R validationReq) {
 		// [1] - Get the OTP task either by taskOid, phone or email
-    	log.info("[1][OTPValidation]: validate otp task {}={}",
-    			 validationReq.getKeyType().getCode(),validationReq.getKey());
+		log.info("[1][OTPValidation]: validate otp task ({}) of type {}={}",
+				 validationReq.getTaskOid(),validationReq.getKeyType().getCode(),validationReq.getKey());
 
-		OTPTask otpTask = loadTaskBy( securityContext,
-				                      validationReq.getAppCode(),validationReq.getAppComponent(),
-									  validationReq.getKey());
-
-	    // [2] - If the task was not found, it was either expired or deleted
+//		OTPTask otpTask = loadTaskBy( securityContext,
+//				                      validationReq.getAppCode(),validationReq.getAppComponent(),
+//									  validationReq.getKey());
+		OTPTask otpTask = loadTask(securityContext,
+								   validationReq.getTaskOid());
+		
+		// [2] - If the task was not found, it was either expired or deleted
 		if (otpTask == null) {
-			String msg = Strings.customized("Searched an otp task by {} with key={} " +
+			String msg = Strings.customized("Searched an otp task with oid={} " +
 											"BUT it was NOT found: the OTP task might be expired or it does NOT exists!",
-								 			validationReq.getKeyType().getCode(),validationReq.getKey());
+								 			validationReq.getTaskOid());
 			log.info("[2][OTPValidation]: {}",msg);
 			return OTPOperationExecResultBuilder.notExecuted(OTPOperation.VALIDATION)
 											 	.because(OTPErrorTypes.OTP_VALIDATION_ERROR_OTP_DOES_NOT_EXISTS_OR_EXPIRED,
 											 			 msg);
-	    }
+		}
 		log.info("[2][OTPValidation]: found otp task {}={}: oid={}",
-					 validationReq.getKeyType().getCode(),validationReq.getKey(),
 					 otpTask.getOid());
+		
+		// [3] - If the task was found, check if request is valid for the task
+		boolean taskValidationOk = validateRequest(validationReq.getKey(), otpTask);
+		if (!taskValidationOk) {
+			String msg = Strings.customized("Otp task with oid= {} not valid for key {}={}",
+											validationReq.getTaskOid(),validationReq.getKeyType().getCode(),validationReq.getKey());
+			log.info("[3][OTPValidation]: {}",msg);
+			return OTPOperationExecResultBuilder.notExecuted(OTPOperation.VALIDATION)
+												.because(OTPErrorTypes.OTP_VALIDATION_ERROR_OTP_DOES_NOT_EXISTS_OR_EXPIRED,
+														 msg);
 
+		}
+		log.info("[3][OTPValidation]: valid otp request task with oid {} and key {}={",
+				 otpTask.getOid(),validationReq.getKeyType().getCode(),validationReq.getKey()
+				 );
 
-		// [3] - Check the number of retries
+		// [4] - Check the number of retries
 		if (otpTask.getRemainingRetryNum() == 0) {
-		    log.warn("[3][OTPValidation]: otp task oid={} has exhausted the number of retries!",
+		    log.warn("[4][OTPValidation]: otp task oid={} has exhausted the number of retries!",
 		    		 otpTask.getOid());
 		   	return OTPOperationExecResultBuilder.notExecuted(OTPOperation.VALIDATION)
 									 	        .because(OTPErrorTypes.OTP_VALIDATION_ERROR_OTP_NUMBER_OF_ATTEMPTS_EXCEEDED,
 									 	        		 "Number of attempts exceeded for key "+ otpTask.getSecret() + " !");
 
 		}
-		log.info("[3][OTPValidation]: otp task oid={} has {} retries left",
+		log.info("[4][OTPValidation]: otp task oid={} has {} retries left",
 		    		 otpTask.getOid(),otpTask.getRemainingRetryNum());
 
-		// [4] - Check the secret
+		// [5] - Check the secret
 		if (otpTask.getSecret().is(validationReq.getSecret())) {
-			log.info("[3][OTPValidation]: otp task oid={} was SUCCESFULLY validated!",
+			log.info("[5][OTPValidation]: otp task oid={} was SUCCESFULLY validated!",
 					 otpTask.getOid());
 
 			// Remove from cache after a successful otp validation,
@@ -86,7 +101,7 @@ public class OTPServicesSubDelegateForValidation
 			return OTPOperationExecResultBuilder.executed(OTPOperation.VALIDATION)
 													.returning(response);
 		}
-		log.info("[3][OTPValidation]: otp task oid={} was NOT validated: the provided secret does NOT match the previously sent one!",
+		log.info("[5][OTPValidation]: otp task oid={} was NOT validated: the provided secret does NOT match the previously sent one!",
 					 otpTask.getOid());
 			// decrement the number of remaining retries
 		 long remainingRetryNum = otpTask.decrementRemainingRetryNumber();

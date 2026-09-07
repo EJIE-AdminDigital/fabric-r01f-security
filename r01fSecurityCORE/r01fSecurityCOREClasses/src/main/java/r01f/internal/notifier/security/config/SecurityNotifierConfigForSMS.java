@@ -25,7 +25,7 @@ public class SecurityNotifierConfigForSMS
 	public SecurityNotifierConfigForSMS(final CoreAppCode coreAppCode,
 										final Path msgTemplatePath) {
 		super(NotifierType.SMS,
-			  coreAppCode);
+			  coreAppCode.asAppCode());
 		_msgTemplatePath = msgTemplatePath;
 	}
 	public SecurityNotifierConfigForSMS(final XMLPropertiesForAppComponent props) {

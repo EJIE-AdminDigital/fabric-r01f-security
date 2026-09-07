@@ -21,6 +21,7 @@ import r01f.model.security.login.userpassword.factors.LoginAuthFactorValidationR
 import r01f.model.security.login.userpassword.factors.LoginAuthFactorValidationRequestUsingOTPBySMS;
 import r01f.model.security.login.userpassword.reset.UserPasswordLoginResetResponseErrorType;
 import r01f.model.security.operation.SecurityOperationResult;
+import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
 import r01f.model.security.user.User;
 import r01f.objectstreamer.Marshaller;
 import r01f.patterns.Factory;
@@ -42,8 +43,6 @@ import r01f.types.contact.HasPhoneNumber;
 import r01f.types.contact.Phone;
 import r01f.types.url.Url;
 import r01f.util.types.Strings;
-
-
 
 @Slf4j
 public class RESTDelegateForUserPasswordSecurityProvider<U extends User & HasMailAddress & HasPhoneNumber,L extends UserPasswordLogin,
@@ -120,18 +119,20 @@ public class RESTDelegateForUserPasswordSecurityProvider<U extends User & HasMai
 		return  _doLogin(loginRequest, to);
 	}
 
-	public Response validateAuthFactorOTPBySMS(final LoginID loginId, final Password secret,
-			                                   final Phone phone,
-			                                   final Url to) {
+	public Response validateAuthFactorOTPBySMS(final OTPTaskOID taskOid,
+											   final LoginID loginId, final Password secret,
+											   final Phone phone,
+											   final Url to) {
 		// [ ] Validate user known secret.
-		return _doLoginValidate(new LoginAuthFactorValidationRequestUsingOTPBySMS(loginId,secret,phone), to);
+		return _doLoginValidate(new LoginAuthFactorValidationRequestUsingOTPBySMS(taskOid,loginId,secret,phone), to);
 	}
 
-	public Response validateAuthFactorOTPByEMail(final LoginID loginId, final Password secret,
-            									 final EMail email,
-            									 final Url to) {
+	public Response validateAuthFactorOTPByEMail(final OTPTaskOID taskOid,
+												 final LoginID loginId, final Password secret,
+												 final EMail email,
+												 final Url to) {
 	 // [ ] Validate user known secret.
-		return _doLoginValidate(new LoginAuthFactorValidationRequestUsingOTPByEMail(loginId,secret,email), to);
+		return _doLoginValidate(new LoginAuthFactorValidationRequestUsingOTPByEMail(taskOid,loginId,secret,email), to);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	RECOVER PASSWORD

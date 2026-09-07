@@ -6,7 +6,7 @@ import lombok.experimental.Accessors;
 import r01f.guids.CommonOIDs.SystemID;
 import r01f.model.PersistableModelObjectBase;
 import r01f.model.metadata.annotations.ModelObjectData;
-import r01f.model.security.pushtoken.PushTokenID.PushTokenIDByPhone;
+import r01f.model.security.pushtoken.IsPushTokenID.PushTokenIDByPhone;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
 import r01f.securitycontext.SecurityIDS.SecurityToken;
@@ -31,7 +31,7 @@ public abstract class PushTokenBase<SELF_TYPE extends PushTokenBase<SELF_TYPE>>
 	
 	@MarshallField(as="tokenId",
 			         whenXml=@MarshallFieldAsXml(attr=true))
-	@Getter @Setter private PushTokenID  _pushTokenId;
+	@Getter @Setter private IsPushTokenID  _pushTokenId;
 	
 	@MarshallField(as="plataform",
 	         whenXml=@MarshallFieldAsXml(attr=true))
@@ -59,7 +59,7 @@ public abstract class PushTokenBase<SELF_TYPE extends PushTokenBase<SELF_TYPE>>
 	}
 
 	public PushTokenBase(final SystemID systemId,
-					  	 final PushTokenID phone,  final SecurityToken token) {
+					  	 final IsPushTokenID phone,  final SecurityToken token) {
 		_systemId = systemId;
 		_pushTokenId = phone;
 		_token = token;

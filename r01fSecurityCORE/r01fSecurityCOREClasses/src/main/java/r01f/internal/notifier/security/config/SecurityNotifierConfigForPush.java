@@ -25,7 +25,7 @@ public class SecurityNotifierConfigForPush
 	public SecurityNotifierConfigForPush(final CoreAppCode coreAppCode,
 										 final Path msgTemplatePath) {
 		super(NotifierType.PUSH,
-			  coreAppCode);
+			  coreAppCode.asAppCode());
 		_msgTemplatePath = msgTemplatePath;
 	}
 	public SecurityNotifierConfigForPush(final XMLPropertiesForAppComponent props) {

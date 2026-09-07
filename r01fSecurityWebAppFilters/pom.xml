@@ -21,6 +21,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>r01fSecurityBaseWebFilterClasses</module>
 		<module>r01fSecurityAuthorizationWebFilterClasses</module>
 		<module>r01fSecurityLoginWebFilterClasses</module>
 		<module>r01fSecurityJerseyWebFilterClasses</module>

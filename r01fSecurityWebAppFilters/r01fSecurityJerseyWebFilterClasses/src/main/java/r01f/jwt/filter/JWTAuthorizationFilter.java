@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 
 import jakarta.ws.rs.NameBinding;
 
+@Deprecated
 @NameBinding
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JWTAuthorizationFilter {
-	// Wallet Owner
+	// 
 }

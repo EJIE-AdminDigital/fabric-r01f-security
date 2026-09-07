@@ -1,43 +1,27 @@
 package r01f.security.keycloak.model;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
-import r01f.guids.OIDBaseMutable;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.securitycontext.SecurityIDS.IsIdentityBrokerObjectID;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)
 public abstract class KeycloakIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
-//	Keycloak
-/////////////////////////////////////////////////////////////////////////////////////////
-///
-	/**
-	 * Base for every Keycloack ID objects
-	 */
-	@Immutable
-	@NoArgsConstructor
-	public static abstract class KCIDBase
-						 extends OIDBaseMutable<String> {
-					 
-		private static final long serialVersionUID = 4162366466990455545L;
-
-		public KCIDBase(final String id) {
-			super(id);
-		}
-	}
+//	
+/////////////////////////////////////////////////////////////////////////////////////////	
     /*
 	 * Keycloak Client Id : : El ID alfanumérico que usas en tus aplicaciones (ej: mi-app-backend).
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientId")
-	@NoArgsConstructor
-	public static final class KeycloakClientID
-			 extends KCIDBase{
+	public record KeycloakClientID(@Getter String id)
+	   implements IsIdentityBrokerObjectID {
 		
-		private static final long serialVersionUID = -1546028791819011235L;
-		public KeycloakClientID(final String oid) {
-			super(oid);
+		public static KeycloakClientID from(final String id) {
+			return new KeycloakClientID(id);
 		}
 		public static KeycloakClientID forId(final String id) {
 			return new KeycloakClientID(id);
@@ -45,28 +29,76 @@ public abstract class KeycloakIDs {
 		public static KeycloakClientID valueOf(final String str) {
 			return new KeycloakClientID(str);
 		}
+		public static KeycloakClientID fromString(final String id) {
+			return new KeycloakClientID(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
+		}
 	}
 	
-	
-	
- /*
+	/*
 	 * Keycloak Client Id : : El ID alfanumérico que usas en tus users (ej: mi-app-backend).
 	 */
 	@Immutable
 	@MarshallType(as="keycloakUserId")
-	@NoArgsConstructor
-	public static final class KeycloakUserID
-			 extends KCIDBase{
+	public record KeycloakUserID(@Getter String id)
+	   implements IsIdentityBrokerObjectID {
 		
-		private static final long serialVersionUID = -1546028791819011235L;
-		public KeycloakUserID(final String oid) {
-			super(oid);
+		public static KeycloakUserID from(final String id) {
+			return new KeycloakUserID(id);
 		}
 		public static KeycloakUserID forId(final String id) {
 			return new KeycloakUserID(id);
 		}
 		public static KeycloakUserID valueOf(final String str) {
 			return new KeycloakUserID(str);
+		}
+		public static KeycloakUserID fromString(final String str) {
+			return new KeycloakUserID(str);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
+		}
+	}
+		
+	@Immutable
+	@MarshallType(as="keycloakAttributeId")
+	public record KeycloakAttributeID(@Getter String id)
+	    implements IsIdentityBrokerObjectID {
+
+		public static KeycloakAttributeID from(final String id) {
+			return new KeycloakAttributeID(id);
+		}
+		public static KeycloakAttributeID forId(final String id) {
+			return new KeycloakAttributeID(id);
+		}
+		public static KeycloakAttributeID valueOf(final String str) {
+			return new KeycloakAttributeID(str);
+		}
+		public static KeycloakAttributeID fromString(final String id) {
+			return new KeycloakAttributeID(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 		
@@ -76,19 +108,29 @@ public abstract class KeycloakIDs {
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientRole")
-	@NoArgsConstructor
-	public static final class KeycloakRole
-			 extends KCIDBase{
+	public record KeycloakRole(@Getter String id)
+	   implements IsIdentityBrokerObjectID {
 		
-		private static final long serialVersionUID = -1546028791819011235L;
-		public KeycloakRole(final String oid) {
-			super(oid);
+		public static KeycloakRole from(final String id) {
+			return new KeycloakRole(id);
 		}
 		public static KeycloakRole forId(final String id) {
 			return new KeycloakRole(id);
 		}
 		public static KeycloakRole valueOf(final String str) {
 			return new KeycloakRole(str);
+		}
+		public static KeycloakRole fromString(final String id) {
+			return new KeycloakRole(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 	
@@ -99,19 +141,29 @@ public abstract class KeycloakIDs {
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientSecret")
-	@NoArgsConstructor
-	public static final class KeycloakClientSecret
-			 extends KCIDBase{
+	public record KeycloakClientSecret(@Getter String id)
+	   implements IsIdentityBrokerObjectID {
 		
-		private static final long serialVersionUID = -1546028791819011235L;
-		public KeycloakClientSecret(final String oid) {
-			super(oid);
+		public static KeycloakClientSecret from(final String id) {
+			return new KeycloakClientSecret(id);
 		}
 		public static KeycloakClientSecret forId(final String id) {
 			return new KeycloakClientSecret(id);
 		}
 		public static KeycloakClientSecret valueOf(final String str) {
 			return new KeycloakClientSecret(str);
+		}
+		public static KeycloakClientSecret fromString(final String id) {
+			return new KeycloakClientSecret(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 	
@@ -121,19 +173,29 @@ public abstract class KeycloakIDs {
 	 */
 	@Immutable
 	@MarshallType(as="keycloakRealm")
-	@NoArgsConstructor
-	public static final class KeycloakRealm
-					  extends KCIDBase {
+	public record KeycloakRealm(@Getter String id)
+	   implements IsIdentityBrokerObjectID {
 		
-		private static final long serialVersionUID = -5210327231117228216L;
-		public KeycloakRealm(final String oid) {
-			super(oid);
+		public static KeycloakRealm from(final String id) {
+			return new KeycloakRealm(id);
 		}
 		public static KeycloakRealm forId(final String id) {
 			return new KeycloakRealm(id);
 		}
 		public static KeycloakRealm valueOf(final String str) {
 			return new KeycloakRealm(str);
+		}
+		public static KeycloakRealm fromString(final String id) {
+			return new KeycloakRealm(id);
+		}
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
 		}
 	}
 	

@@ -18,21 +18,28 @@ import r01f.util.types.Strings;
  * keycloak:
  *   url: ${DENA_KEYCLOAK_URL}
  *   admin:
- *     token-url:     ${DENA_TOKEN_URL_USER}
- *     realm:         ${DENA_KEYCLOAK_REALM_USER}
- *     client-id:     ${DENA_KEYCLOAK_CLIENT_ID_USER}
- *     client-secret: ${DENA_KEYCLOAK_CLIENT_SECRET_USER}
+ *     token-url:         ${DENA_TOKEN_URL_ADMIN}
+ *     introspection-uri: ${DENA_INTROSPECTION_URL_ADMIN}
+ *     realm:             ${DENA_KEYCLOAK_REALM_ADMIN}
+ *     client-id:         ${DENA_KEYCLOAK_CLIENT_ID_ADMIN}
+ *     client-secret:     ${DENA_KEYCLOAK_CLIENT_SECRET_ADMIN}
  *   user:
- *     token-url:     ${DENA_TOKEN_URL_ADMIN}
- *     realm:         ${DENA_KEYCLOAK_REALM}
- *     client-id:     ${DENA_KEYCLOAK_CLIENT_ID_ADMIN}
- *     client-secret: ${DENA_KEYCLOAK_CLIENT_SECRET_ADMIN}
+ *     token-url:         ${DENA_TOKEN_URL_USER}
+ *     introspection-uri: ${DENA_INTROSPECTION_URL_USER}
+ *     realm:             ${DENA_KEYCLOAK_REALM_USER}
+ *     client-id:         ${DENA_KEYCLOAK_CLIENT_ID_USER}
+ *     client-secret:     ${DENA_KEYCLOAK_CLIENT_SECRET_USER}
  * </pre>
  */
 @Accessors(prefix="_")
 @NoArgsConstructor
 public class KeycloakClientConfig
 	 implements Debuggable {
+	
+/////////////////////////////////////////////////////////////////////////////////////////
+//PROPERTIES PREFIX (yml)
+/////////////////////////////////////////////////////////////////////////////////////////
+	public static final String PROPERTIES_PREFIX = "keycloak";
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -67,6 +74,7 @@ public class KeycloakClientConfig
 	                            final Url endPoint) {
 		_url = endPoint;
 		_admin = new KeycloakRealmClientConfig(null,			// token-url
+											   null,			// introspection-uri
 											   realm,
 											   keycloakClientId,keycloakClientSecret);
 	}
@@ -96,6 +104,7 @@ public class KeycloakClientConfig
 		 implements Debuggable {
 
 		@Getter @Setter private Url                  _tokenUrl;				// token-url
+		@Getter @Setter private Url                  _introspectionUri;		// introspection-uri
 		@Getter @Setter private KeycloakRealm        _realm;				// realm
 		@Getter @Setter private KeycloakClientID	 _clientId;		// client-id
 		@Getter @Setter private KeycloakClientSecret _clientSecret;	// client-secret
@@ -105,6 +114,8 @@ public class KeycloakClientConfig
 			StringBuilder outDbgInfo = new StringBuilder();
 			outDbgInfo.append(Strings.customized("{ tokenUrl={}",
 												 _tokenUrl != null ? _tokenUrl : " is null!"));
+			outDbgInfo.append(Strings.customized(", introspectionUri={}",
+												 _introspectionUri != null ? _introspectionUri : " is null!"));
 			outDbgInfo.append(Strings.customized(", realm={}",
 												 _realm != null ? _realm : " is null!"));
 			outDbgInfo.append(Strings.customized(", clientId={}",

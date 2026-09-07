@@ -2,8 +2,6 @@ package r01f.services.delegates.sub.security.otp;
 
 import java.util.concurrent.TimeUnit;
 
-
-
 import lombok.extern.slf4j.Slf4j;
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.eventbus.EventBus;
@@ -17,7 +15,6 @@ import r01f.model.security.otp.operations.OTPOperationExecResultBuilder;
 import r01f.model.security.otp.task.OTPTask;
 import r01f.objectstreamer.Marshaller;
 import r01f.securitycontext.SecurityContext;
-
 import r01f.services.core.ServicesCoreModuleConfig;
 
 @Slf4j
@@ -28,7 +25,7 @@ public class OTPServicesSubDelegateForGeneration
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public OTPServicesSubDelegateForGeneration(final ServicesCoreModuleConfig coreConfig,
-											   final Marshaller modelObjectsMarshaller, EventBus eventBus,
+											   final Marshaller modelObjectsMarshaller, final EventBus eventBus,
 											   final CRUDServicesForOTPTask taskPersistenceService) {
 		super(coreConfig, modelObjectsMarshaller, eventBus, taskPersistenceService);
 	}

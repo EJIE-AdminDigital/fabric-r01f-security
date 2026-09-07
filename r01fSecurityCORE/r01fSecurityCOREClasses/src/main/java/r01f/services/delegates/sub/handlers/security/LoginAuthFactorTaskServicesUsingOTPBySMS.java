@@ -110,7 +110,7 @@ public class LoginAuthFactorTaskServicesUsingOTPBySMS
 		log.debug("Validate {}  for phone number {} ",
 						factorValidationRequest.getPhone(),
 						factorValidationRequest.getSecret());
-		OTPValidationRequest<Phone> validReq = OTPValidationRequestBuilder.using(factorValidationRequest.getPhone())
+		OTPValidationRequest<Phone> validReq = OTPValidationRequestBuilder.using(factorValidationRequest.getTaskOid(),factorValidationRequest.getPhone())
 																		  .validate(factorValidationRequest.getSecret())
 																		  .buildFor(_appCode);
 

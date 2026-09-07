@@ -22,6 +22,8 @@ import r01f.internal.Env;
 import r01f.mime.MimeTypes;
 import r01f.security.provider.SecurityProviderException;
 import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.user.google.GoogleUserData;
+import r01f.security.user.google.GoogleUserDataBuilder;
 import r01f.securitycontext.SecurityIDS.SecurityToken;
 import r01f.types.contact.EMail;
 import r01f.types.url.Url;
@@ -55,7 +57,7 @@ public class GoogleApi {
 		try {
 			String key = _securityProviderSecretConfig.getProperty("key").asString();
 			Url oauth2callback =  _securityProviderSecretConfig.getProperty("oauth2callback").asUrl();
-			authorizationCodeURI = _securityProviderSecretConfig.getProperty("authorizationCodeURI").asUrl();
+			authorizationCodeURI = _securityProviderSecretConfig.getProperty("authorization-code-uri").asUrl();
 
 			String state = StringEncodeUtils.encodeBase64(finalTargetUri.asString()).toString();
 			UrlQueryString qryStr = UrlQueryString.fromParams(UrlQueryStringParam.of("client_id",key), // The CallBack uri mus be registred!
@@ -64,7 +66,7 @@ public class GoogleApi {
 															  UrlQueryStringParam.of("response_type","code"),
 															  UrlQueryStringParam.of("state",state));
 			authorizationCodeURI = authorizationCodeURI.joinWith(qryStr);
-			log.info("[Google authorizationCodeURI]: {}",
+			log.warn("[Google authorizationCodeURI]: {}",
 					 authorizationCodeURI);
 			 return authorizationCodeURI;
 		} catch (final Throwable th) {
@@ -122,7 +124,7 @@ public class GoogleApi {
 	 * @return
 	 */
 	public HttpResponseResult getGoogleAccessTokenHttpResponseUsing(final String authorizationCode) {
-		Url accessTokenURI = _securityProviderSecretConfig.getProperty("accessTokenURI").asUrl();
+		Url accessTokenURI = _securityProviderSecretConfig.getProperty("access-token-uri").asUrl();
 		String key = _securityProviderSecretConfig.getProperty("key").asString();
 		String  secret = _securityProviderSecretConfig.getProperty("secret").asString();
 
@@ -169,7 +171,7 @@ public class GoogleApi {
 	 * @return
 	 */
 	public HttpResponseResult getGoogleUserInfoHttpResponseUsing(final SecurityToken accessToken) {
-		Url userInfoBaseUrl = _securityProviderSecretConfig.getProperty("userInfoURI").asUrl();
+		Url userInfoBaseUrl = _securityProviderSecretConfig.getProperty("user-info-uri").asUrl();
 		UrlQueryString qryStr = UrlQueryString.fromParams(UrlQueryStringParam.of("access_token",
 																				 accessToken));
 		Url userInfoUrl = userInfoBaseUrl.joinWith(qryStr);
@@ -195,6 +197,16 @@ public class GoogleApi {
 					  											th.getLocalizedMessage()),
 					  						    th);
 		}
+	}
+	
+	public GoogleUserData getGoogleUserInfoUsing(final SecurityToken accessToken) {
+		HttpResponseResult result =  getGoogleUserInfoHttpResponseUsing( accessToken);
+		if (result.isSuccess()) {
+			return _from(result.loadAsString());
+		} 
+		throw new SecurityProviderException(Throwables.message("Could NOT access Google USER info, error/data {}",
+					                                               result.loadAsString()));
+		
 	}
 	/**
 	 * Using an [access token] returned by goole gets the user email.
@@ -237,6 +249,27 @@ public class GoogleApi {
 			throw new SecurityProviderException(e.getLocalizedMessage());
 		}
 	}
+	
+	private GoogleUserData _from (final String userInfoResponseAsJson) {
+
+		GoogleJSonFieldAccessor jsonFieldAccessor = fieldsAccessorFor(userInfoResponseAsJson);
+		EMail googleMail = EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email"));
+		String givenName = jsonFieldAccessor.getValueOfFieldNamed("given_name");
+		String familyName = jsonFieldAccessor.getValueOfFieldNamed("family_name");
+		Url uri = Url.from(jsonFieldAccessor.getValueOfFieldNamed("picture"));
+		String displayName = Strings.customized("{} {}",
+												givenName,familyName);
+
+		// [3] - Return the third-party user data
+		GoogleUserData googleUserData = 
+				GoogleUserDataBuilder.createForMail(googleMail)
+										 .givenName(givenName)
+										 .familiyName(familyName)
+										 .andDisplayName(displayName)
+										 .andProfile(uri)
+									 .build();
+		return googleUserData;
+	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	GSON
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -261,4 +294,6 @@ public class GoogleApi {
 			return value;
 		}
 	}
+
+	
 }

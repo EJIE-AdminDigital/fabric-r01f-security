@@ -6,5 +6,5 @@ public interface CWTModelObjectTransformer<M extends  CWTModelObject ,A> {
 
 	A fromModelObject(final M modelObject);
 
-	M toModelObject(A thirdPartyModelObject);
+	M toModelObject(final A thirdPartyModelObject);
 }

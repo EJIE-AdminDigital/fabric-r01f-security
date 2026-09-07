@@ -29,8 +29,7 @@ public class KeycloakClientAPIDelegateForUsersAuthServices
 //	METHODS TO IMPLEMENTS
 ///////////////////////////////////////////////////////////////////////////////////////////
 	@Override
-	public KeycloakUserAuthRequestResult authenticate(final KeycloakUserAuthTokenRequest authRequest) {
-		
+	public KeycloakUserAuthRequestResult authenticate(final KeycloakUserAuthTokenRequest authRequest) {		
 		return _authtService.authenticate(authRequest);
 	}
 	@Override

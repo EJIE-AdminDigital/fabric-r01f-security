@@ -325,6 +325,7 @@ public abstract class AuthorizationServletFilterBase<U extends User,
 	 */
 	protected void setUserAuthsAtSecurityContext(final Collection<A> userAuths,
 												 final SecurityContext securityContext) {
+		//
 	}
 	/**
 	 * Creates a {@link Map} of {@link AuthorizationTargetResource} indexed by oid

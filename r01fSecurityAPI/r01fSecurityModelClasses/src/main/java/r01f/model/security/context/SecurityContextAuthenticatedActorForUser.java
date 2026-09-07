@@ -43,6 +43,8 @@ public class SecurityContextAuthenticatedActorForUser<U extends User>
 																		SecurityProviderID.PAIRED_PHONE,
 																		SecurityProviderID.API_KEY,
 																		SecurityProviderID.XLNETS,
+																		SecurityProviderID.IDENTITY_BROKER,
+																		
 																		SecurityProviderID.OSAKIDETZA_AZURE_AD)) throw new IllegalArgumentException( "Not found any provider with ID "  + securityProviderId +
 																																		" > Use " + SecurityContextAuthenticatedActorForUser.class.getSimpleName() + " for USER-related providers: " +
 																																		SecurityProviderID.USER_PASSWORD + ", " +

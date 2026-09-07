@@ -22,7 +22,7 @@ public class KeycloakUserDeleteResult
 /////////////////////////////////////////////////////////////////////////////////////////
 	public KeycloakUserDeleteResult(final KeycloakRealm realm,final KeycloakUserModel userModel) {
 		super(realm,
-			  userModel.getUserOid(),userModel.getUserId(),
+			  userModel.getOid(),userModel.getId(),
 			  KeycloakRequestedOperation.DELETE);
 		_userModel = userModel;
 	}

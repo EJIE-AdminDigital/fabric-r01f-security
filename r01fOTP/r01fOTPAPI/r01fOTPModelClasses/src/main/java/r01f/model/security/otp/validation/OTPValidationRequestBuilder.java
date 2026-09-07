@@ -22,29 +22,31 @@ public abstract class OTPValidationRequestBuilder
 /////////////////////////////////////////////////////////////////////////////////////////
 	public static OTPValidationRequestBuilderSecretStep<OTPTaskOID> using(final OTPTaskOID taskOid) {
 		return new OTPValidationRequestBuilder() { /* nothing */ }
-					 	.new OTPValidationRequestBuilderSecretStep<OTPTaskOID>(taskOid);
+					 	.new OTPValidationRequestBuilderSecretStep<OTPTaskOID>(taskOid, taskOid);
 	}
-	public static OTPValidationRequestBuilderSecretStep<Phone> using(final Phone phone) {
+	public static OTPValidationRequestBuilderSecretStep<Phone> using(final OTPTaskOID taskOid, final Phone phone) {
 		return new OTPValidationRequestBuilder() { /* nothing */ }
-					 	.new OTPValidationRequestBuilderSecretStep<Phone>(phone);
+					 	.new OTPValidationRequestBuilderSecretStep<Phone>(taskOid, phone);
 	}
-	public static OTPValidationRequestBuilderSecretStep<EMail> using(final EMail eMail) {
+	public static OTPValidationRequestBuilderSecretStep<EMail> using(final OTPTaskOID taskOid, final EMail eMail) {
 		return new OTPValidationRequestBuilder() { /* nothing */ }
-					 	.new OTPValidationRequestBuilderSecretStep<EMail>(eMail);
+					 	.new OTPValidationRequestBuilderSecretStep<EMail>(taskOid, eMail);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 	public final class OTPValidationRequestBuilderSecretStep<K> {
+		private final OTPTaskOID _taskOid;
 		private final K _key;
 
 		public OTPValidationRequestBuilderBuildStep<K> validate(final Password secret) {
-			return new OTPValidationRequestBuilderBuildStep<K>(_key,secret);
+			return new OTPValidationRequestBuilderBuildStep<K>(_taskOid,_key,secret);
 		}
 	}
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 	public final class OTPValidationRequestBuilderBuildStep<K> {
+		private final OTPTaskOID _taskOid;
 		private final K _key;
 		private final Password _secret;
 
@@ -54,10 +56,10 @@ public abstract class OTPValidationRequestBuilder
 				return (R)new OTPValidationRequestByTaskOID(appCode,appComp,
 													        (OTPTaskOID)_key,_secret);
 			} else if (_key instanceof EMail) {
-				return (R)new OTPValidationRequestByEMail(appCode,appComp,
+				return (R)new OTPValidationRequestByEMail(appCode,appComp,_taskOid,
 													      (EMail)_key,_secret);
 			} else if (_key instanceof Phone) {
-				return (R)new OTPValidationRequestByPhone(appCode,appComp,
+				return (R)new OTPValidationRequestByPhone(appCode,appComp,_taskOid,
 													      (Phone)_key,_secret);
 			}
 			throw new IllegalArgumentException(_key.getClass() + " is NOT a supported validation key type: " +

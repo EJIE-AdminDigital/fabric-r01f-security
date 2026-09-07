@@ -16,6 +16,7 @@ import r01f.api.interfaces.security.login.userpassword.UserPasswordLoginServices
 import r01f.api.interfaces.security.user.CRUDServicesForUser;
 import r01f.model.security.login.entry.UserLoginEntry;
 import r01f.model.security.login.userpassword.UserPasswordLogin;
+import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
 import r01f.model.security.user.User;
 import r01f.objectstreamer.Marshaller;
 import r01f.patterns.Factory;
@@ -136,22 +137,24 @@ public class RESTResourceForUserPasswordSecurityProvider<U extends User & HasMai
 	@POST
 	@Path("/login/validate/authfactor/usingOTPBySMS")
 	public Response validateAuthFactorOTPBySMS(@FormParam("userCode") final LoginID userCode,
-			                                   @FormParam("secret")   final Password secret,
-			                                   @FormParam("phone")    final Phone phone,
-			                                   @FormParam("to")       final Url url) {
+											   @FormParam("task")     final OTPTaskOID taskOid,
+											   @FormParam("secret")   final Password secret,
+											   @FormParam("phone")    final Phone phone,
+											   @FormParam("to")       final Url url) {
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .validateAuthFactorOTPBySMS(userCode,secret,phone,url);
+				   .validateAuthFactorOTPBySMS(taskOid,userCode,secret,phone,url);
 	}
 
 	@POST
 	@Path("/login/validate/authfactor/usingOTPByEMail")
-	public Response validateAuthFactorOTPByEMail(@FormParam("userCode")   final LoginID userCode,
-					                             @FormParam("secret")     final Password secret,
-					                             @FormParam("email")      final EMail email,
-					                             @FormParam("to")         final Url url) {
+	public Response validateAuthFactorOTPByEMail(@FormParam("userCode") final LoginID userCode,
+												 @FormParam("task")     final OTPTaskOID taskOid,
+												 @FormParam("secret")   final Password secret,
+												 @FormParam("email")    final EMail email,
+												 @FormParam("to")       final Url url) {
 
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .validateAuthFactorOTPByEMail(userCode,secret,email,url);
+				   .validateAuthFactorOTPByEMail(taskOid,userCode,secret,email,url);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////

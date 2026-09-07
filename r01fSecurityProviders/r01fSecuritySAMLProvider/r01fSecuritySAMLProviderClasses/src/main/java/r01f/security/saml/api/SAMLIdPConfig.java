@@ -14,8 +14,8 @@ import org.opensaml.security.credential.Credential;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
 import r01f.security.saml.api.SAMLIDs.SAMLIdPID;
+import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
 import r01f.security.saml.api.SAMLIDs.SAMLRelyingPartyID;
 import r01f.types.url.Url;
 import r01f.util.types.collections.CollectionUtils;

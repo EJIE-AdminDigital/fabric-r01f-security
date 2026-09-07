@@ -96,6 +96,7 @@ public abstract class OTPBeanCoreBootstrapConfigBuilder
 /////////////////////////////////////////////////////////////////////////////////////////	
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 	public class OTPBeanCoreBootstrapConfigBuilderBuildStep {
+		@SuppressWarnings("unused")
 		private final OTPBootstrapBuilderWrapperData _initData;
 
 		/*public ServicesCoreModuleBootstrapConfig build() {		

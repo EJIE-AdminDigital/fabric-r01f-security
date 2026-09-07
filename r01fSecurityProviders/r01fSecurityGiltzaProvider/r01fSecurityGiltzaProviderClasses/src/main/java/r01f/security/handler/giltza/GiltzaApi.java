@@ -52,6 +52,7 @@ import r01f.util.types.Strings;
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Get authorization code uri, first step oth Giltza oauth flow..where user will obtain an authorization code,.
 	 * @param finalTargetUri
@@ -59,7 +60,17 @@ import r01f.util.types.Strings;
 	 */
 	public Url getAuthorizationCodeUri(final Url finalTargetUri) {
 		String acrValues = _securityProviderSecretConfig.getProperty("acr_values").asString();
-		return this.getAuthorizationCodeUri(finalTargetUri,acrValues);
+		return this.getAuthorizationCodeUri(finalTargetUri,acrValues,null);
+	}
+
+	/**
+	 * Get authorization code uri, first step oth Giltza oauth flow..where user will obtain an authorization code,.
+	 * @param finalTargetUri
+	 * @return
+	 */
+	public Url getAuthorizationCodeUri(final Url finalTargetUri,  final String codeChallenge) {
+		String acrValues = _securityProviderSecretConfig.getProperty("acr_values").asString();
+		return this.getAuthorizationCodeUri(finalTargetUri,acrValues,codeChallenge);
 	}
 	/**
 	 * Get authorization code uri, first step oth Giltza oauth flow..where user will obtain an authorization code,.
@@ -68,7 +79,7 @@ import r01f.util.types.Strings;
 	 *                     ( f.e for bakq: "urn:safelayer:tws:policies:authentication:flow:bakq")
 	 * @return
 	 */
-	public Url getAuthorizationCodeUri ( final Url finalTargetUri, final String acrValues) {
+	public Url getAuthorizationCodeUri ( final Url finalTargetUri, final String acrValues , final String codeChallenge) {
 		Url authorizationCodeURI = null;
 		try {
 			// Load Giltza SecurityProvideConfigData ( key | oauth2callback | authorizationCodeURI)
@@ -79,7 +90,7 @@ import r01f.util.types.Strings;
 			// Compose required params for authorization code uri.
 			List<UrlQueryStringParam> queryRequiredParams  = Lists.newArrayList();
 			queryRequiredParams.add(UrlQueryStringParam.of("client_id",key));
-			queryRequiredParams.add(UrlQueryStringParam.of("redirect_uri",URLEncoder.encode(oauth2callback.asString(),Charset.defaultCharset())));
+			queryRequiredParams.add(UrlQueryStringParam.of("redirect_uri",URLEncoder.encode(finalTargetUri.asString(),Charset.defaultCharset())));
 			queryRequiredParams.add(UrlQueryStringParam.of("scope",URLEncoder.encode("urn:izenpe:identity:global urn:izenpe:fea:properties urn:safelayer:eidas:authn_details urn:safelayer:eidas:sign:identity:profile",Charsets.ISO_8859_1.name())));
 			queryRequiredParams.add(UrlQueryStringParam.of("response_type","code"));
 			queryRequiredParams.add(UrlQueryStringParam.of("state",state));
@@ -90,6 +101,12 @@ import r01f.util.types.Strings;
 				//,  UrlQueryStringParam.of("acr_values","urn:safelayer:tws:policies:authentication:flow:bakq")
 				queryRequiredParams.add(UrlQueryStringParam.of("acr_values", URLEncoder.encode(acrValues,Charset.defaultCharset())));
 			}
+			// Code Challenge // by default plain , its posible to send a sha , but must be specified..[todo]
+			if (codeChallenge != null) {
+				queryRequiredParams.add(UrlQueryStringParam.of("code_challenge",codeChallenge));
+				queryRequiredParams.add(UrlQueryStringParam.of("code_challenge_method","S256"));
+			}
+
 			UrlQueryString qryStr = UrlQueryString.fromParams( queryRequiredParams);
 			authorizationCodeURI = authorizationCodeURI.joinWith(qryStr);
 			log.info("\n\n[Giltza authorizationCodeURI]: {}",
@@ -124,8 +141,32 @@ import r01f.util.types.Strings;
 	 * @return
 	 */
 	public SecurityToken getGiltzaAccessTokenUsing(final String authoritationCode) {
+		return getGiltzaAccessTokenUsing(authoritationCode,null);
+	}
+
+
+	/**
+	 * Obtains the Giltza access token through an authorization code [with code verifier ]got in the first step of Giltza oauth flow.
+	 * This Giltza Access token will be used to obtain user data.
+	 * @param authoritationCode
+	 * @return
+	 */
+	public SecurityToken getGiltzaAccessTokenUsing(final String authoritationCode,final String codeVerifier) {
+		return getGiltzaAccessTokenUsing(authoritationCode,codeVerifier,null);
+	}
+
+	/**
+	 * Obtains the Giltza access token through an authorization code [with code verifier ]got in the first step of Giltza oauth flow.
+	 * This Giltza Access token will be used to obtain user data.
+	 * @param authoritationCode
+	 * @param codeVerifier
+	 * @param redirectUri the redirect_uri to use for the token exchange; if null the configured
+	 *                    'oauth2callback' property is used
+	 * @return
+	 */
+	public SecurityToken getGiltzaAccessTokenUsing(final String authoritationCode,final String codeVerifier,final Url redirectUri) {
 		log.warn(" _getGiltzaAccessTokenUsing {}",authoritationCode);
-		HttpResponseResult accessTokenResponse = this.getGiltzaAccessTokenHttpResponseUsing(authoritationCode);
+		HttpResponseResult accessTokenResponse = this.getGiltzaAccessTokenHttpResponseUsing(authoritationCode,codeVerifier,redirectUri);
 		if (!accessTokenResponse.getCode().isIn(HttpResponseCode.OK)) {
 			String errorStream = accessTokenResponse.loadAsString();
 			log.error("Remote Server Error int Giltza Auth Service: (code={}) > {}",
@@ -142,21 +183,29 @@ import r01f.util.types.Strings;
 				 accessToken);
 		return SecurityToken.forId(accessToken);
 	}
+
 	/**
 	 * Obtains the Giltza access token through an authorization code got in the first step of Giltza oauth flow.
 	 * This Giltza Access token will be used to obtain user data.
 	 * @param authorizationCode
+	 * @param codeVerifier
+	 * @param redirectUri the redirect_uri to use for the token exchange; if null the configured
+	 *                    'oauth2callback' property is used. OAuth requires this to be identical to
+	 *                    the redirect_uri used when the authorization code was requested.
 	 * @return
 	 */
-	public HttpResponseResult getGiltzaAccessTokenHttpResponseUsing(final String authorizationCode) {
+	public HttpResponseResult getGiltzaAccessTokenHttpResponseUsing(final String authorizationCode, final String codeVerifier, final Url redirectUri) {
 		Url accessTokenURI = _securityProviderSecretConfig.getProperty("access-token-uri").asUrl();
 		String key = _securityProviderSecretConfig.getProperty("key").asString();
 		String  secret = _securityProviderSecretConfig.getProperty("secret").asString();
-		Url oauth2callback =  _securityProviderSecretConfig.getProperty("oauth2callback").asUrl();
+		Url oauth2callback =  redirectUri != null ? redirectUri
+												  : _securityProviderSecretConfig.getProperty("oauth2callback").asUrl();
 		try {
 
 			// .. compose the request
-			HttpRequest request = HttpRequest.newBuilder()
+			HttpRequest request = null;
+			if (codeVerifier == null ) {
+				request  = HttpRequest.newBuilder()
 					  						 .uri(accessTokenURI.asUri())
 					  						 .header("Content-Type", MimeTypes.FORM_URL_ENCODED.getName())
 					  						 .header("Authorization", "Basic " + secret)
@@ -168,6 +217,22 @@ import r01f.util.types.Strings;
 
 												  		      .build())
 					  						 .build();
+			} else {
+				request  = HttpRequest.newBuilder()
+				 						 .uri(accessTokenURI.asUri()) //
+				 						 .header("Content-Type", MimeTypes.FORM_URL_ENCODED.getName())
+				 						 .header("Authorization", "Basic " + secret)
+				 						 .POST(new HttpRequestBodyPublisherForURLEncodedForm()
+											  		      .withPOSTFormParameters(HttpRequestFormParameterForText.of(key).withName("client_id"),
+																  		    	  HttpRequestFormParameterForText.of(oauth2callback.asString()).withName("redirect_uri"),
+																  		    	  HttpRequestFormParameterForText.of("authorization_code").withName("grant_type"),
+																  		    	  HttpRequestFormParameterForText.of(authorizationCode).withName("code"),
+																  		    	  HttpRequestFormParameterForText.of(codeVerifier).withName("code_verifier")
+											  		    		  )
+
+											  		      .build())
+				 						 .build();
+			}
 	      // .. do the request
 			HttpResponse<InputStream> response =  _httpClient()
 														   .send(request,
@@ -207,7 +272,7 @@ import r01f.util.types.Strings;
 			 HttpResponse<InputStream> response =  _httpClient()
 																.send(request,
 																      HttpResponse.BodyHandlers.ofInputStream());
-			
+
 			return new HttpResponseResult(response);
 		} catch (final Throwable th) {
 			log.error("Could NOT access Giltza url at {} (using proxy={}): {}",
@@ -230,11 +295,10 @@ import r01f.util.types.Strings;
 		HttpResponseResult result =  getGiltzaUserInfoHttpResponseUsing( accessToken);
 		if (result.isSuccess()) {
 			return _from(result.loadAsString());
-		} 
+		}
 		throw new SecurityProviderException(Throwables.message("Could NOT access Giltza USER info, error/data {}",
 					                                               result.loadAsString()));
-	    
-		
+
 	}
 	/**
 	 * Using an [access token] returned by goole gets the user email.
@@ -259,7 +323,7 @@ import r01f.util.types.Strings;
 								   .getValueOfFieldNamed("dni");
 		return PersonID.forId(dniAsString);
 	}
-	
+
 	@SuppressWarnings("static-method")
 	private  HttpClient _httpClient() {
 		Env env = Env.guessFromSystemProps();
@@ -276,33 +340,37 @@ import r01f.util.types.Strings;
 			throw new SecurityProviderException(e.getLocalizedMessage());
 		}
 	}
-	
-	
+
+
 	private GiltzaUserData _from (final String userInfoResponseAsJson) {
 
 		GiltzaJSonFieldAccessor jsonFieldAccessor = this.fieldsAccessorFor(userInfoResponseAsJson);
 		EMail mail = (  jsonFieldAccessor.getValueOfFieldNamed("email") != null ) ?
 				                          EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email")):null;
 
-		String givenName = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
+		String name = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
 				                                jsonFieldAccessor.getValueOfFieldNamed("given_name"):null;
 
-		String familyName =  jsonFieldAccessor.getValueOfFieldNamed("family_name") != null ?
-				                  jsonFieldAccessor.getValueOfFieldNamed("family_name") : null;
+		String surname1 =  jsonFieldAccessor.getValueOfFieldNamed("surname1") != null ?
+				                  jsonFieldAccessor.getValueOfFieldNamed("surname1") : null;
+
+		String surname2 =  jsonFieldAccessor.getValueOfFieldNamed("surname2") != null ?
+				                  jsonFieldAccessor.getValueOfFieldNamed("surname2") : null;
 
 		PersonID dni =   jsonFieldAccessor.getValueOfFieldNamed("dni") != null ?
 				                             PersonID.forId(jsonFieldAccessor.getValueOfFieldNamed("dni")) : null;
 
-		String displayName = Strings.customized("{} {}",
-												givenName,familyName);
+		String displayName =  jsonFieldAccessor.getValueOfFieldNamed("name") != null ?
+                							jsonFieldAccessor.getValueOfFieldNamed("name") : null;
 
 		// [N] - Return the giltzaUserData
 		GiltzaUserData giltzaUserData =
 				   GiltzaUserDataBuilder.forPersonId(dni)
-										 .givenName(givenName)
-										 .familiyName(familyName)
-										 .andDisplayName(displayName)
+										 .name(name)
+										 .surname1(surname1)
+										 .surname2(surname2)
 										 .withMail(mail)
+										 .displayName(displayName)
 									 .build();
 		return giltzaUserData;
 	}
@@ -331,7 +399,7 @@ import r01f.util.types.Strings;
 			return value;
 		}
 	}
-	
-	
-	
+
+
+
 }

@@ -25,7 +25,7 @@ public class KeycloakClientAPI {
 	private final Keycloak _keycloakClientAdmin;
 	private final Keycloak _keycloakClientUser;
 	@SuppressWarnings("unused")
-	private final KeycloakClientConfig _config;
+	@Getter private final KeycloakClientConfig _config;
 /////////////////////////////////////////////////////////////////////////////////////////
 // DELEGATES
 /////////////////////////////////////////////////////////////////////////////////////////	
@@ -96,12 +96,12 @@ public class KeycloakClientAPI {
 		}
 
 		Keycloak keyCloak =  KeycloakBuilder.builder()
-							                .serverUrl(config.getUrl().getUrl())
-							                .realm(config.getUser().getRealm().asString())
-							                .clientId(config.getUser().getClientId().asString())
-							                .clientSecret(config.getUser().getClientSecret().asString())
-							                .grantType("client_credentials")
-							                .scope("openid")
+								                .serverUrl(config.getUrl().getUrl())
+								                .realm(config.getUser().getRealm().asString())
+								                .clientId(config.getUser().getClientId().asString())
+								                .clientSecret(config.getUser().getClientSecret().asString())
+								                .grantType("client_credentials")
+								                .scope("openid")
 							               .build();
 
 		return keyCloak;

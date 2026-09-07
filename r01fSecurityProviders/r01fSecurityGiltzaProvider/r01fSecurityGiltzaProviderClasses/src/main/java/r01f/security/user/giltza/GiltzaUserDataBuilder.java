@@ -14,11 +14,11 @@ public abstract class GiltzaUserDataBuilder
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 	public static GiltzaUserDataBuilderNameStep forPersonId(final PersonID dniNif) {
-		GiltzaUserData googleUser = new GiltzaUserData();
-		googleUser.setDni(dniNif);
+		GiltzaUserData gilzaUser = new GiltzaUserData();
+		gilzaUser.setDni(dniNif);
 
 		return new GiltzaUserDataBuilder() { /* nothing */ }
-					.new GiltzaUserDataBuilderNameStep(googleUser);
+					.new GiltzaUserDataBuilderNameStep(gilzaUser);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -27,17 +27,26 @@ public abstract class GiltzaUserDataBuilder
 	public class GiltzaUserDataBuilderNameStep {
 		private final GiltzaUserData _user;
 
-		public GiltzaUserDataBuilderFamiliyNameStep givenName(final String name) {
-			_user.setGivenName(name);
-			return new GiltzaUserDataBuilderFamiliyNameStep(_user);
+		public GiltzaUserDataBuilderSurname1Step name(final String name) {
+			_user.setName(name);
+			return new GiltzaUserDataBuilderSurname1Step(_user);
 		}
 	}
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
-	public class GiltzaUserDataBuilderFamiliyNameStep {
+	public class GiltzaUserDataBuilderSurname1Step {
 		private final GiltzaUserData _user;
 
-		public GiltzaUserDataBuilderDisplayNameStep familiyName(final String familiyName) {
-			_user.setFamilyName(familiyName);
+		public GiltzaUserDataBuilderSurname2Step surname1(final String surname1) {
+			_user.setSurname1(surname1);
+			return new GiltzaUserDataBuilderSurname2Step(_user);
+		}
+	}
+	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
+	public class GiltzaUserDataBuilderSurname2Step {
+		private final GiltzaUserData _user;
+
+		public GiltzaUserDataBuilderDisplayNameStep surname2(final String surname2) {
+			_user.setSurname2(surname2);
 			return new GiltzaUserDataBuilderDisplayNameStep(_user);
 		}
 	}
@@ -49,26 +58,31 @@ public abstract class GiltzaUserDataBuilder
 			_user.setDisplayName(displayName);
 			return new GiltzaUserDataBuilderBuildStep(_user);
 		}
+		public GiltzaUserDataBuilderBuildStep withMail(final EMail mail) {
+			_user.setMail(mail);
+			return new GiltzaUserDataBuilderBuildStep(_user);
+		}
+		public GiltzaUserDataBuilderBuildStep noDni() {
+			return new GiltzaUserDataBuilderBuildStep(_user);
+		}
 	}
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
 	public class GiltzaUserDataBuilderBuildStep {
 		private final GiltzaUserData _user;
 
-		public BuilderBuildStep withMail(final EMail mail) {
+		public GiltzaUserDataBuilderBuildStep withMail(final EMail mail) {
 			_user.setMail(mail);
-			return new BuilderBuildStep(_user);
+			return new GiltzaUserDataBuilderBuildStep(_user);
 		}
-		
-		public BuilderBuildStep noDni() {
-			return new BuilderBuildStep(_user);
+
+		public GiltzaUserDataBuilderBuildStep displayName(final String displayName) {
+			_user.setDisplayName(displayName);
+			return new GiltzaUserDataBuilderBuildStep(_user);
 		}
-	}
-/////////////////////////////////////////////////////////////////////////////////////////
-//
-/////////////////////////////////////////////////////////////////////////////////////////
-	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
-	public class BuilderBuildStep {
-		private final GiltzaUserData  _user;
+
+		public GiltzaUserDataBuilderBuildStep noDni() {
+			return new GiltzaUserDataBuilderBuildStep(_user);
+		}
 
 		public GiltzaUserData build() {
 			return _user;

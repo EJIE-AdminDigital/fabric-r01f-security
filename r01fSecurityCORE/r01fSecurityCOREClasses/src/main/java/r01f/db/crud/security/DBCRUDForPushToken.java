@@ -10,7 +10,7 @@ import r01f.model.persistence.CRUDResult;
 import r01f.model.persistence.CRUDResultBuilder;
 import r01f.model.persistence.PersistencePerformedOperation;
 import r01f.model.security.pushtoken.PushToken;
-import r01f.model.security.pushtoken.PushTokenID;
+import r01f.model.security.pushtoken.IsPushTokenID;
 import r01f.model.security.pushtoken.PushTokenOID;
 import r01f.objectstreamer.Marshaller;
 import r01f.securitycontext.SecurityContext;
@@ -64,7 +64,7 @@ public abstract class DBCRUDForPushToken<T extends PushToken,DB extends DBEntity
 	
 	@Override @SuppressWarnings("resource")
 	public CRUDResult<T> loadBy(final SecurityContext securityContext,
-								final PushTokenID id,
+								final IsPushTokenID id,
 								final SystemID systemOid) {
 		TypedQuery<DB> query = this.getEntityManager()
 									  .createQuery(Strings.customized("SELECT entity " +

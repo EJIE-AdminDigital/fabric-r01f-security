@@ -1,5 +1,6 @@
 package r01f.cwt.model.transformers;
 
+import java.util.Date;
 import java.util.List;
 
 import com.authlete.cbor.CBORInteger;
@@ -24,7 +25,7 @@ public class CWTPayloadTransformer
 		CWTClaimsSetBuilder builder = new CWTClaimsSetBuilder();
 
 		if (payloadData.getIssuer() != null) builder.iss(payloadData.getIssuer());
-		if (payloadData.getIssuedAt() != null) builder.iat(DateTimeUtils.dateFromInstant(payloadData.getIssuedAt()));
+		if (payloadData.getIssuedAt() != null) builder.iat(Date.from(payloadData.getIssuedAt()));
 		if (payloadData.getSubject() != null) builder.sub(payloadData.getSubject());
 		if (payloadData.getAudience() != null) {
 			if (payloadData.getAudience().size() > 1) throw  new IllegalArgumentException(" Not supported more than one audience");

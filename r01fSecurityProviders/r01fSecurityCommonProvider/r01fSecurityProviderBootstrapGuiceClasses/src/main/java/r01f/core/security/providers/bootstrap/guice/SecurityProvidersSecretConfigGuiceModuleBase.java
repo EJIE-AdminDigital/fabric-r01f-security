@@ -58,7 +58,7 @@ public abstract class SecurityProvidersSecretConfigGuiceModuleBase
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Provides @Singleton
-	SecurityProviderSecretConfigSet _provideSecretConfigSet( @ModelObjectsMarshaller final Marshaller marshaller) {
+	SecurityProviderSecretConfigSet _provideSecretConfigSet(@ModelObjectsMarshaller final Marshaller marshaller) {
 		XMLPropertiesForApp props = XMLPropertiesBuilder.create()
 															.notUsingCache()
 														 .forApp(_coreAppCode);

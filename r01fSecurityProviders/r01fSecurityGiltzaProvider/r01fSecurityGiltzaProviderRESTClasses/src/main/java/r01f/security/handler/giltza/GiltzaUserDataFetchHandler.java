@@ -96,32 +96,37 @@ public class GiltzaUserDataFetchHandler<U extends User,L extends GiltzaLogin>
 											userInfoResponseAsJson);
 
 		GiltzaJSonFieldAccessor jsonFieldAccessor = _giltzaApi.fieldsAccessorFor(userInfoResponseAsJson);
+
 		EMail mail = (  jsonFieldAccessor.getValueOfFieldNamed("email") != null ) ?
 				                          EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email")):null;
 
-		String givenName = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
+		String name = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
 				                                jsonFieldAccessor.getValueOfFieldNamed("given_name"):null;
 
-		String familyName =  jsonFieldAccessor.getValueOfFieldNamed("family_name") != null ?
-				                  jsonFieldAccessor.getValueOfFieldNamed("family_name") : null;
+		String surname1 =  jsonFieldAccessor.getValueOfFieldNamed("surname1") != null ?
+				                  jsonFieldAccessor.getValueOfFieldNamed("surname1") : null;
+
+		String surname2 =  jsonFieldAccessor.getValueOfFieldNamed("surname2") != null ?
+				                  jsonFieldAccessor.getValueOfFieldNamed("surname2") : null;
 
 		PersonID dni =   jsonFieldAccessor.getValueOfFieldNamed("dni") != null ?
 				                             PersonID.forId(jsonFieldAccessor.getValueOfFieldNamed("dni")) : null;
 
-		String displayName = Strings.customized("{} {}",
-												givenName,familyName);
+		String displayName =  jsonFieldAccessor.getValueOfFieldNamed("name") != null ?
+                							jsonFieldAccessor.getValueOfFieldNamed("name") : null;
 
-		// [3] - Return the third-party user data
+		// [N] - Return the giltzaUserData
 		GiltzaUserData giltzaUserData =
 				   GiltzaUserDataBuilder.forPersonId(dni)
-										 .givenName(givenName)
-										 .familiyName(familyName)
-										 .andDisplayName(displayName)
+										 .name(name)
+										 .surname1(surname1)
+										 .surname2(surname2)
 										 .withMail(mail)
+										 .displayName(displayName)
 									 .build();
 
 		log.warn("INFORMATIVE Purpose: END FETCH Third Party User, for provider type: Giltza. User: {} / {}", displayName, mail);
-		
+
 		return giltzaUserData;
 	}
 }

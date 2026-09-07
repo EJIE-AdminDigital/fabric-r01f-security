@@ -3,6 +3,7 @@ package r01f.model.security.pairing.otp;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
 import r01f.model.security.pairing.PairingRequest;
 import r01f.model.security.pairing.PairingRequestBase;
 import r01f.objectstreamer.annotations.MarshallField;
@@ -12,7 +13,7 @@ import r01f.util.types.Strings;
 
 @Accessors(prefix="_")
 @MarshallType(as="otpRequestForPairingBase") 
-public   class PairingRequestUsingOTPBase
+public class PairingRequestUsingOTPBase
      extends PairingRequestBase
   implements PairingRequestByOTP {
 	
@@ -20,6 +21,9 @@ public   class PairingRequestUsingOTPBase
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
+	@MarshallField(as="taskOid",escape=true)
+	@Getter @Setter protected OTPTaskOID _taskOid;
+
 	@MarshallField(as="otp",escape=true)
 	@Getter @Setter protected Password _otp;
 /////////////////////////////////////////////////////////////////////////////////////////

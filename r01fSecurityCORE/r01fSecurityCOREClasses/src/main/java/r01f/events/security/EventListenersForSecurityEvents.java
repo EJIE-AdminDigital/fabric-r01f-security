@@ -1,10 +1,9 @@
 package r01f.events.security;
 
-import jakarta.inject.Inject;
-
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 
+import jakarta.inject.Inject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +39,7 @@ public abstract class EventListenersForSecurityEvents {
 //  IMPORTANT!!
 //  Guava's {@link EventBus} does not cope with generic events:
 //  		There MUST exist specific event handlers associated with CRUD events for each of the indexable model objects
-//  		These event handlers are registered at {@link BeanImplementedPersistenceServicesCoreBootstrapGuiceModuleBase} where the @Subscribe annotated method is
-//  		used to know the event-type and associate the event type with the event handler
-//
-//   	The underlying problem is that if a generic event like CRUDOperationEvent<R extends PersistableModelObject<? extends OID>> is used
+//   		The underlying problem is that if a generic event like CRUDOperationEvent<R extends PersistableModelObject<? extends OID>> is used
 //  		due to type erasure, ALL event handlers would be associated with the SAME raw event-type: {@link CRUDOperationEvent}
 //  		The consequences of this multiple-association is that ALL three event handlers will be called for any event, independently of
 //  		the event type

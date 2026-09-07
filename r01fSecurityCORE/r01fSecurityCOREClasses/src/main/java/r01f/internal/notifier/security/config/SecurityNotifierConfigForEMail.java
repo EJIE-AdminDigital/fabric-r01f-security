@@ -34,7 +34,7 @@ public class SecurityNotifierConfigForEMail
 							 	   	   	  final Url pwdRstRedirectUrl,
 							 	   	   	  final Url usrRegRedirectUrl) {
 		super(NotifierType.EMAIL,
-			  coreAppCode);
+			  coreAppCode.asAppCode());
 		_msgTemplatePath = msgTemplatePath;
 		_usrRegMsgTemplatePath = usrRegMsgPath;
 		_msgImagePath = msgImagePath;

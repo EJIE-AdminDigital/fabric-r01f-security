@@ -13,18 +13,7 @@ import r01f.securitycontext.SecurityIDS.SecurityToken;
 public class KeycloakToClientModelTransferDelegate {
 
 //////////////////////////////////////////////////////////////////////////////
-//       CONSTRUCTORS
-//////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Private constructor for static class
-     */
-    private KeycloakToClientModelTransferDelegate() {
-
-    }
-
-//////////////////////////////////////////////////////////////////////////////
-///       METHODS
+///  METHODS
 //////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -41,13 +30,12 @@ public class KeycloakToClientModelTransferDelegate {
         if (client.getSecret() != null) {
             clientModel.setSecret(SecurityToken.forId(client.getSecret()));
         }
-        clientModel.setClientId(KeycloakClientID.forId(client.getClientId()));
+        clientModel.setId(KeycloakClientID.forId(client.getClientId()));
         clientModel.setEnabled(client.isEnabled());
         return clientModel;
 
     }
-    
-    
+     
 
     /**
      * Converts a Keycloak ClientRepresentation object into an DN00KeycloakClientModel.
@@ -61,7 +49,7 @@ public class KeycloakToClientModelTransferDelegate {
         client.setId(model.getOid() != null ? model.getOid().asString() : null);
         client.setName(model.getName());
         client.setSecret(model.getSecret() != null ? model.getSecret().asString() : null);
-        client.setClientId(model.getClientId() != null ? model.getClientId().asString() : null);
+        client.setClientId(model.getId() != null ? model.getId().asString() : null);
         client.setEnabled(model.isEnabled());
         return client;
 

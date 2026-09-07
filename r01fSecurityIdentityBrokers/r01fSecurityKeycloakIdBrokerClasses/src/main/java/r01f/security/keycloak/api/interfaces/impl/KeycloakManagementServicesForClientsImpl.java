@@ -93,15 +93,15 @@ public class KeycloakManagementServicesForClientsImpl
 	    KeycloakClientModel model = postRequest.getClientModel();
 	    
 	    //[1]Validate that the CLINET ID (KeycloakClientID) MUST BE  provided externally
-	    if (model.getClientId() == null 
-	    		|| model.getClientId().asString().isBlank()) {
+	    if (model.getId() == null 
+	    		|| model.getId().asString().isBlank()) {
 	        throw new IllegalArgumentException("The KeycloakClientOID must be provided externally for client creation.");
 	    }	    
 	    //[2] Map model to Representation
 	    ClientRepresentation keycloakClient = KeycloakToClientModelTransferDelegate.clientModelToKeycloakClientRepresentation(model);
 
 	    // 3. Set Keycloak specific defaults and force the provided ID
-	    keycloakClient.setClientId(model.getClientId().asString());
+	    keycloakClient.setClientId(model.getId().asString());
 	    keycloakClient.setAuthorizationServicesEnabled(true);
 	    keycloakClient.setPublicClient(false);
 	    keycloakClient.setDirectAccessGrantsEnabled(true);
@@ -134,7 +134,7 @@ public class KeycloakManagementServicesForClientsImpl
 	            return new KeycloakClientCreateResult(postRequest.getRealm(), model);
 	        }
 	        
-	        log.error("Failed to create Keycloak client '{}'. HTTP Status: {}", model.getClientId(), response.getStatus());
+	        log.error("Failed to create Keycloak client '{}'. HTTP Status: {}", model.getId(), response.getStatus());
 	        return null;
 	        
 	    } finally {
@@ -220,13 +220,11 @@ public class KeycloakManagementServicesForClientsImpl
 	 
 	 private boolean _hasRole(final String realmId, String clientId, String roleName) {
 		    return _keycloakAdminRestAPI.realm(realmId)
-					                    .clients()
-					                    .get(clientId)
-					                    .roles()
-					                    .list() 
-					                    .stream()
+						                    .clients()
+						                    .get(clientId)
+						                    .roles()
+						                    .list() 
+						                    .stream()
 					                  .anyMatch(r -> r.getName().equals(roleName));
 		}
-
-
 }

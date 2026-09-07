@@ -4,7 +4,6 @@ import java.time.Instant;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-
 import lombok.extern.slf4j.Slf4j;
 import r01f.api.interfaces.security.otp.OTPService;
 import r01f.core.services.mail.EMailMimeMessages;
@@ -41,15 +40,15 @@ import r01f.util.types.Strings;
 public class LoginAuthFactorTaskServicesUsingOTPByEMail
 	implements  LoginAuthFactorTaskServices {
 /////////////////////////////////////////////////////////////////////////////////////////
-// MEMBERS
-/////////////////////////////////////////////////////////////////////////////////////////
-	final OTPService _otpService;
-	final AppCode _appCode;
+//	FIELDS
+/////////////////////////////////////////////////////////////////////////////////////////	
+	private final OTPService _otpService;
+	private final AppCode _appCode;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public LoginAuthFactorTaskServicesUsingOTPByEMail( final AppCode appCode,
-			                                           final OTPService otpService) {
+	public LoginAuthFactorTaskServicesUsingOTPByEMail(final AppCode appCode,
+			                                          final OTPService otpService) {
 		_otpService = otpService;
 		_appCode = appCode;
 	}
@@ -126,7 +125,7 @@ public class LoginAuthFactorTaskServicesUsingOTPByEMail
 		log.info("Validate '{} ' for secret '{}' ",
 											factorValidationRequest.getEMail(),
 											factorValidationRequest.getSecret());
-		OTPValidationRequest<EMail> validReq = OTPValidationRequestBuilder.using(factorValidationRequest.getEMail())
+		OTPValidationRequest<EMail> validReq = OTPValidationRequestBuilder.using(factorValidationRequest.getTaskOid(),factorValidationRequest.getEMail())
 																		  .validate(factorValidationRequest.getSecret())
 																		  .buildFor(_appCode);
 

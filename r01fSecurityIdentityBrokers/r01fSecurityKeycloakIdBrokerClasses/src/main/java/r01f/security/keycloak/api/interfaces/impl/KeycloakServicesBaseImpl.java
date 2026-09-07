@@ -11,13 +11,14 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import lombok.extern.slf4j.Slf4j;
 import r01f.objectstreamer.Marshaller;
 import r01f.security.keycloak.client.api.KeycloakClientConfig;
 import r01f.security.keycloak.model.clients.KeycloakClientRequestCriteria;
 import r01f.security.keycloak.model.users.KeycloakUserRequestCriteria;
 
 
-
+@Slf4j
 abstract class KeycloakServicesBaseImpl {
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	FIELDS
@@ -40,29 +41,39 @@ abstract class KeycloakServicesBaseImpl {
 /////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings("static-method")
 	protected ClientRepresentation _clientRepresentation(final ClientsResource clientsResource, final KeycloakClientRequestCriteria criteria) {
-	    if (criteria.byOid()) {
-	        //[] Direct fetch using the Internal UUID (KeycloakClientOID)
-	        return clientsResource.get(criteria.getKeycloakClientOid().asString()).toRepresentation();
-	    } 
-	    
-	    // [] Search using the Business ID (KeycloakClientID)
-	    List<ClientRepresentation> clients = clientsResource.findByClientId(criteria.getKeycloakClientId().asString());	    
-	    return (clients == null || clients.isEmpty()) ? null : clients.get(0);
+		 try {
+			if (criteria.byOid()) {
+		        //[] Direct fetch using the Internal UUID (KeycloakClientOID)
+		        return clientsResource.get(criteria.getKeycloakClientOid().asString()).toRepresentation();
+		    } 		    
+	        //[] Search using the Business ID (KeycloakClientID)
+	    	List<ClientRepresentation> clients =  clientsResource.findByClientId(criteria.getKeycloakClientId().asString());	
+	    	return (clients == null || clients.isEmpty()) ? null : clients.get(0);
+	    } catch ( final jakarta.ws.rs.ProcessingException proceEx) {
+	    	proceEx.printStackTrace();
+	    	throw new IllegalStateException("Cannot process request against KeyCloak: " +proceEx.getLocalizedMessage());
+	    }
+	   
 	}
 
 	@SuppressWarnings("static-method")
 	protected UserRepresentation _userRepresentation(final UsersResource usersResource, final KeycloakUserRequestCriteria criteria) {
-	    if (criteria.byOid()) {
-	        // Direct fetch using the Internal UUID (KeycloakUserOID)
-	        return usersResource.get(criteria.getKeycloakUserOid().asString()).toRepresentation();
-	    } 
-	    
-	    // Search using Username (KeycloakUserID) with exact match = true
-	    List<UserRepresentation> users = usersResource.searchByUsername(criteria.getKeycloakUserId().asString(), 
-	    		                                                        true);
-	    
-	    return (users == null 
-	    				|| users.isEmpty()) ? null : users.get(0);
+		  try {
+			if (criteria.byOid()) {
+		        // Direct fetch using the Internal UUID (KeycloakUserOID)
+		        return usersResource.get(criteria.getKeycloakUserOid().asString()).toRepresentation();
+		    } 		    
+		    // Search using Username (KeycloakUserID) with exact match = true
+		    log.warn("...Search using Username [ KeycloakUserID ] ='{}'",criteria.getKeycloakUserId().asString() );
+		    List<UserRepresentation> users = usersResource.searchByUsername(criteria.getKeycloakUserId().asString(), 
+                                                  true);//exact    
+		    return (users == null 
+    					|| users.isEmpty()) ? null : users.get(0);
+	    } catch ( final jakarta.ws.rs.ProcessingException proceEx) {
+	    	proceEx.printStackTrace();
+	    	throw new IllegalStateException("Cannot process request against KeyCloak: " +proceEx.getLocalizedMessage());
+	    }		
+	   
 	}
 
 	protected ClientResource _clientResource(final ClientsResource clientsResource, final KeycloakClientRequestCriteria criteria) {

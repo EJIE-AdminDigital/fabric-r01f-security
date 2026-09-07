@@ -7,6 +7,7 @@ import r01f.types.contact.EMail;
 
 public interface UserDataFromThirdPartySecurityProvider
 		 extends Serializable {
+	
 	public LoginID getLoginId();
 	public EMail getMail();
 }

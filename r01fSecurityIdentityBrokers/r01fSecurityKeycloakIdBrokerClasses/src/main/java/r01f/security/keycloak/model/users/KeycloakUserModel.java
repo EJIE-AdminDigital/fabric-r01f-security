@@ -1,5 +1,7 @@
 package r01f.security.keycloak.model.users;
 
+import java.util.Collection;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,8 +9,12 @@ import lombok.experimental.Accessors;
 import r01f.model.ModelObject;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.security.keycloak.model.KeycloakIDs.KeycloakAttributeID;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakUserOID;
+import r01f.security.keycloak.model.base.KeycloackIdentityModelAtttribute;
+import r01f.security.keycloak.model.base.KeycloackIdentityModelAtttribute.KeycloakAttributeValue;
+import r01f.security.keycloak.model.base.KeycloackIdentityModelObjectBase;
 import r01f.types.contact.EMail;
 
 /**
@@ -18,23 +24,11 @@ import r01f.types.contact.EMail;
 @Accessors(prefix="_")
 @MarshallType(as="keycloakUser")
 public class KeycloakUserModel
-        implements ModelObject {
-	
+		extends KeycloackIdentityModelObjectBase<KeycloakUserOID,KeycloakUserID,KeycloakUserModel> {
 	private static final long serialVersionUID = -8389048195998131206L;
 //////////////////////////////////////////////////////////////////////////////
 //  FIELDS
 //////////////////////////////////////////////////////////////////////////////
-	// The IDP Dena users identifier of the user.
-    @MarshallField(as="oid")
-    @Getter @Setter private KeycloakUserOID _userOid;
-	// The IDP Dena users identifier of the user.
-    @MarshallField(as="sub")
-    @Getter @Setter private KeycloakUserID _userId;
-
-    // The preferred username of the user.
-   /* @MarshallField(as="username")
-    @Setter private String _username;*/
-
     // The given name of the user.
     @MarshallField(as="given_name")
     @Getter @Setter private String _firstName;
@@ -50,9 +44,10 @@ public class KeycloakUserModel
     // The email verified status of the user.
     @MarshallField(as="email_verified")
     @Getter @Setter private boolean _emailVerified;
-
-   /* public String getUsername() {
-        return _username == null ? null : _username.toUpperCase();
-    }*/
+//////////////////////////////////////////////////////////////////////////////
+// FIELDS
+//////////////////////////////////////////////////////////////////////////////
+	
+  
 
 }

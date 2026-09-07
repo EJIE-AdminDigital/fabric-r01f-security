@@ -1,10 +1,11 @@
 package r01f.model.security.webauthn;
 
+import lombok.Getter;
 import r01f.annotations.Immutable;
+import r01f.guids.JavaOIDDispenser;
 import r01f.objectstreamer.annotations.MarshallType;
 import r01f.patterns.FactoryFrom;
-import r01f.securitycontext.SecurityOIDs.SecurityObjectOID;
-import r01f.securitycontext.SecurityOIDs.SecurityObjectOIDBase;
+import r01f.securitycontext.SecurityOIDs.IsSecurityObjectOID;
 
 public abstract class WebAuthnOIDs {
 
@@ -13,18 +14,16 @@ public abstract class WebAuthnOIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Immutable
 	@MarshallType(as="loginOid")
-	public static final class CredentialOID
-					  extends SecurityObjectOIDBase
-				   implements SecurityObjectOID {
-
-		private static final long serialVersionUID = -2162289370851262116L;
+	public record CredentialOID(@Getter String id)
+	   implements IsSecurityObjectOID {
 
 		public static final CredentialOID ALL = CredentialOID.forId("*");
-		public CredentialOID() {
-			super();
+
+		public static CredentialOID from(final String id) {
+			return new CredentialOID(id);
 		}
-		public CredentialOID(final String oid) {
-			super(oid);
+		public static CredentialOID forId(final String id) {
+			return new CredentialOID(id);
 		}
 		public static CredentialOID valueOf(final String s) {
 			return CredentialOID.forId(s);
@@ -32,17 +31,19 @@ public abstract class WebAuthnOIDs {
 		public static CredentialOID fromString(final String s) {
 			return CredentialOID.forId(s);
 		}
-		public static CredentialOID forId(final String id) {
-			return new CredentialOID(id);
-		}
+
 		public static CredentialOID supply() {
-			return CredentialOID.forId(SecurityObjectOIDBase.supplyId());
+			return CredentialOID.forId(JavaOIDDispenser.generateGUID());
 		}
-		public static FactoryFrom<String,CredentialOID> FACTORY_FROM_STRING = new FactoryFrom<>() {
-																							@Override
-																							public CredentialOID from(final String oid) {
-																								return CredentialOID.forId(oid);
-																							}
-																		 };
+		public static FactoryFrom<String,CredentialOID> FACTORY_FROM_STRING = CredentialOID::forId;
+		
+		@Override
+		public String asString() {
+			return this.id;
+		}
+		@Override
+		public String toString() {
+			return this.id;
+		}
 	}
 }

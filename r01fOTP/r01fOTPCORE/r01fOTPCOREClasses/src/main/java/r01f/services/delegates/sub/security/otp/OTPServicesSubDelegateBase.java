@@ -1,6 +1,5 @@
 package r01f.services.delegates.sub.security.otp;
 
-
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.core.services.mail.model.EMailRFC822Address;
 import r01f.eventbus.EventBus;
@@ -15,7 +14,6 @@ import r01f.securitycontext.SecurityContext;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.types.contact.EMail;
 import r01f.types.contact.Phone;
-
 
 abstract class OTPServicesSubDelegateBase 	 {
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +38,17 @@ abstract class OTPServicesSubDelegateBase 	 {
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
+
+	public <K> OTPTask loadTask(final SecurityContext scx,
+								final OTPTaskOID taskOid) {
+		try {
+			return _taskPersistenceService.load(scx,
+												taskOid).getOrThrow();
+		} catch ( final PersistenceException perx) {
+			return null;
+		}
+	}
+
 	public <K> OTPTask loadTaskBy(final SecurityContext scx,
 			                      final AppCode appCode,final AppComponent appComp,
 		   				          final K key) {
@@ -89,4 +98,25 @@ abstract class OTPServicesSubDelegateBase 	 {
 										   EMail.class + " or " + EMailRFC822Address.class + " or " +
 										   Phone.class);
 	}
+	
+	public <K> boolean validateRequest(final K key,
+									   final OTPTask task) {
+		if (key instanceof OTPTaskOID) {
+			return key.equals(task.getOid());
+		}
+		else if (key instanceof Phone) {
+			Phone phone = (Phone)key;
+			return phone.equals(task.getPhone());
+		}
+		else if (key instanceof EMail) {
+			EMail email = (EMail)key;
+			return email.equals(task.getEmail());
+		}
+		else if (key instanceof EMailRFC822Address) {
+			EMail email = ((EMailRFC822Address)key).getEmail();
+			return email.equals(task.getEmail());
+		}
+		return false;
+	}
+	
 }

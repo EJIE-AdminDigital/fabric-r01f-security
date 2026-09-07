@@ -6,7 +6,7 @@ import r01f.guids.CommonOIDs.SystemID;
 import r01f.model.persistence.CRUDResult;
 import r01f.model.persistence.PersistenceException;
 import r01f.model.security.pushtoken.PushToken;
-import r01f.model.security.pushtoken.PushTokenID;
+import r01f.model.security.pushtoken.IsPushTokenID;
 import r01f.model.security.pushtoken.PushTokenOID;
 import r01f.objectstreamer.Marshaller;
 import r01f.securitycontext.SecurityContext;
@@ -28,7 +28,7 @@ public class ClientAPIDelegateForPushTokenCRUDServices<T extends PushToken>
 //	EXTENSION METHODS
 /////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings("unchecked")
-	public T loadBy(final PushTokenID id,
+	public T loadBy(final IsPushTokenID id,
 				    final SystemID systemOid) {
 		CRUDResult<T> results = this.getServiceProxyAs(CRUDServicesForPushToken.class)
 												.loadBy(this.getSecurityContext(),
