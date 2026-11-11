@@ -31,14 +31,14 @@ import r01f.crypto.CryptoKeyPair;
 import r01f.crypto.CryptoKeySpecFactory;
 import r01f.crypto.CryptoKeys;
 import r01f.debug.Debuggable;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
 import r01f.jwt.JWT;
 import r01f.jwt.JWTBuilder;
 import r01f.jwt.verifier.JWTVerificationResult;
 import r01f.jwt.verifier.JWTVerificationResultAsNotValidToken;
 import r01f.jwt.verifier.JWTVerifier;
 import r01f.jwt.verifier.JWTVerifierBuilder;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
 import r01f.types.Path;
 import r01f.util.types.Strings;
 
@@ -218,7 +218,7 @@ public class AccessGrantedTokenService
 			 CryptoKeys.PUBLIC_KEY_SPEC_FACTORY,CryptoKeys.PUBLIC_KEY_FROM_SPEC_FACTORY,PUBLIC_KEY_CLASSPATH_LOCATION);
 	}
 	public AccessGrantedTokenService(final AccessGrantedTokenSpec authTokenSpec,
-							  final Path privateKeyClassPathLoc,final Path publicKeyClassPathLoc) {
+							  		 final Path privateKeyClassPathLoc,final Path publicKeyClassPathLoc) {
 		this(authTokenSpec,
 			 // private key
 			 CryptoKeys.PRIVATE_KEY_SPEC_FACTORY,CryptoKeys.PRIVATE_KEY_FROM_SPEC_FACTORY,privateKeyClassPathLoc,
@@ -241,7 +241,7 @@ public class AccessGrantedTokenService
 	public AccessGrantedTokenService(final AccessGrantedTokenSpec authTokenSpec,
 									 final CryptoKeyPair rsaKeyPair) {
 		this(authTokenSpec,
-			 rsaKeyPair.getPrivateKey(),rsaKeyPair.getPublicKey());
+			 (RSAPrivateKey)rsaKeyPair.getPrivateKey(),(RSAPublicKey)rsaKeyPair.getPublicKey());
 	}
 	public AccessGrantedTokenService(final AccessGrantedTokenSpec authTokenSpec,
 							  		 final RSAPrivateKey privateKey,final RSAPublicKey publicKey) {

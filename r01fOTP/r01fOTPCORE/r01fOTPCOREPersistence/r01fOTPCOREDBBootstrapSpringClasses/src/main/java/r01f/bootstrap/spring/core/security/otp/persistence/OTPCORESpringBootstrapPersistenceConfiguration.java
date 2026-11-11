@@ -10,14 +10,14 @@ import r01f.services.bootstrap.core.spring.CoreSpringComponentScan;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.annotations.ServicesCoreConfigFor;
 import r01f.services.ids.ServiceIDs.CoreAppCode;
-import r01f.services.security.otp.persistence.CoreOTPDBPersistenceService;
+import r01f.services.security.otp.persistence.IsCoreOTPDBPersistenceService;
 import r01f.spring.IsSpringConfiguration;
 
 
 @Configuration
 //@EnableCoreEvents
 @CoreSpringComponentScan(basePackageClasses  = {  
-													CoreOTPDBPersistenceService.class     
+													IsCoreOTPDBPersistenceService.class     
 						})
 public class OTPCORESpringBootstrapPersistenceConfiguration 
   implements IsSpringConfiguration {	

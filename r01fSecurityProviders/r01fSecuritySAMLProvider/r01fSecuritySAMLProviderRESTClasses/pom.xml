@@ -31,6 +31,12 @@
 	<!-- DEPENDENCIES                                                           -->
 	<!-- ====================================================================== -->
 	<dependencies>
+		<dependency>
+			<groupId>r01.fabric.security.providers.saml</groupId>
+			<artifactId>r01fSecuritySAMLProviderClasses</artifactId>		
+			<version>${revision}</version>
+		</dependency>
+		
 		<!-- ///////////////////////////////////////// -->
 		<!-- R01F: Base Provider Classes               -->
 		<!-- ///////////////////////////////////////// -->

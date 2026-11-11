@@ -4,16 +4,15 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.mail.internet.MimeMessage;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.mail.internet.MimeMessage;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +27,12 @@ import r01f.core.services.notifier.config.NotifierConfigForEMail;
 import r01f.events.security.UserPasswordRecoverMessage;
 import r01f.internal.R01F;
 import r01f.internal.notifier.security.config.SecurityNotifierConfigForEMail;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.patterns.Factory;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.types.Path;
+import r01f.types.contact.EMail;
+import r01f.types.contact.NotificationMedium;
 import r01f.types.url.Url;
 
 /**
@@ -60,18 +61,11 @@ public class UserPasswordRecoverNotifierEMailImpl
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
 	public NotifierResponse sendNotification(final UserPasswordRecoverMessage pwdRecoverMsg) {
-		if (!this.isEnabledConsidering(_mailNotifier)) {
-			log.warn("EMail notifier is DISABLED!");
-			return null;
-		}
-		log.info("[EMailNotifier ({})]================================================",
-				 _mailNotifier.getClass().getSimpleName());
-		if (pwdRecoverMsg.getEmail() == null) {
-			log.warn("... NO emails to notify to");
-			return null;
-		}
-		NotifierServiceResponse<EMailRFC822Address> serviceResponse = _sendEMailMessage(EMailRFC822Address.of(pwdRecoverMsg.getEmail()),
-								  													    pwdRecoverMsg.getUserOid(),pwdRecoverMsg.getUserName(),
+		EMail email = _getContactMean(pwdRecoverMsg,
+									 NotificationMedium.EMAIL,
+									 _mailNotifier);
+		NotifierServiceResponse<EMailRFC822Address> serviceResponse = _sendEMailMessage(EMailRFC822Address.of(email),
+								  													    pwdRecoverMsg.getPrincipalOid(),pwdRecoverMsg.getDisplayName(),
 								  													    pwdRecoverMsg.getToken());
 		return new NotifierResponse() {
 						@Override
@@ -96,7 +90,7 @@ public class UserPasswordRecoverNotifierEMailImpl
 	 * @return
 	 */
 	private NotifierServiceResponse<EMailRFC822Address> _sendEMailMessage(final EMailRFC822Address to,
-																          final UserOID userOid,final String userName,
+																          final SecurityPrincipalOID userOid,final String userName,
 																          final SecurityToken securityToken) {
 		log.info("\t-->sending email to {} using {}",
 				 to,_mailNotifier.getClass());
@@ -144,7 +138,7 @@ public class UserPasswordRecoverNotifierEMailImpl
 		return "Recuperación de password";
 	}
 	private static String _composeMailMessageBody(final VelocityEngine velocityEngine,final Path alertMsgTemplatePath,
-												  final UserOID userOid,final String userName,
+												  final SecurityPrincipalOID userOid,final String userName,
 								   				  final SecurityToken securityToken, final Url redirectUrl) {
 
 		// Text... using velocity

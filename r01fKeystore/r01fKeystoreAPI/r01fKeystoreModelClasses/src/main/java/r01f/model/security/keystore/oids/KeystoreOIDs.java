@@ -2,10 +2,10 @@ package r01f.model.security.keystore.oids;
 
 import lombok.Getter;
 import r01f.annotations.Immutable;
-import r01f.guids.JavaOIDDispenser;
-import r01f.guids.OIDTyped;
-import r01f.guids.PersistableObjectOID;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.JavaOIDDispenser;
+import r01f.oids.OIDTyped;
+import r01f.oids.PersistableObjectOID;
 
 public abstract class KeystoreOIDs {
 

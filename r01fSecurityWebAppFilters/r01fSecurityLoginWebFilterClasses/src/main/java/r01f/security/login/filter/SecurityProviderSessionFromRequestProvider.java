@@ -1,9 +1,8 @@
 package r01f.security.login.filter;
 
 import jakarta.servlet.http.HttpServletRequest;
-
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.security.login.LoginSession;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
 import r01f.types.StringBase64;
 
 /**
@@ -33,7 +32,7 @@ public interface SecurityProviderSessionFromRequestProvider {
 	 * @return
 	 */
 	public <S> S getLoginSession(final HttpServletRequest request,
-								 final SecurityProviderID providerId);
+								 final IdentityProvider providerId);
 	/**
 	 * Serializes the [security provider]-specific [login session] to a [base64] string
 	 * that can be sent to the [security REST services war] where it can be de-serialized
@@ -44,5 +43,5 @@ public interface SecurityProviderSessionFromRequestProvider {
 	 * @return
 	 */
 	public <S> StringBase64 base64SerializeLoginSession(final S session,
-													 	final SecurityProviderID providerId);
+													 	final IdentityProvider providerId);
 }

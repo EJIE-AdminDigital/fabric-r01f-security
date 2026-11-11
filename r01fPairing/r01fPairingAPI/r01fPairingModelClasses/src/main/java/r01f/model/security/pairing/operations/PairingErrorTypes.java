@@ -16,30 +16,30 @@ public abstract class PairingErrorTypes
 
 	//	PAIR_ERROR_FOR_NOT_VALID_OTP
 	public static COREServiceErrorType PAIR_ERROR_FOR_NOT_VALID_OTP = COREServiceErrorType.originatedAt(COREServiceErrorOrigin.CLIENT)
-																							  .withName("PAIR_ERROR_FOR_NOT_VALID_OTP")
-																							  .coded(300,1)
-																							  .severity(ExceptionSeverity.FATAL)
+																						  .withName("PAIR_ERROR_FOR_NOT_VALID_OTP")
+																						  .coded(300,1)
+																						  .severity(ExceptionSeverity.FATAL)
 																						  .build();
 	
-//	PAIR_ERROR_FOR_NOT_VALID_OTP
+	//	PAIR_ERROR_FOR_NOT_VALID_OTP
 	public static COREServiceErrorType PAIR_ERROR_ON_OTP_DISTPATCH = COREServiceErrorType.originatedAt(COREServiceErrorOrigin.CLIENT)
-																							  .withName("PAIR_ERROR_FOR_NOT_VALID_OTP")
-																							  .coded(300,1)
-																							  .severity(ExceptionSeverity.FATAL)
-																						  .build();
+																						 .withName("PAIR_ERROR_FOR_NOT_VALID_OTP")
+																						 .coded(300,1)
+																						 .severity(ExceptionSeverity.FATAL)
+																						 .build();
 	
 	//	PAIR_ERROR_FOR_UNCHECKED_USER_DATA
 	public static COREServiceErrorType PAIR_ERROR_FOR_UNCHECKED_USER_DATA = COREServiceErrorType.originatedAt(COREServiceErrorOrigin.CLIENT)
-																								  .withName("PAIR_ERROR_FOR_UNCHECKED_USER_DATA")
-																								  .coded(300,4)
-																								  .severity(ExceptionSeverity.FATAL)
-																							  .build();
+																								.withName("PAIR_ERROR_FOR_UNCHECKED_USER_DATA")
+																								.coded(300,4)
+																								.severity(ExceptionSeverity.FATAL)
+																							    .build();
 	
-	// UNPAIR_ERROR
+	// 	UNPAIR_ERROR
 	public static COREServiceErrorType UNPAIR_ERROR = COREServiceErrorType.originatedAt(COREServiceErrorOrigin.SERVER)
-																							  .withName("UNPAIR_ERROR")
-																							  .coded(300,5)
-																							  .severity(ExceptionSeverity.FATAL)
-																							  .build();
+																		  .withName("UNPAIR_ERROR")
+																		  .coded(300,5)
+																		  .severity(ExceptionSeverity.FATAL)
+																		  .build();
 	
 }

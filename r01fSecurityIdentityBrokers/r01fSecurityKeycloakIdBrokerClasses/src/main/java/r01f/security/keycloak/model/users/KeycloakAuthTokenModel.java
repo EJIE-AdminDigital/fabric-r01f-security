@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.model.ModelObject;
 import r01f.objectstreamer.annotations.MarshallField;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 
 
 /**

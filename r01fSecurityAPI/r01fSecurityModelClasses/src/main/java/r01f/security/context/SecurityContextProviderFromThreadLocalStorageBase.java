@@ -1,0 +1,48 @@
+package r01f.security.context;
+
+import lombok.extern.slf4j.Slf4j;
+import r01f.model.security.context.SecurityContext;
+import r01f.patterns.Provider;
+
+/**
+ * Provides a {@link SecurityContext} previously attached to the 
+ * [thread local] storage
+ * Usually is used like:
+ * <pre>
+ * 			[security filter]  <-- attaches the [security context] to the [thread local] storage
+ *                  |
+ *               [CORE] <-- uses this [provider] to get the [security context] from the [thread local] storage
+ * </pre>
+ * Usage: if using javax.inject
+ * <pre>
+ * 		public class MySecurityContextProviderFromThreadLocalStorage
+ * 			 extends SecurityContextProviderFromThreadLocalStorageBase 
+ * 		  implements jakarta.inject.Provider<SecurityContext> {
+ * 
+ * 			@Override
+ * 			public SecurityContext get() {
+ * 				return super.provideValue();
+ * 			}
+ * 		}
+ * </pre>
+ */
+@Slf4j
+public abstract class SecurityContextProviderFromThreadLocalStorageBase 
+  		   implements Provider<SecurityContext> {
+/////////////////////////////////////////////////////////////////////////////////////////
+//  Provider
+/////////////////////////////////////////////////////////////////////////////////////////
+	@Override
+	public SecurityContext provideValue() {
+		// The Auth attached to the ThreadLocal storage at the security filter
+		SecurityContext outSecurityContext = SecurityContextStoreAtThreadLocalStorage.get();
+		if (outSecurityContext != null) {
+			log.trace("got a [security context] attached to the [thread local] storage for principal={}",
+					  outSecurityContext.getSecurityPrincipalId());
+		} else {
+			log.info("NO [security context] attached to the [thread local] storage: no security filter in use!!");
+		}
+		return outSecurityContext;
+	}
+
+}

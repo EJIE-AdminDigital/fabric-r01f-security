@@ -2,27 +2,24 @@ package r01f.security.rest.resource.giltza;
 
 import jakarta.inject.Provider;
 import jakarta.ws.rs.core.Response;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.giltza.GiltzaLogin;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.giltza.GiltzaCallBackOnLoginHandler;
 import r01f.security.handler.giltza.GiltzaLoginEntryPointHandler;
-import r01f.security.handler.giltza.GiltzaUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.giltza.GiltzaSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTDelegateForLoginBase;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
 
 
 /**
  * Google base login: https://developers.google.com/actions/identity/oauth2-code-flow
  */
-  class RESTDelegateForGiltzaSecurityProvider<U extends User,L extends GiltzaLogin,
-  											  E extends UserLoginEntry>
-extends RESTDelegateForLoginBase<U,L,E> {
+  class RESTDelegateForGiltzaSecurityProvider<P extends IsSecurityPrincipal>
+extends RESTDelegateForLoginBase<P> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -31,23 +28,22 @@ extends RESTDelegateForLoginBase<U,L,E> {
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
 	public RESTDelegateForGiltzaSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-												 final SecurityProviderSecretConfig securityProviderSecretConfig,
+												 final AuthenticationProviderSecretConfig authnProviderSecretConfig,
 												 // handlers
 												 final GiltzaLoginEntryPointHandler loginEntryPointHandler,
 									  			 final GiltzaCallBackOnLoginHandler callbackOnLoginHandler,
-									  			 final GiltzaUserDataFetchHandler<U,L> fetchUserDataHandler,
+									  			 final GiltzaSecurityPrincipalDataFetchHandler<P> fetchPrincipalDataHandler,
 									  			 // marshaller
 									  			 final Marshaller marshaller,
 									  			 // used to create [login entries] when the user logs-in
-									  			 final Factory<E> loginEntryFactory,
-									  			 final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
-		super(SecurityProviderID.GILTZA,
+									  			 final CRUDServicesForLoginEntry loginEntryCrud) {
+		super(IdentityProvider.GILTZA,AuthenticationMethod.OAUTH_AUTH_CODE_FLOW,
 			  sysSecurityContextProvider,
-			  securityProviderSecretConfig,
+			  authnProviderSecretConfig,
 			  loginEntryPointHandler,
-			  fetchUserDataHandler,
+			  fetchPrincipalDataHandler,
 			  marshaller,
-			  loginEntryFactory,loginEntryCrud);
+			  loginEntryCrud);
 		_callbackOnLoginHandler = callbackOnLoginHandler;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////

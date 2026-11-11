@@ -11,8 +11,8 @@ import org.opensaml.security.credential.Credential;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import r01f.oids.SecurityIDs.LoginID;
 import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
-import r01f.securitycontext.SecurityIDS.LoginID;
 import r01f.util.types.Strings;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)

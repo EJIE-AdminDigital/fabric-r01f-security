@@ -9,11 +9,11 @@ import r01f.api.interfaces.security.webauthn.FindServicesForAuthenticatorCredent
 import r01f.db.entities.security.webauthn.DBEntityForAuthenticatorCredential;
 import r01f.model.persistence.FindResult;
 import r01f.model.persistence.FindResultBuilder;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.WebAuthnOIDs.CredentialOID;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.services.core.persistence.db.DBFindForModelObjectBase;
 import r01f.services.core.persistence.db.config.DBModuleConfig;
 import r01f.services.core.persistence.db.entities.primarykeys.DBPrimaryKeyForModelObject;
@@ -47,7 +47,7 @@ public abstract class DBFindForAuthenticatorCredentialBase<C extends Authenticat
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
 	public FindResult<C> findBy(final SecurityContext securityContext,
-			                    final UserOID userOid ) {
+			                    final SecurityPrincipalOID userOid ) {
 		log.warn("[DBFindForAuthenticatorCredentialBase]: linked credentials to user {}", userOid);
 		TypedQuery<DB> query = this.getEntityManager()
 									.createQuery(Strings.customized("SELECT usageProcess " +

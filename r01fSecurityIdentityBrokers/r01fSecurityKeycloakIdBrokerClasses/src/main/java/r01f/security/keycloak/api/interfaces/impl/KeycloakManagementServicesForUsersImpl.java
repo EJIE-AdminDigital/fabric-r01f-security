@@ -1,18 +1,16 @@
 package r01f.security.keycloak.api.interfaces.impl;
 
-import org.jboss.resteasy.client.jaxrs.internal.proxy.ResteasyClientProxy;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import r01f.oids.SecurityIDs.Password;
 import r01f.security.keycloak.api.interfaces.KeycloakManagementServicesForUsers;
 import r01f.security.keycloak.client.api.KeycloakClientConfig;
-import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakUserOID;
 import r01f.security.keycloak.model.users.KeycloakToUserModelTransferDelegate;
 import r01f.security.keycloak.model.users.KeycloakUserCreateRequest;
@@ -28,25 +26,27 @@ import r01f.security.keycloak.model.users.KeycloakUserModel;
 import r01f.security.keycloak.model.users.KeycloakUserRequestCriteria.KeycloakUserGetRequestCriteriaByOID;
 import r01f.security.keycloak.model.users.KeycloakUserUpdateRequest;
 import r01f.security.keycloak.model.users.KeycloakUserUpdateResult;
-import r01f.securitycontext.SecurityIDS.Password;
 
 @Slf4j
 public class KeycloakManagementServicesForUsersImpl
 		extends KeycloakServicesBaseImpl
-	implements KeycloakManagementServicesForUsers {
+	 implements KeycloakManagementServicesForUsers {
 ////////////////////////////////////////////////////////////////////////////////---------
 //CONSTRUCTORS
 ////////////////////////////////////////////////////////////////////////////////---------
 	public KeycloakManagementServicesForUsersImpl(final KeycloakClientConfig keyCloakClientConfig,
 												  final	Keycloak keycloakAdminClient) {
-		super(keyCloakClientConfig, keycloakAdminClient,null);
+		super(keyCloakClientConfig,
+			  keycloakAdminClient,
+			  null);	// marshaller
 	}
 ////////////////////////////////////////////////////////////////////////////////
 //METHODS
 ////////////////////////////////////////////////////////////////////////////////
 	@Override
 	public KeycloakUserGetResult load(final KeycloakUserGetRequest getRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(getRequest.getRealm().asString()).users();
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(getRequest.getRealm().asString())
+														   .users();
 		UserRepresentation userRepresentation = _userRepresentation(usersResource,
 				                                                    getRequest.getCriteria());
 		if (userRepresentation == null) {
@@ -60,23 +60,21 @@ public class KeycloakManagementServicesForUsersImpl
 
 	@Override
 	public KeycloakUserHeadResult exists(final KeycloakUserHeadRequest headRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(headRequest.getRealm().asString()).users();
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(headRequest.getRealm().asString())
+														   .users();
 
 		UserRepresentation userRepresentation = _userRepresentation(usersResource,
 				                                                    headRequest.getCriteria());
 		if (userRepresentation == null) {
 			return new KeycloakUserHeadResult(headRequest.getRealm(),
 					                          false,
-					                          headRequest.getCriteria().byOid() ? headRequest.getCriteria().getKeycloakUserOid(): null,
-					                          headRequest.getCriteria().byId() ? headRequest.getCriteria().getKeycloakUserId(): null
-					                          );
-
+					                          headRequest.getCriteria().byOid() ? headRequest.getCriteria().getKeycloakUserOid() : null,
+					                          headRequest.getCriteria().byId() ? headRequest.getCriteria().getKeycloakUserId() : null);
 		}
 		return new KeycloakUserHeadResult(headRequest.getRealm(),
 							              false,
-							              headRequest.getCriteria().byOid() ? headRequest.getCriteria().getKeycloakUserOid(): null,
-							              headRequest.getCriteria().byId() ? headRequest.getCriteria().getKeycloakUserId(): null
-                );
+							              headRequest.getCriteria().byOid() ? headRequest.getCriteria().getKeycloakUserOid() : null,
+							              headRequest.getCriteria().byId() ? headRequest.getCriteria().getKeycloakUserId() : null);
 	}
 
 
@@ -85,7 +83,8 @@ public class KeycloakManagementServicesForUsersImpl
 
 	@Override
 	public KeycloakUserCreateResult create(final KeycloakUserCreateRequest postRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(postRequest.getRealm().asString()).users();
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(postRequest.getRealm().asString())
+														   .users();
 
 		KeycloakUserModel model = postRequest.getUserModel();
 
@@ -140,7 +139,8 @@ public class KeycloakManagementServicesForUsersImpl
 
 	@Override
 	public KeycloakUserUpdateResult update(final KeycloakUserUpdateRequest putRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(putRequest.getRealm().asString()).users();
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(putRequest.getRealm().asString())
+														   .users();
 
 		if (putRequest.getUserModel().getOid() == null) {
 		    throw new IllegalArgumentException("User OID not provided for update.");
@@ -164,7 +164,8 @@ public class KeycloakManagementServicesForUsersImpl
 
 	@Override
 	public KeycloakUserUpdateResult enable(final KeycloakUserEnableRequest enableRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(enableRequest.getRealm().asString()).users();
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(enableRequest.getRealm().asString())
+														   .users();
 		UserResource userResource = _userResource(usersResource, enableRequest.getCriteria());
 
 		if (userResource == null) {
@@ -176,14 +177,16 @@ public class KeycloakManagementServicesForUsersImpl
 		userResource.update(representation);
 
 		KeycloakUserModel model = KeycloakToUserModelTransferDelegate.keycloakUserRepresentationToUserModel(representation);
-		return new KeycloakUserUpdateResult(enableRequest.getRealm(), model);
+		return new KeycloakUserUpdateResult(enableRequest.getRealm(),
+											model);
 	}
 
 	@Override
 	public KeycloakUserDeleteResult delete(final KeycloakUserDeleteRequest deleteRequest) {
-		UsersResource usersResource = _keycloakAdminRestAPI.realm(deleteRequest.getRealm().asString()).users();
-		UserResource userResource = _userResource(usersResource, deleteRequest.getCriteria());
-
+		UsersResource usersResource = _keycloakAdminRestAPI.realm(deleteRequest.getRealm().asString())
+														   .users();
+		UserResource userResource = _userResource(usersResource, 
+												  deleteRequest.getCriteria());
 		if (userResource == null) {
 		    //log.error("User not found to delete");
 		    return null;

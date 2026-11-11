@@ -12,8 +12,8 @@ import lombok.experimental.Accessors;
 import r01f.config.ContainsConfigData;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.patterns.Memoized;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
 import r01f.types.url.Url;
 
 @MarshallType(as="webAuthnConfig")

@@ -7,20 +7,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-
 import lombok.experimental.Accessors;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.google.GoogleLogin;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.google.GoogleCallBackOnLoginHandler;
 import r01f.security.handler.google.GoogleLoginEntryPointHandler;
-import r01f.security.handler.google.GoogleUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.google.GoogleSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTResourceForSecurityServicesBase;
-import r01f.securitycontext.SecurityContext;
 
 /**
  * The implementation must follow the HTTP 1.1 spec (http://www.w3.org/Protocols/rfc2616/rfc2616.html), specifically
@@ -30,29 +26,27 @@ import r01f.securitycontext.SecurityContext;
  */
 @Path("api/google/users")
 @Accessors(prefix="_")
-public class RESTResourceForGoogleSecurityProvider<U extends User,L extends GoogleLogin,
-												   E extends UserLoginEntry>
+public class RESTResourceForGoogleSecurityProvider<P extends IsSecurityPrincipal>
 	 extends RESTResourceForSecurityServicesBase {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public RESTResourceForGoogleSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-												 final SecurityProviderSecretConfig securityProviderSecretConfig,
+												 final AuthenticationProviderSecretConfig authnProviderSecretConfig,
 												 final GoogleLoginEntryPointHandler loginEntryPointHandler,
 									  			 final GoogleCallBackOnLoginHandler callbackOnLoginHandler,
-									  			 final GoogleUserDataFetchHandler<U,L> fetchUserDataHandler,
+									  			 final GoogleSecurityPrincipalDataFetchHandler<P> fetchPrincipalDataHandler,
 									  			 final Marshaller marshaller,
 									  			 // used to create [login entries] when the user logs-in
-									  			 final Factory<E> loginEntryFactory,
-									  			 final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
+									  			 final CRUDServicesForLoginEntry loginEntryCrud) {
 		super(new RESTDelegateForGoogleSecurityProvider<>(sysSecurityContextProvider,
-														  securityProviderSecretConfig,
+														  authnProviderSecretConfig,
 														  loginEntryPointHandler,
 														  callbackOnLoginHandler,
-														  fetchUserDataHandler,
+														  fetchPrincipalDataHandler,
 														  marshaller,
-														  loginEntryFactory,loginEntryCrud));
+														  loginEntryCrud));
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	Redirected after a successful google login
@@ -61,7 +55,7 @@ public class RESTResourceForGoogleSecurityProvider<U extends User,L extends Goog
 	@Path("/login/oauth2callback")
 	public Response loginCallBack(@QueryParam("code") final String code,
 		                          @QueryParam("state") final String state,
-		                          @Context HttpServletRequest httpRequest) {
+		                          @Context final HttpServletRequest httpRequest) {
 
 		return this.getDelegateAs(RESTDelegateForGoogleSecurityProvider.class)
 				   .loginCallBack(code,state);

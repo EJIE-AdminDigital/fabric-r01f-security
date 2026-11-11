@@ -3,13 +3,13 @@ package r01f.bootstrap.core.security.otp.persistence;
 import jakarta.inject.Provider;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import r01f.api.interfaces.security.otp.persistence.OTPPersistenceServiceInterface;
-import r01f.securitycontext.SecurityContext;
+import r01f.api.interfaces.security.otp.persistence.IsOTPPersistenceServiceInterface;
+import r01f.model.security.context.SecurityContext;
 import r01f.services.bootstrap.config.ServicesBootstrapConfigBuilder;
 import r01f.services.bootstrap.config.ServicesCoreModuleBootstrapConfig;
 import r01f.services.ids.ServiceIDs.CoreAppCode;
 import r01f.services.ids.ServiceIDs.CoreModule;
-import r01f.services.security.otp.persistence.CoreOTPDBPersistenceService;
+import r01f.services.security.otp.persistence.IsCoreOTPDBPersistenceService;
 import r01f.xmlproperties.XMLProperties;
 
 /**
@@ -29,11 +29,11 @@ public abstract class OTPDBPersistenceBeanCoreBootstrapConfigBuilder {
 		ServicesCoreModuleBootstrapConfig persistModCfg = null;
 		persistModCfg =	ServicesBootstrapConfigBuilder.coreModuleBootstrapConfigBuilderFor(coreAppCode,coreModule)
 													   // Servie interfaces extending DN00IsServiceInterfaceForInteropConfig	
-													   .exposingServiceInterfacesExtending(OTPPersistenceServiceInterface.class)
-													   .withServicesCoreImplOrProxyToCoreModuleConfigs(// core services impl extending DN01COREPersistenceServiceForPersistableInteropConfigObject
-													    		 									  ServicesBootstrapConfigBuilder.createServiceCoreModuleInProcess()
-															  																		.withCoreServiceOrProxyToCoreServiceExtending(CoreOTPDBPersistenceService.class)
-															  																		.build())
+													   .exposingServiceInterfacesExtending(IsOTPPersistenceServiceInterface.class)
+													   .ofCoreImplOrProxyToCoreImpl(// core services impl extending DN01COREPersistenceServiceForPersistableInteropConfigObject
+								    		 									    ServicesBootstrapConfigBuilder.createServiceCoreModuleInProcess()
+										  																		  .withCoreServiceImplExtending(IsCoreOTPDBPersistenceService.class)
+										  																		  .build())
 													   .build();
 	   return persistModCfg;
 	}

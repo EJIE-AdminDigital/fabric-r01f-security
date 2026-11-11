@@ -48,7 +48,6 @@ public class PairingOperationExecResultBuilder
 		return  new PairingOperationExecResultBuilder() {/* nothing */}
 		          .new TK00PairingOperationExecResultBuilderErrorStep( requestedOp.getCOREServiceMethod());
 	}
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Operation
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +57,7 @@ public class PairingOperationExecResultBuilder
 
 		public <T> PairingOperationExecOK<T> returning(final T instance) {
 			PairingOperationExecOK<T> outOpOK = new PairingOperationExecOK<T>(_requestedOp,
-																                       instance);
+																              instance);
 			return outOpOK;
 		}
 	}
@@ -71,28 +70,27 @@ public class PairingOperationExecResultBuilder
 
 		public <T> PairingOperationExecError<T> because(final Throwable th) {
 			PairingOperationExecError<T> outError = new PairingOperationExecError<T>(_requestedOp,
-																			                  th);
+																			         th);
 			return outError;
 		}
 		public <T> PairingOperationExecError<T> because(final COREServiceErrorType errType,
 													        final Throwable th) {
 			PairingOperationExecError<T> outError = new PairingOperationExecError<T>(_requestedOp,
-																			                 errType,
-																		                 	 th);
+																			         errType,
+																		             th);
 			return outError;
 		}
 		public <T> PairingOperationExecError<T> because(final COREServiceErrorType errType,
 													        final String error) {
 			PairingOperationExecError<T> outError = new PairingOperationExecError<T>(_requestedOp,
-																			                  errType,
-																			                  error);
+																			         errType,
+																			         error);
 			return outError;
 		}
 		public <T> PairingOperationExecError<T> becauseClientBadRequest(final String msg,final Object... vars) {
-			@SuppressWarnings("static-access")
 			PairingOperationExecError<T> outError = new PairingOperationExecError<T>(_requestedOp,
-				                                                                             PairingErrorTypes.BAD_CLIENT_REQUEST,
-																			                 Strings.customized(msg,vars));			// the error message
+				                                                                     PairingErrorTypes.BAD_CLIENT_REQUEST,
+																			         Strings.customized(msg,vars));			// the error message
 			return outError;
 		}
 

@@ -4,8 +4,8 @@ import java.net.URI;
 
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import r01f.security.handler.LoginEntryPointHandlerBase;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.authn.handler.LoginEntryPointHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.saml.api.SAMLAPI;
 import r01f.security.saml.api.SAMLAPIForAuthn;
 import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
@@ -23,7 +23,7 @@ public class SAMLLoginEntryPointHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public SAMLLoginEntryPointHandler(final SecurityProviderSecretConfig securityProviderSecretConfig,
+	public SAMLLoginEntryPointHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig,
 									  final SAMLAPI samlAPI) {
 		super(securityProviderSecretConfig);
 		_samlAPI = samlAPI;

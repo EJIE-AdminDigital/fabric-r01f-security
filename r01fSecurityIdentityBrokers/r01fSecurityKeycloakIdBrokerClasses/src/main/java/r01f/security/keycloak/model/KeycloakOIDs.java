@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.securitycontext.SecurityOIDs.IsIdentityBrokerObjectOID;
+import r01f.oids.SecurityOIDs.IsSecurityObjectOID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 
 /**
  * -----------------------------------------------------------------------------------------------------------
@@ -25,13 +26,20 @@ public abstract class KeycloakOIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////
-    /*
+	public interface IsKeycloakOID 
+	  	     extends IsSecurityObjectOID {
+		// just a marker interface
+	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////
+    /**
 	 * Keycloak Client oid : Keyclock asigned oid for client
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientOid")
 	public record KeycloakClientOID(@Getter String id)
-       implements IsIdentityBrokerObjectOID {
+       implements IsKeycloakOID {
 		
 		public static KeycloakClientOID from(final String id) {
 			return new KeycloakClientOID(id);
@@ -45,6 +53,12 @@ public abstract class KeycloakOIDs {
 		public static KeycloakClientOID fromString(final String id) {
 			return new KeycloakClientOID(id);
 		}
+		public static KeycloakClientOID fromSecurityPrincipalOid(final SecurityPrincipalOID oid) {
+			return new KeycloakClientOID(oid.asString());
+		}
+		public SecurityPrincipalOID asSecurityPrincipalOid() {
+			return new SecurityPrincipalOID(this.id);
+		}
 		
 		@Override
 		public String asString() {
@@ -55,14 +69,13 @@ public abstract class KeycloakOIDs {
 			return this.id;
 		}
 	}
-	
-	/*
-	* Keycloak Client oid : Keycloak asigned oid for user
+	/**
+	 * Keycloak Client oid : Keycloak asigned oid for user
 	 */
 	@Immutable
 	@MarshallType(as="keycloakUserOid")
 	public record KeycloakUserOID(@Getter String id)
-       implements IsIdentityBrokerObjectOID {
+       implements IsKeycloakOID {
 		
 		public static KeycloakUserOID from(final String id) {
 			return new KeycloakUserOID(id);
@@ -76,7 +89,12 @@ public abstract class KeycloakOIDs {
 		public static KeycloakUserOID fromString(final String id) {
 			return new KeycloakUserOID(id);
 		}
-		
+		public static KeycloakUserOID fromSecurityPrincipalOid(final SecurityPrincipalOID oid) {
+			return new KeycloakUserOID(oid.asString());
+		}
+		public SecurityPrincipalOID asSecurityPrincipalOid() {
+			return new SecurityPrincipalOID(this.id);
+		}
 		@Override
 		public String asString() {
 			return this.id;

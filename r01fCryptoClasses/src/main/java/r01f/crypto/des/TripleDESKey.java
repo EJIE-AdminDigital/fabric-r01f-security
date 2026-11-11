@@ -7,7 +7,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.securitycontext.SecurityIDS.Password;
+import r01f.oids.SecurityIDs.Password;
 import r01f.types.StringHex;
 
 @Accessors(prefix="_")

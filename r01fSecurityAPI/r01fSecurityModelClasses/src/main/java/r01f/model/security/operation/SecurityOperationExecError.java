@@ -14,7 +14,7 @@ import r01f.util.types.Strings;
 @Accessors(prefix="_")
 public class SecurityOperationExecError<T>
 	 extends COREServiceMethodExecError<T> 
-  implements SecurityOperationResult<T> {
+  implements IsSecurityOperationResult<T> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR & BUILDER
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,9 @@ public class SecurityOperationExecError<T>
 								  	  final Throwable th) {
 		super(reqOp.getCOREServiceMethod(),
 			  th);
+	}
+	public SecurityOperationExecError(final COREServiceMethodExecError<?> error) {
+		super(error);
 	}
 	public SecurityOperationExecError(final COREServiceMethod reqOp,
 								  	  final COREServiceErrorType errType,

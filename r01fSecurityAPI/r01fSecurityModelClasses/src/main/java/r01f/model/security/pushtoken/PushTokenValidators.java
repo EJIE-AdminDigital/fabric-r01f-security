@@ -12,20 +12,20 @@ public abstract class PushTokenValidators {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	Push Notification Token
 /////////////////////////////////////////////////////////////////////////////////////////
-	public static <T extends PushToken> Validates<T> createPhoneTokenObjectValidator() {
+	public static <T extends IsPushToken> Validates<T> createPhoneTokenObjectValidator() {
 		return new Validates<>() {
 						@Override
 						public ObjectValidationResult<T> validate(final T obj) {
 							// this valid?
 							ObjectValidationResult<T> thisValidResult = null;						
 						
-							if ((obj.getPushTokenId() == null || !obj.getPushTokenId().isValid())
-							 || (obj.getSystemId() == null || !obj.getSystemId().isValid())
+							if ((obj.getDestinationId() == null || !obj.getDestinationId().isValid())
+							 || (obj.getSourceSystemId() == null || !obj.getSourceSystemId().isValid())
 							 || (obj.getToken() != null && !obj.getToken().isValid())) {							
 								thisValidResult = ObjectValidationResultBuilder.on(obj)
 																			   .isNotValidBecause(Strings.customized("token id='{}', system id ='{}', token ='{}'",
-																					   										obj.getPushTokenId(),
-																					   										obj.getSystemId(),obj.getToken()));
+																					   										obj.getDestinationId(),
+																					   										obj.getSourceSystemId(),obj.getToken()));
 							}
 							// combine
 							return thisValidResult;

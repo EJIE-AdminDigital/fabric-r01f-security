@@ -1,26 +1,11 @@
 package r01f.security.handler.pairedphone;
 
-import java.net.URI;
-import java.util.HashMap;
-
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import r01f.jwt.JWT;
-import r01f.model.security.login.pairedphone.PairedPhoneLoginConsent;
-import r01f.model.security.login.pairedphone.PairedPhoneLoginConsentStatus;
-import r01f.security.handler.CallBackOnLoginHandlerBase;
-import r01f.security.provider.SecurityProvider;
-import r01f.security.provider.SecurityProviderSecretConfig;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityOIDs.UserOID;
-import r01f.types.contact.Phone;
-import r01f.types.url.Url;
-import r01f.types.url.UrlQueryString;
-import r01f.types.url.UrlQueryStringParam;
+import r01f.security.authn.handler.CallBackOnLoginHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 
 @Slf4j
-public class PairedPhoneCallBackOnLoginHandler<C extends PairedPhoneLoginConsent>
+public class PairedPhoneCallBackOnLoginHandler
      extends CallBackOnLoginHandlerBase {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTANTS
@@ -29,12 +14,13 @@ public class PairedPhoneCallBackOnLoginHandler<C extends PairedPhoneLoginConsent
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public PairedPhoneCallBackOnLoginHandler(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public PairedPhoneCallBackOnLoginHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		super(securityProviderSecretConfig);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////	
+/*
 	@SuppressWarnings({ "null", "serial" })
 	public Response loginCallBack(final C loginConsent,
 							 	  final Url to) {
@@ -43,13 +29,14 @@ public class PairedPhoneCallBackOnLoginHandler<C extends PairedPhoneLoginConsent
 			throw new IllegalStateException("Phone login Consent is null!!!!");
 		}
 		
-		log.info("===========================================================");
-		log.warn("INFORMATIVE Purpose: AFTER LOGIN, by provider type: Paired Phone. Login Consent oid={}", loginConsent.getOid());
-		log.info("===========================================================");
+		log.info("===================================================================");
+		log.warn("AFTER LOGIN, by provider type: Paired Phone. Login Consent oid={}",
+				 loginConsent.getOid());
+		log.info("===================================================================");
 
 		// [1] - Get the target url
 		Url targetUrl = null;
-		PairedPhoneLoginConsentStatus status = null;
+		PairedPhoneLoginResult status = null;
 		if (loginConsent != null) {
 			// Check the login consent.
 		    status = loginConsent.getStatus();
@@ -80,18 +67,21 @@ public class PairedPhoneCallBackOnLoginHandler<C extends PairedPhoneLoginConsent
 		// [2] - Get the jwt and put it on the url as param
 		JWT jwt = null;
 		if (status != null
-		 && status.is(PairedPhoneLoginConsentStatus.ACCEPTED)) {
+		 && status.is(PairedPhoneLoginResult.ACCEPTED)) {
 			// a) Create a jwt token
-			UserOID  userOid = loginConsent.getResponse().getUserOid();
+			SecurityPrincipalOID principalOid = loginConsent.getResponse()
+															.getUserOid();
 			Phone phone = loginConsent.getRequest().getPhone();
 
 			jwt = _createJWT(//Secret Key Dat.
 					         _securityProviderSecretConfig.getKeyData().asString(),
 							 // Provider Type
-					         SecurityProvider.PAIRED_PHONE.getCode(),LoginID.forId(phone.asString()),	// uses the [phone] as [loginId]
+					         IdentityProvider.FABRIC,AuthenticationMethod.PAIRED_PHONE,
+					         principalId,
+					         null,	// uses the [phone] as [loginId]
 	                         // Custom Claims
 					         new HashMap<String,String>() {{
-					        	 			put(JWT_CUSTOM_CLAIM_FOR_USER_OID,userOid.asString());
+					        	 			put(JWT_CUSTOM_CLAIM_FOR_PRINCIPAL_OID,principalOid.asString());
 	                        				put(JWT_CUSTOM_CLAIM_FOR_PAIRED_PHONE,phone.asString());
 								    	 }});
 
@@ -113,4 +103,5 @@ public class PairedPhoneCallBackOnLoginHandler<C extends PairedPhoneLoginConsent
 		return Response.seeOther(targetURI)
 					   .build();
 	}
+*/
 }

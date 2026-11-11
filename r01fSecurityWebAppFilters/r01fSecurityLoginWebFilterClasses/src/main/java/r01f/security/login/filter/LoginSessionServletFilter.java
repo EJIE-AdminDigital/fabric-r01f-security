@@ -23,19 +23,21 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import r01f.jwt.JWT;
-import r01f.model.security.user.User;
+import r01f.model.security.IdentityProviderAndAuthnMethod;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
+import r01f.security.authn.provider.cookie.AuthenticationProviderCookie;
+import r01f.security.authn.provider.cookie.AuthenticationProviderCookieStore;
 import r01f.security.base.SecuritySessionHandler;
 import r01f.security.base.StoresSecurityDataAtThreadLocalStorage;
 import r01f.security.context.SecurityContextStore;
+import r01f.security.context.SecurityContextStoreAtThreadLocalStorage;
 import r01f.security.login.LoginSession;
 import r01f.security.login.LoginSessionStore;
-import r01f.security.provider.SecurityProviderIdCookie;
-import r01f.security.provider.SecurityProviderIdCookieStore;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityContextStoreAtThreadLocalStorage;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
 import r01f.servlet.HttpServletRequestUtils;
 import r01f.types.url.Host;
 import r01f.types.url.Url;
@@ -69,13 +71,13 @@ import r01f.util.types.collections.CollectionUtils;
  */
 @Slf4j
 @Accessors(prefix="_")
-public abstract class LoginSessionServletFilter<U extends User>
+public abstract class LoginSessionServletFilter<P extends IsSecurityPrincipal>
   		   implements Filter,
-  		   			  StoresSecurityDataAtThreadLocalStorage<U> {
+  		   			  StoresSecurityDataAtThreadLocalStorage<P> {
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	@Getter protected final Class<U> _userType;
+	@Getter protected final Class<P> _userType;
 	@Getter protected final SecurityLoginFilterConfig _loginFilterConfig;
 
 	@Getter protected final Predicate<ServletRequest> _notFilteredResourcePredicate;
@@ -85,7 +87,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	// 		The LOCAL [user data] IS NOT the same as the one returned by a [security provider] (ie google, xlnets, etc)
 	// 		Usually the LOCAL [user data] is created FROM the one returned by google, xlnets, etc,
 	// 		BUT might have more (or less) properties
-	@Getter protected final UserDataFromAfterLoginJWT<U> _userDataFromAfterLoginJWT;
+	@Getter protected final SecurityPrincipalDataFromAfterLoginJWT<P> _userDataFromAfterLoginJWT;
 
 	// After a user is logged-in, it's redirected to the [Security REST Services WAR] where an [after login jwt] token is created and then
 	// the [user] is redirected to the [UI] with this [after login jwt] token as param
@@ -104,7 +106,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 						 			 // used to "serialize" the XLNets session from the [UI War] to the [security REST services WAR]
@@ -115,7 +117,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 			 securityProviderSessionFromRequestProvider,
 			 (Predicate<ServletRequest>)null);		// notFilteredResourcePredicate
 	}
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 // used to "serialize" the XLNets session from the [UI War] to the [security REST services WAR]
@@ -128,7 +130,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 			 securityProviderSessionFromRequestProvider,
 			 _createServletRequestPredicateFrom(notFilteredResourcesPatterns));
 	}
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 // used to "serialize" the XLNets session from the [UI War] to the [security REST services WAR]
@@ -137,13 +139,13 @@ public abstract class LoginSessionServletFilter<U extends User>
 									 final Predicate<ServletRequest> notFilteredResourcePredicate) {
 		_loginFilterConfig = loginFilterConfig;
 		_userType = userType;
-		_userDataFromAfterLoginJWT = new UserDataFromAfterLoginJWT<>(_userType,
-												 					 _loginFilterConfig,
-												 					 marshaller);
+		_userDataFromAfterLoginJWT = new SecurityPrincipalDataFromAfterLoginJWT<>(_userType,
+												 					 			  _loginFilterConfig,
+												 					 			  marshaller);
 		_securityProviderSessionFromRequestProvider = securityProviderSessionFromRequestProvider;
 		_notFilteredResourcePredicate = notFilteredResourcePredicate;
 	}
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig) {
 		this(userType,
@@ -151,7 +153,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 			 loginFilterConfig,
 			 (SecurityProviderSessionFromRequestProvider)null);
 	}
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 final Collection<Pattern> notFilteredResourcesPatterns) {
@@ -161,7 +163,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 			 null,		// SecurityProviderSessionFromRequestProvider
 			 _createServletRequestPredicateFrom(notFilteredResourcesPatterns));
 	}
-	public LoginSessionServletFilter(final Class<U> userType,
+	public LoginSessionServletFilter(final Class<P> userType,
 									 final Marshaller marshaller,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 final Predicate<ServletRequest> notFilteredResourcePredicate) {
@@ -209,7 +211,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 														 ServletException {
 		try {
 			if (log.isTraceEnabled()) {
-				_traceUserOfSecurityContext("INIT");
+				_tracePrincipalOfSecurityContext("INIT");
 			}
 			_executeFilter(req, res, chain);
 		} catch (IllegalStateException illegalExc) {
@@ -226,7 +228,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 			}
 		} finally {
 			if (log.isTraceEnabled()) {
-				_traceUserOfSecurityContext("END");
+				_tracePrincipalOfSecurityContext("END");
 			}
 			SecurityContextStoreAtThreadLocalStorage.remove();
 			log.trace("[login filter][remove Thread]. REMOVED");
@@ -292,7 +294,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 		}
 
 		// [2] - Check the http session to see if there exists an [loginSession]
-		LoginSession<U> loginSession = LoginSessionStore.getFromSession(request);
+		LoginSession<P> loginSession = LoginSessionStore.getFromSession(request);
 		if (loginSession != null) _onLoginSessionExists(loginSession,
 								  						request,response);
 
@@ -365,10 +367,10 @@ public abstract class LoginSessionServletFilter<U extends User>
 				redirUrl = Url.from(requestedUrlPath)
 							  .joinWith(qryStringWithoutJWTParam);	// request url WITHOUT the [after login JWT] param
 			} else {
-				// the user has a [login session] BUT maybe the user is NOT active or user data must be completed
-				if (logEnabled) log.trace("[login filter] > user with loginId={} has to complete some data: redir to {}",
-						 loginSession.getLoginId(),
-						 redirUrl);
+				// the [principal] has a [login session] BUT maybe the [principal] is NOT active or [principal] data must be completed
+				if (logEnabled) log.trace("[login filter] > [principal]={} has to complete some data: redir to {}",
+						 				  loginSession.getSecurityPrincipalId(),
+						 				  redirUrl);
 			}
 			if (logEnabled) log.trace("[login filter][REDIR] {} <<<<<<<<<<",
 									  redirUrl);
@@ -380,19 +382,19 @@ public abstract class LoginSessionServletFilter<U extends User>
 			  && afterLoginJWT == null) {
 			if (logEnabled) log.trace("[login filter] > [login session]=ABSENT / [after login jwt token]=ABSENT > NO [login session] > POSSIBLE redir to login page");
 
-			// Two options: either the user is authenticated, or they need to log in through the login page.
+			// Two options: either the [principal] is authenticated, or they need to log in through the login page.
 			_goToPossibleLog(request, response, loginSession, clientRequestedUrl, isLogout);
 		}
 		else if (loginSession != null
 			  && afterLoginJWT != null) {
-			throw new IllegalStateException("This is IMPOSIBLE: once the user is authenticated, the [after login jwt] token MUST be removed from url; this is a developer fault!!");
+			throw new IllegalStateException("This is IMPOSIBLE: once the [principal] is authenticated, the [after login jwt] token MUST be removed from url; this is a developer fault!!");
 		}
 		else if (loginSession != null) {
-			// the user has previously been authenticated > the [login session] and [security context] MUST be present (see _onLoginSessionExists)
+			// the [principal] has previously been authenticated > the [login session] and [security context] MUST be present (see _onLoginSessionExists)
 			if (LoginSessionStore.getFromSession(request) == null || SecurityContextStore.getFromSession(request) == null) throw new IllegalStateException("[login session] or [security context] is NOT present!!");
 
-			if (logEnabled) log.trace("[login filter] > [login session]=PRESENT / [after login jwt]=ABSENT > There exists a [loginSession] for login {} go on to {}",
-					 				  loginSession.getLoginId(),
+			if (logEnabled) log.trace("[login filter] > [login session]=PRESENT / [after login jwt]=ABSENT > There exists a [loginSession] for [principal]={} go on to {}",
+					 				  loginSession.getSecurityPrincipalId(),
 					 				  request.getRequestURI());
 			 // Warn : _filterChain exposes internally beforeFilterChain if any condition must be validated.
 			_filterChain(chain,
@@ -403,7 +405,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 //	CHAIN
 /////////////////////////////////////////////////////////////////////////////////////////
 	protected void _filterChain(final FilterChain chain,
-								final LoginSession<U> loginSession,
+								final LoginSession<P> loginSession,
 								final HttpServletRequest request,final HttpServletResponse response) throws IOException,
 																										  	ServletException {
 		boolean logEnabled = _isLogEnabled();
@@ -433,7 +435,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	private void _cleanupSession(final HttpServletRequest request,final HttpServletResponse response, final boolean isWithCookieClean) {
 		if (isWithCookieClean) {
 			// create an utility that encapsulates the [security session] handling
-			SecuritySessionHandler<U> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
+			SecuritySessionHandler<P> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
 																					this,
 																					// SecurityContext from LoginSession)
 																					this::createSecurityContextFromLoginSession,
@@ -448,10 +450,10 @@ public abstract class LoginSessionServletFilter<U extends User>
 			SecurityContextStore.removeFromHttpSession(request);
 		}
 	}
-	private SecurityContext _onLoginSessionExists(final LoginSession<U> loginSession,
+	private SecurityContext _onLoginSessionExists(final LoginSession<P> loginSession,
 									   			  final HttpServletRequest request,final HttpServletResponse response) {
 		// create an utility that encapsulates the [security session] handling
-		SecuritySessionHandler<U> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
+		SecuritySessionHandler<P> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
 																				this,
 																				// SecurityContext from LoginSession)
 																				this::createSecurityContextFromLoginSession,
@@ -460,12 +462,13 @@ public abstract class LoginSessionServletFilter<U extends User>
 		// create a [security context] from the [login session]
 		SecurityContext outSecurityContext = sessionHandler.securityContextFromLoginSession(loginSession,
 												   											request,response);
-		// store a [cookie] that sets the [security provider id] that the [user] used to log-in
-		// (this cookie is used to re-create the [security session] when the [user] goes from one [webapp]
+		// store a [cookie] that sets the [security provider id] that the [principal] used to log-in
+		// (this cookie is used to re-create the [security session] when the [principal] goes from one [webapp]
 		// where he/she has been authenticated to another were he/she has not
-		if ( loginSession.getSecurityProviderId() != null)
-			sessionHandler.setSecurityProviderIdCookie(loginSession.getSecurityProviderId(),
-												   	   request,response);
+		if (loginSession.getIdentityProvider() != null) {
+			sessionHandler.setAuthnProviderCookie(loginSession.getIdentityProvider(),loginSession.getAuthenticationMethod(),
+												  request,response);
+		}
 		// return
 		return outSecurityContext;
 	}
@@ -474,7 +477,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 //	LOGIN CONTROL
 /////////////////////////////////////////////////////////////////////////////////////////
 	private void _goToPossibleLog(final HttpServletRequest request, final HttpServletResponse response,
-			final LoginSession<U> loginSession, final Url clientRequestedUrl, final boolean isLogout) throws IOException {
+			final LoginSession<P> loginSession, final Url clientRequestedUrl, final boolean isLogout) throws IOException {
 
 		boolean logEnabled = _isLogEnabled();
 
@@ -486,19 +489,21 @@ public abstract class LoginSessionServletFilter<U extends User>
 		boolean hasSessionInProvider = false;
 		String urlSendRedirect = null;
 
-		SecurityProviderID securityProviderId = null;
-		Cookie providerIdCookie = null;
-		SecurityProviderIdCookieStore securityProviderIdCookieStore = SecurityProviderIdCookieStore.createWithCookieName(this.securityProviderIdCookieName());
+		IdentityProvider identityProvider = null;
+		AuthenticationMethod authnMethod = null;
+		
+		Cookie authnProviderCookie = null;
+		AuthenticationProviderCookieStore authnProviderCookieStore = AuthenticationProviderCookieStore.createWithCookieName(this.securityProviderIdCookieName());
 
-		if (securityProviderIdCookieStore == null) {
+		if (authnProviderCookieStore == null) {
 			// Do nothing
 		} else {
-			providerIdCookie = securityProviderIdCookieStore.getProviderIdCookieFrom(request);
-			if (providerIdCookie == null) {
+			authnProviderCookie = authnProviderCookieStore.getAuthnProviderCookieFrom(request);
+			if (authnProviderCookie == null) {
 				Cookie xlnetsCookie = null;
-				if ( request.getCookies() != null ) {
-					for (  Cookie cookie : request.getCookies() ) {
-						if( cookie.getName().equals("n38UidSesion") ) {
+				if (request.getCookies() != null) {
+					for (Cookie cookie : request.getCookies()) {
+						if (cookie.getName().equals("n38UidSesion") ) {
 							xlnetsCookie = cookie;
 							break;
 						}
@@ -506,27 +511,30 @@ public abstract class LoginSessionServletFilter<U extends User>
 				}
 				if (xlnetsCookie != null) {
 					Host clientRequestedHost = HttpServletRequestUtils.clientRequestedHost(request); 	// BEWARE!! this method takes proxies into account in order to get the REAL client url
-					SecurityProviderIdCookie spic = securityProviderIdCookieStore.storeProviderId(clientRequestedHost, SecurityProviderID.XLNETS, response);
-					providerIdCookie = spic.createNonPersistentCookie();
+					AuthenticationProviderCookie spic = authnProviderCookieStore.storeAuthnProvider(clientRequestedHost,
+																									 IdentityProvider.XLNETS,AuthenticationMethod.UNKNOWN, 
+																									 response);
+					authnProviderCookie = spic.createNonPersistentCookie();
 					if (logEnabled) log.trace("[login filter] > [login session]=ABSENT / [after login jwt token]=ABSENT > NO [login session] > No provider, but exists XLNETS session");
 				}
 			}
 		}
 
-		if (providerIdCookie == null) {
+		if (authnProviderCookie == null) {
 			// Do nothing
 			if (logEnabled) log.trace("[login filter] [Go To Possible Log] NO SECURITY PROVIDER. GO TO LOGIN.");
 		} else {
-
 			if (!isLogout
-			 && Strings.isNOTNullOrEmpty(providerIdCookie.getValue())
-			 && providerIdCookie.getMaxAge() != 0) {
+			 && Strings.isNOTNullOrEmpty(authnProviderCookie.getValue())
+			 && authnProviderCookie.getMaxAge() != 0) {
 
-				if (logEnabled) log.trace("[login filter] [Go To Possible Log] Exists a SECURITY PROVIDER: {}", providerIdCookie.getValue());
+				if (logEnabled) log.trace("[login filter] [Go To Possible Log] Exists a SECURITY PROVIDER: {}", authnProviderCookie.getValue());
 
-				securityProviderId = SecurityProviderID.forId(providerIdCookie.getValue());
+				IdentityProviderAndAuthnMethod idpAndAuthnMethod = AuthenticationProviderCookie.decodeCookieValue(authnProviderCookie.getValue());
+				identityProvider = idpAndAuthnMethod.getIdentityProvider();
+				authnMethod = idpAndAuthnMethod.getAuthnMethod();
 
-				Url securityRESTServicesLoginEndPointForProvider = _loginFilterConfig.getSecurityRESTServicesLoginEndPointForProviderWithId(securityProviderId);
+				Url securityRESTServicesLoginEndPointForProvider = _loginFilterConfig.getSecurityRESTServicesLoginEndPointForProviderWithId(identityProvider,authnMethod);
 
 				String reqUrlStr = clientRequestedUrl.toString();
 
@@ -546,7 +554,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 				// the final url
 				urlToRedir = securityRESTServicesLoginEndPointForProvider.joinWith(UrlQueryString.fromParams(UrlQueryStringParam.of("to",urlTo)));
 
-				// There is a provider, so the user must to redirect to it.
+				// There is a provider, so the [principal] must to redirect to it.
 				hasSessionInProvider = true;
 
 				// Store the callback url param in session
@@ -562,7 +570,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 // ----------------------------------------------------
 		if (!hasSessionInProvider) {
 			// get the url to redir to
-			Url loginPageUrl = LoginPageUtil.forSecurityProviderIdStoredAt(securityProviderIdCookieStore)
+			Url loginPageUrl = LoginPageUtil.forIdentityProviderStoredAt(authnProviderCookieStore)
 											.usingDefaultUrlToProvider()
 											.loginPageUrl(_loginFilterConfig,
 														  request);
@@ -589,7 +597,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	 * @param loginSession
 	 * @return
 	 */
-	protected abstract SecurityContext createSecurityContextFromLoginSession(final LoginSession<U> loginSession);
+	protected abstract SecurityContext createSecurityContextFromLoginSession(final LoginSession<P> loginSession);
 /////////////////////////////////////////////////////////////////////////////////////////
 //	SECURITY PROVIDER COOKIE
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -600,22 +608,22 @@ public abstract class LoginSessionServletFilter<U extends User>
 	 */
 	@SuppressWarnings("static-method")
 	protected String securityProviderIdCookieName() {
-		return SecurityProviderIdCookieStore.SECURITY_PROVIDER_COOKIE_DEFAULT_NAME;
+		return AuthenticationProviderCookieStore.AUTH_PROVIDER_COOKIE_DEFAULT_NAME;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	HOOK POINTS THAT CAN BE OVERRIDEN
 /////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * This method is called AT THE END of the filter if the {@link LoginSession} object
-	 * Gives the application an opportunity to verify the user status
+	 * Gives the application an opportunity to verify the [principal] status
 	 * The session created at this point is correct BUT there could be some actions to complete depending on
-	 * for example the user status [see @UserStatus]
-	 * By default UserStatus is create as ACTIVE, but the are some other cases such as:
-	 *  	- PENDING_ADMIN_APROVAL			: A user has been created but requires an admin aproval
+	 * for example the [principal] status [see @SecurityPrincipalStatus]
+	 * By default [principal] status is create as ACTIVE, but the are some other cases such as:
+	 *  	- PENDING_ADMIN_APROVAL			: A [principal] has been created but requires an admin aproval
 	 *									 		> redir to an informative page
-	 *		- PENDING_USER_DATA_COMPLETION	: the user has been created, but additional user data not provided by the google / xlnets / etc must be completed.
+	 *		- PENDING_USER_DATA_COMPLETION	: the [principal] has been created, but additional user data not provided by the google / xlnets / etc must be completed.
 	 *												> redir to a user-data completion page
-	 *		- INACTIVE						: the user has been put into an inactive state for any reason
+	 *		- INACTIVE						: the [principal] has been put into an inactive state for any reason
 	 *											> redir to an informative page
 	 * This method just returns the url where the request should be redirected (if any)
 	 * if the method returns null, the filter is chained
@@ -623,7 +631,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	 * @param loginSession
 	 */
 	@SuppressWarnings("unused")
-	protected Url getRedirUrlAfterLoginIfNecessary(final LoginSession<U> loginSession,
+	protected Url getRedirUrlAfterLoginIfNecessary(final LoginSession<P> loginSession,
 												   final HttpServletRequest request,final HttpServletResponse response) {
 		return null;	// by default null > no redirection
 	}
@@ -634,7 +642,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	 * @param request
 	 * @param response
 	 */
-	protected Url beforeFilterChain(final LoginSession<U> loginSession,
+	protected Url beforeFilterChain(final LoginSession<P> loginSession,
 									final HttpServletRequest request,final HttpServletResponse response) {
 		return null;	// do nothing by default
 	}
@@ -654,7 +662,7 @@ public abstract class LoginSessionServletFilter<U extends User>
 	 * @param request
 	 * @param response
 	 */
-	protected void beforeRedirectWithLogin(final LoginSession<U> loginSession,
+	protected void beforeRedirectWithLogin(final LoginSession<P> loginSession,
 								  		   final HttpServletRequest request,final HttpServletResponse response) {
 		// do nothing by default
 	}
@@ -693,19 +701,23 @@ public abstract class LoginSessionServletFilter<U extends User>
 		}
 	}
 
-	private void _traceUserOfSecurityContext(String msg) {
-		String _idUser = "[USER NO EXISTS]";
-		SecurityContext _sc = SecurityContextStoreAtThreadLocalStorage.get();
-		if (_sc != null) {
-			LoginID _loginUser = _sc.getLoginId();
-			if (_loginUser != null) {
-				_idUser = _loginUser.getId();
+	private void _tracePrincipalOfSecurityContext(final String msg) {
+		String principalIdStr = "[PRINCIPAL NO EXISTS AT SECURITY CONTEXT]";
+		SecurityContext securityContext = SecurityContextStoreAtThreadLocalStorage.get();
+		if (securityContext != null) {
+			SecurityPrincipalID principalId = securityContext.getSecurityPrincipalId();
+			if (principalId == null) { 
+				log.trace("[login filter][Thread]. {}. [principal] IS NULL",
+						  msg);
 			} else {
-				log.trace("[login filter][Thread]. {}. User IS NULL", msg);
+				principalIdStr = principalId.asString();
 			}
 		} else {
-			log.trace("[login filter][Thread]. {}. ThreadLocalStorage IS NULL", msg);
+			log.trace("[login filter][Thread]. {}. ThreadLocalStorage IS NULL",
+					  msg);
 		}
-		log.trace("[login filter][Thread]. {}. User:{} (SecurityContext:{})", msg, _idUser, _sc);
+		log.trace("[login filter][Thread]. {}. [principal]={} (SecurityContext:{})",
+				  msg,principalIdStr,
+				  securityContext);
 	}
 }

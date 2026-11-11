@@ -5,17 +5,16 @@ import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import r01f.locale.Language;
-import r01f.model.security.login.userpassword.UserPasswordLogin;
-import r01f.model.security.user.User;
-import r01f.model.security.user.UserRoleInModule;
-import r01f.model.security.user.UserStatus;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.SecurityPrincipalStatus;
+import r01f.model.security.SecurityRoleInModule;
+import r01f.model.security.login.Login;
+import r01f.model.security.login.data.userpassword.LoginDataForUserPassword;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.LoginID;
+import r01f.oids.SecurityIDs.Password;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
 import r01f.patterns.Factory;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.Password;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
-import r01f.types.contact.HasMailAddress;
-import r01f.types.contact.HasPhoneNumber;
 import r01f.util.types.collections.CollectionUtils;
 
 /**
@@ -31,42 +30,31 @@ import r01f.util.types.collections.CollectionUtils;
  * </pre>
  */
 @Slf4j
-public class InitialUserPasswordLoginHelpper<U extends User & HasMailAddress & HasPhoneNumber,L extends UserPasswordLogin,
-											 A extends SecurityAPIBase<U,?,?,?,?>> {
+public class InitialUserPasswordLoginHelpper<P extends IsSecurityPrincipal,
+											 A extends SecurityAPIBase<P>> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
 	private final A _api;
-	private final Factory<U> _userFactory;
-	private final Factory<L> _loginFactory;
+	private final Factory<P> _securityPrincipalFactory;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTORS
 /////////////////////////////////////////////////////////////////////////////////////////
 	public InitialUserPasswordLoginHelpper(final A api,
-										   final Factory<U> userFactory,final Factory<L> loginFactory) {
+										   final Factory<P> securityPrincipalFactory) {
 		_api = api;
-		_userFactory = userFactory;
-		_loginFactory = loginFactory;
+		_securityPrincipalFactory = securityPrincipalFactory;
 	}
-	public static <U extends User & HasMailAddress & HasPhoneNumber> InitialUserPasswordLoginHelpperUserPasswordLoginFactoryStep<U> createUserObjectInstancesUsing(final Factory<U> userFactory) {
-		return new InitialUserPasswordLoginHelpperUserPasswordLoginFactoryStep<>(userFactory);
-	}
-	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
-	public static class InitialUserPasswordLoginHelpperUserPasswordLoginFactoryStep<U extends User & HasMailAddress & HasPhoneNumber> {
-		private final Factory<U> _userFactory;
-
-		public <L extends UserPasswordLogin> InitialUserPasswordLoginHelpperApiStep<U,L> createUserPasswordLoginObjectInstancesUsing(final Factory<L> userPasswordLoginFactory) {
-			return new InitialUserPasswordLoginHelpperApiStep<>(_userFactory,userPasswordLoginFactory);
-		}
+	public static <P extends IsSecurityPrincipal> InitialUserPasswordLoginHelpperApiStep<P> createUserObjectInstancesUsing(final Factory<P> userFactory) {
+		return new InitialUserPasswordLoginHelpperApiStep<>(userFactory);
 	}
 	@RequiredArgsConstructor(access=AccessLevel.PRIVATE)
-	public static class InitialUserPasswordLoginHelpperApiStep<U extends User & HasMailAddress & HasPhoneNumber,L extends UserPasswordLogin> {
-		private final Factory<U> _userFactory;
-		private final Factory<L> _userPasswordLoginFactory;
+	public static class InitialUserPasswordLoginHelpperApiStep<P extends IsSecurityPrincipal> {
+		private final Factory<P> _userFactory;
 
-		public <A extends SecurityAPIBase<U,?,?,?,?>> InitialUserPasswordLoginHelpper<U,L,A> use(final A api) {
+		public <A extends SecurityAPIBase<P>> InitialUserPasswordLoginHelpper<P,A> use(final A api) {
 			return new InitialUserPasswordLoginHelpper<>(api,
-														 _userFactory,_userPasswordLoginFactory);
+														 _userFactory);
 		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -79,64 +67,65 @@ public class InitialUserPasswordLoginHelpper<U extends User & HasMailAddress & H
 	 * @param userRoles
 	 * @return
 	 */
-	@SuppressWarnings({ "unused","unchecked" })
+	@SuppressWarnings({ "unused" })
 	public boolean ensureInitialUserWithUserPasswordLogin(final LoginID loginId,final Password password,
-														  final UserRoleInModule... userRoles) {
+														  final SecurityRoleInModule... userRoles) {
 		try {
 			// use the api to load the user (if it exists)
-			U existingUser = _api.getUsersApi()
-								 .getForCrud()
-								 .loadByOrNull(SecurityProviderID.USER_PASSWORD,loginId);
+			P existingPrincipal = _api.getPrincipalsApi()
+								 	  .getForCrud()
+								 	  .loadByOrNull(IdentityProvider.FABRIC,SecurityPrincipalID.fromLoginId(loginId));
 
 			// the required user does NOT exist... create it
-			if (existingUser == null) {
-				log.warn("The {} [user] DOES NOT exist at the system: create it",
+			if (existingPrincipal == null) {
+				log.warn("The {} [principal] DOES NOT exist at the system: create it",
 						 loginId);
 
 				// a) use the api to create the user with given roles
-				U newUser = _userFactory.create();
-				newUser.setPrefLang(Language.DEFAULT);
-				newUser.setStatus(UserStatus.ACTIVE);
+				P newPrincipal = _securityPrincipalFactory.create();
+				newPrincipal.setStatus(SecurityPrincipalStatus.ACTIVE);
 				if (CollectionUtils.hasData(userRoles)) {
 					Stream.of(userRoles)
-						  .forEach(userRole -> newUser.addUserSystemWideRoleInModule(userRole));
+						  .forEach(userRole -> newPrincipal.addSystemWideRoleInModule(userRole));
 				}
 
-				U createdAdminUser = _api.getUsersApi()
+				P createdAdminUser = _api.getPrincipalsApi()
 										 .getForCrud()
-										 .save(newUser);
+										 .save(newPrincipal);
 				log.warn("Created the {} [user] oid={}",
 						 loginId,createdAdminUser.getOid());
 
 				// b) create a [user/password login] entry for the [user]
-				L usrPwdLogin = _loginFactory.create();
-				usrPwdLogin.setUserOid(createdAdminUser.getOid());
-				usrPwdLogin.setLoginId(loginId);
-				usrPwdLogin.setPassword(password);	// user/password = admin/admin CHANGE!
-				usrPwdLogin.setConfirmed(true);
+				LoginDataForUserPassword loginData = new LoginDataForUserPassword();
+				loginData.setPassword(password);
+				loginData.setPasswordHash(password.hash());
+				loginData.setConfirmed(true);
+				
+				Login usrPwdLogin = new Login(loginId);
+				usrPwdLogin.setSecurityPrincipalOid(createdAdminUser.getOid());
+				usrPwdLogin.setData(loginData);
 
-				L createdUsrPwdLogin = (L)_api.getUserPasswordLoginApi()
-										   	  .getForCrud()
-										   	  .create(usrPwdLogin);
+				Login createdUsrPwdLogin = _api.getLoginApi()
+										   	   .getForCrud()
+										   	   .create(usrPwdLogin);
 				log.warn("Created the {} [user/password login] oid={} > " +
-						 "the {} can log-in whith user/password = {}/{}",
-						 loginId,
-						 createdUsrPwdLogin.getOid(),
-						 createdUsrPwdLogin.getLoginId(),createdUsrPwdLogin.getPassword());
+						 "the {} can log-in whith loginId = {}",
+						 loginId,createdUsrPwdLogin.getOid(),
+						 createdUsrPwdLogin.getLoginId());
 			}
-			// the user user does exist... ensure it has the required roles
+			// the user [principal] already exists... ensure it has the required roles
 			else {
 				log.warn("The {} [user] DOES exist at the system: ensure it has the required roles",
 						 loginId);
 				if (CollectionUtils.hasData(userRoles)) {
 					Stream.of(userRoles)
-						  .forEach(userRole -> existingUser.addUserSystemWideRoleInModule(userRole));
+						  .forEach(userRole -> existingPrincipal.addSystemWideRoleInModule(userRole));
 				}
-				U updatedUser = _api.getUsersApi()
+				P updatedUser = _api.getPrincipalsApi()
 									.getForCrud()
-									.save(existingUser);
+									.update(existingPrincipal);
 			}
-			return existingUser != null;
+			return existingPrincipal != null;
 		} catch (final Throwable th) {
 			log.error("\n\n\n\n");
 			log.error("///////// Error creating the {} user:  {}",

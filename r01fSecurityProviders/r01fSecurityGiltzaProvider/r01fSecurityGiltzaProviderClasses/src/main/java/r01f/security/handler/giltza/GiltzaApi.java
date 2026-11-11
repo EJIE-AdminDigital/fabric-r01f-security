@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -23,12 +24,11 @@ import r01f.httpclient.HttpResponseResult;
 import r01f.httpclient.HttpSSLContextBuilder;
 import r01f.internal.Env;
 import r01f.mime.MimeTypes;
-import r01f.security.handler.giltza.GiltzaApi.GiltzaJSonFieldAccessor;
-import r01f.security.provider.SecurityProviderException;
-import r01f.security.provider.SecurityProviderSecretConfig;
-import r01f.security.user.giltza.GiltzaUserData;
-import r01f.security.user.giltza.GiltzaUserDataBuilder;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.security.authn.handler.AuthenticationProviderException;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
+import r01f.security.principal.giltza.SecurityPrincipalDataFromGiltza;
+import r01f.security.principal.giltza.GiltzaUserDataBuilder;
 import r01f.types.contact.EMail;
 import r01f.types.contact.PersonID;
 import r01f.types.url.Url;
@@ -42,17 +42,16 @@ import r01f.util.types.Strings;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	private final SecurityProviderSecretConfig  _securityProviderSecretConfig;
+	private final AuthenticationProviderSecretConfig  _securityProviderSecretConfig;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public GiltzaApi(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public GiltzaApi(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		_securityProviderSecretConfig = securityProviderSecretConfig;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//
+//	AUTHORIZATION CODE URI
 /////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Get authorization code uri, first step oth Giltza oauth flow..where user will obtain an authorization code,.
 	 * @param finalTargetUri
@@ -68,7 +67,7 @@ import r01f.util.types.Strings;
 	 * @param finalTargetUri
 	 * @return
 	 */
-	public Url getAuthorizationCodeUri(final Url finalTargetUri,  final String codeChallenge) {
+	public Url getAuthorizationCodeUri(final Url finalTargetUri,final String codeChallenge) {
 		String acrValues = _securityProviderSecretConfig.getProperty("acr_values").asString();
 		return this.getAuthorizationCodeUri(finalTargetUri,acrValues,codeChallenge);
 	}
@@ -79,7 +78,8 @@ import r01f.util.types.Strings;
 	 *                     ( f.e for bakq: "urn:safelayer:tws:policies:authentication:flow:bakq")
 	 * @return
 	 */
-	public Url getAuthorizationCodeUri ( final Url finalTargetUri, final String acrValues , final String codeChallenge) {
+	public Url getAuthorizationCodeUri(final Url finalTargetUri,
+									   final String acrValues,final String codeChallenge) {
 		Url authorizationCodeURI = null;
 		try {
 			// Load Giltza SecurityProvideConfigData ( key | oauth2callback | authorizationCodeURI)
@@ -116,7 +116,7 @@ import r01f.util.types.Strings;
 			log.error("Could NOT create giltza's authorization code url: {}",
 					  authorizationCodeURI,
 					  th.getLocalizedMessage(),th);
-			throw new SecurityProviderException("Could NOT create Giltza's authorization code url: " + authorizationCodeURI,
+			throw new AuthenticationProviderException("Could NOT create Giltza's authorization code url: " + authorizationCodeURI,
 					  						 th);
          }
 	}
@@ -132,7 +132,7 @@ import r01f.util.types.Strings;
 		return new GiltzaJSonFieldAccessor(jsonAsString);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//
+//	ACCESS TOKEN
 /////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Obtains the Giltza access token through an authorization code got in the first step of Giltza oauth flow.
@@ -171,7 +171,7 @@ import r01f.util.types.Strings;
 			String errorStream = accessTokenResponse.loadAsString();
 			log.error("Remote Server Error int Giltza Auth Service: (code={}) > {}",
 					  accessTokenResponse.getCode(),errorStream);
-			throw new SecurityProviderException(Strings.customized("Remote Server error at Giltza Service (code={}): {}",
+			throw new AuthenticationProviderException(Strings.customized("Remote Server error at Giltza Service (code={}): {}",
 																   accessTokenResponse.getCode(),errorStream));
 		}
 		String accessTokenResponseStr = accessTokenResponse.loadAsString();
@@ -244,7 +244,7 @@ import r01f.util.types.Strings;
 					  accessTokenURI,
 					  _securityProviderSecretConfig.isProxyEnabled(),
 					  th.getLocalizedMessage(),th);
-			throw new SecurityProviderException(Throwables.message("Could NOT access Giltza url at {} (using proxy={}): {}",
+			throw new AuthenticationProviderException(Throwables.message("Could NOT access Giltza url at {} (using proxy={}): {}",
 					  											accessTokenURI,
 					  											_securityProviderSecretConfig.isProxyEnabled(),
 					  											th.getLocalizedMessage()),
@@ -252,26 +252,25 @@ import r01f.util.types.Strings;
 		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//	USER INFO
+//	PRINCIPAL
 /////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Using an [access token] returned by giltza gets the user info detailed by scopes.
 	 * @param accessToken
 	 * @return
 	 */
-	public HttpResponseResult getGiltzaUserInfoHttpResponseUsing(final SecurityToken accessToken) {
+	public HttpResponseResult getGiltzaPrincipalDataHttpResponseUsing(final SecurityToken accessToken) {
 		Url userInfoUrl = _securityProviderSecretConfig.getProperty("user-info-uri").asUrl();
 		try {
-			log.warn("Get [Giltza user info] at {} (NO PROXY)",
+			log.warn("Get [Giltza principal data] at {} (NO PROXY)",
 					  userInfoUrl);
 			 HttpRequest request = HttpRequest.newBuilder()
 												  .uri(userInfoUrl.asUri())
 												  .header("Authorization", "Bearer " + accessToken)
 												  .GET()
 											  .build();
-			 HttpResponse<InputStream> response =  _httpClient()
-																.send(request,
-																      HttpResponse.BodyHandlers.ofInputStream());
+			 HttpResponse<InputStream> response =  _httpClient().send(request,
+														      		  HttpResponse.BodyHandlers.ofInputStream());
 
 			return new HttpResponseResult(response);
 		} catch (final Throwable th) {
@@ -279,11 +278,11 @@ import r01f.util.types.Strings;
 					  userInfoUrl,
 					  _securityProviderSecretConfig.isProxyEnabled(),
 					  th.getLocalizedMessage(),th);
-			throw new SecurityProviderException(Throwables.message("Could NOT access Giltza url at {} (using proxy={}): {}",
-					  											userInfoUrl,
-					  											_securityProviderSecretConfig.isProxyEnabled(),
-					  											th.getLocalizedMessage()),
-					  						    th);
+			throw new AuthenticationProviderException(Throwables.message("Could NOT access Giltza url at {} (using proxy={}): {}",
+					  													 userInfoUrl,
+					  													 _securityProviderSecretConfig.isProxyEnabled(),
+					  													 th.getLocalizedMessage()),
+					  						    	  th);
 		}
 	}
 	/**
@@ -291,98 +290,73 @@ import r01f.util.types.Strings;
 	 * @param accessToken
 	 * @return
 	 */
-	public GiltzaUserData getGiltzaUserInfoUsing(final SecurityToken accessToken) {
-		HttpResponseResult result =  getGiltzaUserInfoHttpResponseUsing( accessToken);
-		if (result.isSuccess()) {
-			return _from(result.loadAsString());
-		}
-		throw new SecurityProviderException(Throwables.message("Could NOT access Giltza USER info, error/data {}",
-					                                               result.loadAsString()));
-
+	public SecurityPrincipalDataFromGiltza getGiltzaPrincipalDataUsing(final SecurityToken accessToken) {
+		HttpResponseResult result = this.getGiltzaPrincipalDataHttpResponseUsing(accessToken);
+		if (result.isSuccess()) return _from(result.loadAsString());
+		
+		throw new AuthenticationProviderException(Throwables.message("Could NOT access Giltza USER info, error/data {}",
+					                                           		 result.loadAsString()));
 	}
 	/**
 	 * Using an [access token] returned by goole gets the user email.
 	 * @param accessToken
 	 * @return
 	 */
-	public PersonID getGiltzaUserPersonIdUsing(final SecurityToken accessToken) {
-		HttpResponseResult userInfoResponse = this.getGiltzaUserInfoHttpResponseUsing(accessToken);
-		if (!userInfoResponse.getCode().isIn(HttpResponseCode.OK)) {
-			String errorStream = userInfoResponse.loadAsString();
-			log.warn("Remote Server Error  Giltza Auth Service  getting user info with token={}: (code={}) > {}",
+	public PersonID getGiltzaPersonIdUsing(final SecurityToken accessToken) {
+		HttpResponseResult principalDataResponse = this.getGiltzaPrincipalDataHttpResponseUsing(accessToken);
+		if (!principalDataResponse.getCode().isIn(HttpResponseCode.OK)) {
+			String errorStream = principalDataResponse.loadAsString();
+			log.warn("Remote Server Error  Giltza Auth Service  getting [principal] data with token={}: (code={}) > {}",
 					 accessToken,
-					 userInfoResponse.getCode(),errorStream);
-			throw new SecurityProviderException(Strings.customized("Remote Server error at Giltza Service using access token={} (code={}): {}",
-																accessToken,
-																userInfoResponse.getCode(),errorStream));
+					 principalDataResponse.getCode(),errorStream);
+			throw new AuthenticationProviderException(Strings.customized("Remote Server error at Giltza Service using access token={} (code={}): {}",
+																		 accessToken,
+																		 principalDataResponse.getCode(),errorStream));
 		}
-		String userInfoResponseStr = userInfoResponse.loadAsString();
-		log.info("\n\n Giltza user info http call response {} ",
-				 userInfoResponseStr);
-		String dniAsString = this.fieldsAccessorFor(userInfoResponseStr)
-								   .getValueOfFieldNamed("dni");
+		String principalDataResponseStr = principalDataResponse.loadAsString();
+		log.info("\n\n Giltza [principal] data http call response {} ",
+				 principalDataResponseStr);
+		String dniAsString = this.fieldsAccessorFor(principalDataResponseStr)
+								 .getValueOfFieldNamed("dni");
 		return PersonID.forId(dniAsString);
 	}
-
-	@SuppressWarnings("static-method")
-	private  HttpClient _httpClient() {
-		Env env = Env.guessFromSystemProps();
-		if (env.isNOT(Env.LOC)) {
-			return HttpClient.newBuilder()
-							 .build();
-		}
-		try {
-			log.warn(" >>> [Warn! ] Build ssl context for untrusted certs. Just for local environment  ");;
-			return HttpClient.newBuilder()
-			                 	.sslContext(HttpSSLContextBuilder.buildSSlContextForUnstrustedCerts())
-			                 .build();
-		} catch (final Throwable e) {
-			throw new SecurityProviderException(e.getLocalizedMessage());
-		}
-	}
-
-
-	private GiltzaUserData _from (final String userInfoResponseAsJson) {
+	private SecurityPrincipalDataFromGiltza _from (final String userInfoResponseAsJson) {
 
 		GiltzaJSonFieldAccessor jsonFieldAccessor = this.fieldsAccessorFor(userInfoResponseAsJson);
-		EMail mail = (  jsonFieldAccessor.getValueOfFieldNamed("email") != null ) ?
-				                          EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email")):null;
+		EMail mail = Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("email"))
+							 .map(EMail::of)
+							 .orElse(null);
+		String name = Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("given_name"))
+							  .orElse(null);
 
-		String name = jsonFieldAccessor.getValueOfFieldNamed("given_name") != null ?
-				                                jsonFieldAccessor.getValueOfFieldNamed("given_name"):null;
-
-		String surname1 =  jsonFieldAccessor.getValueOfFieldNamed("surname1") != null ?
-				                  jsonFieldAccessor.getValueOfFieldNamed("surname1") : null;
-
-		String surname2 =  jsonFieldAccessor.getValueOfFieldNamed("surname2") != null ?
-				                  jsonFieldAccessor.getValueOfFieldNamed("surname2") : null;
-
-		PersonID dni =   jsonFieldAccessor.getValueOfFieldNamed("dni") != null ?
-				                             PersonID.forId(jsonFieldAccessor.getValueOfFieldNamed("dni")) : null;
-
-		String displayName =  jsonFieldAccessor.getValueOfFieldNamed("name") != null ?
-                							jsonFieldAccessor.getValueOfFieldNamed("name") : null;
-
+		String surname1 = Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("surname1"))
+								 .orElse(null);
+		String surname2 = Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("surname2"))
+								  .orElse(null);
+		PersonID dni = Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("dni"))
+							   .map(PersonID::forId)
+							   .orElse(null);
+		String displayName =  Optional.ofNullable(jsonFieldAccessor.getValueOfFieldNamed("name"))
+									  .orElse(null);
 		// [N] - Return the giltzaUserData
-		GiltzaUserData giltzaUserData =
-				   GiltzaUserDataBuilder.forPersonId(dni)
-										 .name(name)
-										 .surname1(surname1)
-										 .surname2(surname2)
-										 .withMail(mail)
-										 .displayName(displayName)
-									 .build();
-		return giltzaUserData;
+		SecurityPrincipalDataFromGiltza giltzaPrincipalData = GiltzaUserDataBuilder.forPersonId(dni)
+										 							   .name(name)
+										 							   .surname1(surname1)
+										 							   .surname2(surname2)
+										 							   .withMail(mail)
+										 							   .displayName(displayName)
+										 							   .build();
+		return giltzaPrincipalData;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//	GiltzaJSonFieldAccessor
-/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////	
 	class GiltzaJSonFieldAccessor {
 		private final JsonObject _json;
 
 		private GiltzaJSonFieldAccessor(final String jsonAsString) {
 			_json = JsonParser.parseString(jsonAsString)
-							   .getAsJsonObject();
+							  .getAsJsonObject();
 		}
 		public String getValueOfFieldNamed(final String name) {
 			String value = null;
@@ -399,7 +373,23 @@ import r01f.util.types.Strings;
 			return value;
 		}
 	}
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//	HTTP CLIENT
+/////////////////////////////////////////////////////////////////////////////////////////	
+	@SuppressWarnings("static-method")
+	private  HttpClient _httpClient() {
+		Env env = Env.guessFromSystemProps();
+		if (env.isNOT(Env.LOC)) {
+			return HttpClient.newBuilder()
+							 .build();
+		}
+		try {
+			log.warn(" >>> [Warn! ] Build ssl context for untrusted certs. Just for local environment  ");;
+			return HttpClient.newBuilder()
+			                 	.sslContext(HttpSSLContextBuilder.buildSSlContextForUnstrustedCerts())
+			                 .build();
+		} catch (final Throwable e) {
+			throw new AuthenticationProviderException(e.getLocalizedMessage());
+		}
+	}
 }

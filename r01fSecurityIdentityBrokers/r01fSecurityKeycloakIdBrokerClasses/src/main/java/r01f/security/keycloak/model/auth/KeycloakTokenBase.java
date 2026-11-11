@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import r01f.objectstreamer.annotations.MarshallField;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 
 @Accessors(prefix = "_")
 @NoArgsConstructor

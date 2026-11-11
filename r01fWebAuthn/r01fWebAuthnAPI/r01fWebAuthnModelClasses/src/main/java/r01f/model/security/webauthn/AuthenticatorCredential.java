@@ -1,22 +1,22 @@
 package r01f.model.security.webauthn;
 
-import r01f.model.security.PersistableSecurityObject;
+import r01f.model.security.IsSecurityPersistableObject;
 import r01f.model.security.keystore.key.PublicKey;
 import r01f.model.security.webauthn.WebAuthnIDS.CredentialID;
 import r01f.model.security.webauthn.WebAuthnOIDs.CredentialOID;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 
 /**
 
  */
 public interface AuthenticatorCredential
-		 extends PersistableSecurityObject<CredentialOID> {
+		 extends IsSecurityPersistableObject<CredentialOID> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-	public UserOID getUserOid();
-	public void setUserOid(final UserOID userDataOid);
+	public SecurityPrincipalOID getSecurityPrincipalOid();
+	public void setSecurityPrincipalOid(final SecurityPrincipalOID securityPrincipalOid);
 
 	public CredentialID getCredentialId();
 	public void setCredentialId(final CredentialID credentialId);
@@ -25,6 +25,6 @@ public interface AuthenticatorCredential
 
 	public Long getSignatureCount();
 
-	public SecurityProviderID getBackMappedSecurityProviderOnRegistration();
+	public IdentityProvider getBackMappedSecurityProviderOnRegistration();
 
 }

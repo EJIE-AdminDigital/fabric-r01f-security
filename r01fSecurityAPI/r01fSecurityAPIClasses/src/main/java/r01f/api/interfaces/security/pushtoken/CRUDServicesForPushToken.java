@@ -1,22 +1,21 @@
 package r01f.api.interfaces.security.pushtoken;
 
-import r01f.api.interfaces.security.SecurityServiceInterface;
-import r01f.guids.CommonOIDs.SystemID;
+import r01f.api.interfaces.security.IsSecurityServiceInterface;
 import r01f.model.persistence.CRUDResult;
-import r01f.model.security.pushtoken.PushToken;
-import r01f.model.security.pushtoken.IsPushTokenID;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.pushtoken.IsPushDestinationID;
+import r01f.model.security.pushtoken.IsPushToken;
 import r01f.model.security.pushtoken.PushTokenOID;
-import r01f.securitycontext.SecurityContext;
+import r01f.oids.CommonOIDs.SystemID;
 import r01f.services.interfaces.CRUDServicesForModelObject;
-import r01f.types.contact.Phone;
 
-public interface CRUDServicesForPushToken<T extends PushToken>
+public interface CRUDServicesForPushToken<T extends IsPushToken>
 		 extends CRUDServicesForModelObject<PushTokenOID,T>, 
-				 SecurityServiceInterface {
+				 IsSecurityServiceInterface {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 	public CRUDResult<T> loadBy(final SecurityContext securityContext,
-								final IsPushTokenID phone,final SystemID systemOid);
+								final SystemID srcSystemId,final IsPushDestinationID destId);
 }

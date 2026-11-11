@@ -19,10 +19,10 @@ import r01f.config.ContainsConfigData;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.patterns.Memoized;
-import r01f.security.provider.SecurityProvider;
-import r01f.security.provider.SecurityProviderPublicConfig;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
+import r01f.security.authn.provider.config.AuthenticationProviderPublicConfig;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
 import r01f.types.url.UrlQueryStringParam;
@@ -34,7 +34,7 @@ import r01f.util.types.collections.CollectionUtils;
 @Accessors(prefix="_")
 public class SecurityLoginFilterConfig
   implements ContainsConfigData,
-			 Iterable<SecurityProviderPublicConfig> {
+			 Iterable<AuthenticationProviderPublicConfig> {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
@@ -64,7 +64,7 @@ public class SecurityLoginFilterConfig
 	}
 
 	@MarshallField(as="providers")
-	@Getter @Setter private Set<SecurityProviderPublicConfig> _securityProviders;
+	@Getter @Setter private Set<AuthenticationProviderPublicConfig> _securityProviders;
 
 	@MarshallField(as="urlVars")
 	@Getter @Setter private Properties _urlVars;
@@ -84,26 +84,24 @@ public class SecurityLoginFilterConfig
 // 	ITERATOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
-	public Iterator<SecurityProviderPublicConfig> iterator() {
+	public Iterator<AuthenticationProviderPublicConfig> iterator() {
 		return _securityProviders != null ? _securityProviders.iterator()
-										  : Lists.<SecurityProviderPublicConfig>newArrayList().iterator();
+										  : Lists.<AuthenticationProviderPublicConfig>newArrayList().iterator();
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////
-	public SecurityProviderPublicConfig getProvider(final SecurityProvider provider) {
-		return this.getProvider(provider.getCode());
-	}
-	public SecurityProviderPublicConfig getProvider(final SecurityProviderID provider) {
-		Collection<SecurityProviderPublicConfig> cfgs = this.getProvidersMatching(providerConfig -> providerConfig.getId().is(provider));
+	public AuthenticationProviderPublicConfig getProviderPublicConfig(final IdentityProvider identityProvider,final AuthenticationMethod authnMethod) {
+		Collection<AuthenticationProviderPublicConfig> cfgs = this.getProvidersMatching(providerConfig -> providerConfig.getIdentityProvider().is(identityProvider)
+																									   && providerConfig.getAuthenticationMethod().is(authnMethod));
 		return Iterables.getFirst(cfgs,null);
 	}
-	public Collection<SecurityProviderPublicConfig> getEnabledProviders() {
-		return this.getProvidersMatching(SecurityProviderPublicConfig::isEnabled);
+	public Collection<AuthenticationProviderPublicConfig> getEnabledProviders() {
+		return this.getProvidersMatching(AuthenticationProviderPublicConfig::isEnabled);
 	}
-	public Collection<SecurityProviderPublicConfig> getProvidersMatching(final Predicate<SecurityProviderPublicConfig> pred) {
+	public Collection<AuthenticationProviderPublicConfig> getProvidersMatching(final Predicate<AuthenticationProviderPublicConfig> pred) {
 		if (CollectionUtils.isNullOrEmpty(_securityProviders)) throw new IllegalStateException("The login [security providers] are null: this is a DEVELOPER FAULT caused by " + SecurityLoginFilterGuiceModule.class.getSimpleName() + " not being installed (see [servlet context listener] constructor)");
-		Collection<SecurityProviderPublicConfig> securityProvidersConfig  = _securityProviders.stream()
+		Collection<AuthenticationProviderPublicConfig> securityProvidersConfig  = _securityProviders.stream()
 																						  	  .filter(pred)
 																						  	  .collect(Collectors.toList());
 		if (CollectionUtils.isNullOrEmpty(securityProvidersConfig)) {
@@ -111,76 +109,33 @@ public class SecurityLoginFilterConfig
 			throw new IllegalStateException("Error!! There is [security provider] matching the given predicate");
 		}
 		// Customize vars
-		Collection<SecurityProviderPublicConfig> outCfgs = securityProvidersConfig.stream()
+		Collection<AuthenticationProviderPublicConfig> outCfgs = securityProvidersConfig.stream()
 																		 		  .map(this::_customizeVarsOf)
 																		 		  .collect(Collectors.toList());
 		return outCfgs;
 	}
-	public Collection<SecurityProvider> getEnabledProvidersIds() {
-		Collection<SecurityProviderPublicConfig> enabledProvidersConfigs = this.getEnabledProviders();
-		return enabledProvidersConfigs.stream()				
-							 		  .map(cfg -> SecurityProvider.from(cfg.getId()))
-							 		  .collect(Collectors.toList());
-	}
-	public Properties getPropertiesForProviderWithId(final SecurityProviderID providerId) {
-		return this.getProvider(providerId).getProperties();
+	public Properties getPropertiesFor(final IdentityProvider identityProvider,final AuthenticationMethod authnMethod) {
+		return this.getProviderPublicConfig(identityProvider,authnMethod)
+				   .getProperties();
 	} 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	LOGIN URL 
 /////////////////////////////////////////////////////////////////////////////////////////
-	public Url getSecurityRESTServicesLoginEndPointForProviderWithId(final SecurityProviderID providerId) {
-		
-		if (providerId.is(SecurityProviderID.SAML)) {
-			return getSecurityRESTServicesLoginEndPointForSAML();
+	public Url getSecurityRESTServicesLoginEndPointForProviderWithId(final IdentityProvider identityProvider,final AuthenticationMethod authnMethod) {
+		Url outUrl = null;
+		if (authnMethod == AuthenticationMethod.SAML) {
+			String samlIssuerId = this.getProviderPublicConfig(identityProvider,AuthenticationMethod.SAML)
+									  .getProperty("issuerId")	
+									  .asString();	// the SAML issuerId for the MS ADFS Provider
+			
+			outUrl = this.getProviderPublicConfig(identityProvider,AuthenticationMethod.SAML)
+					     .getLoginUrl()
+					     .joinWith(UrlQueryString.fromParams(UrlQueryStringParam.of("impl",samlIssuerId)));
+		} else {
+			outUrl = this.getProviderPublicConfig(identityProvider,authnMethod)
+					     .getLoginUrl();
 		}
-		if (providerId.is(SecurityProviderID.XLNETS)) {
-			return getSecurityRESTServicesLoginEndPointForXLNETS();
-		}
-		if (providerId.is(SecurityProviderID.GILTZA)) {
-			return getSecurityRESTServicesLoginEndPointForGiltza();
-		}
-		if (providerId.is(SecurityProviderID.GOOGLE)) {
-			return getSecurityRESTServicesLoginEndPointForGoogle();
-		}
-		if (providerId.is(SecurityProviderID.USER_PASSWORD)) {
-			return getSecurityRESTServicesLoginEndPointForUserPassword();
-		}
-		if (providerId.is(SecurityProviderID.OSAKIDETZA_AZURE_AD)) {
-			return getSecurityRESTServicesLoginEndPointForOsaAzureAD();
-		}
-		return null;
-	}
-	public Url getSecurityRESTServicesLoginEndPointForUserPassword() {
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.USER_PASSWORD);
-	}	
-	public Url getSecurityRESTServicesLoginEndPointForGoogle() {
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.GOOGLE);
-	}
-	public Url getSecurityRESTServicesLoginEndPointForGiltza() {
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.GILTZA);
-	}
-	public Url getSecurityRESTServicesLoginEndPointForXLNETS() {
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.XLNETS);
-	}
-	public Url getSecurityRESTServicesLoginEndPointForSAML() {
-		String samlIssuerId = this.getProvider(SecurityProvider.SAML)
-								  .getProperty("issuerId")	
-								  .asString();	// the SAML issuerId for the MS ADFS Provider
-		
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.SAML)
-				   .joinWith(UrlQueryString.fromParams(UrlQueryStringParam.of("impl",samlIssuerId)));
-	}
-	
-	public Url getSecurityRESTServicesLoginEndPointForOsaAzureAD() {
-		String samlIssuerId = this.getProvider(SecurityProvider.OSAKIDETZA_AZURE_AD)
-								  .getProperty("issuerId")	
-								  .asString(); // the SAML issuerId for the Azure AD Provider
-		
-		return this._getSecurityRESTServicesLoginEndPointForProviderWithId(SecurityProviderID.OSAKIDETZA_AZURE_AD)
-				   .joinWith(UrlQueryString.fromParams(UrlQueryStringParam.of("impl",samlIssuerId)));
-	}
-	private Url _getSecurityRESTServicesLoginEndPointForProviderWithId(final SecurityProviderID providerId) {
-		return this.getProvider(providerId).getLoginUrl();
+		return outUrl;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
@@ -201,8 +156,8 @@ public class SecurityLoginFilterConfig
 		}
 		return Url.from(urlAsString);
 	}
-	private SecurityProviderPublicConfig _customizeVarsOf(final SecurityProviderPublicConfig securityProviderConfig) {
-		SecurityProviderPublicConfig outCfg = null;
+	private AuthenticationProviderPublicConfig _customizeVarsOf(final AuthenticationProviderPublicConfig securityProviderConfig) {
+		AuthenticationProviderPublicConfig outCfg = null;
 		if (CollectionUtils.hasData(securityProviderConfig.getUrlVars())) {
 			// Security provider has custom variables
 			log.debug("Security Provider has custom urls vars ");

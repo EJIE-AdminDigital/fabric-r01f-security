@@ -5,20 +5,28 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.securitycontext.SecurityIDS.IsIdentityBrokerObjectID;
+import r01f.oids.SecurityIDs.IsSecurityObjectID;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)
 public abstract class KeycloakIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
+/////////////////////////////////////////////////////////////////////////////////////////
+	public interface IsKeycloakID 
+	  	     extends IsSecurityObjectID {
+		// just a marker interface
+	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
 /////////////////////////////////////////////////////////////////////////////////////////	
-    /*
+    /**
 	 * Keycloak Client Id : : El ID alfanumérico que usas en tus aplicaciones (ej: mi-app-backend).
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientId")
 	public record KeycloakClientID(@Getter String id)
-	   implements IsIdentityBrokerObjectID {
+	   implements IsKeycloakID {
 		
 		public static KeycloakClientID from(final String id) {
 			return new KeycloakClientID(id);
@@ -32,6 +40,12 @@ public abstract class KeycloakIDs {
 		public static KeycloakClientID fromString(final String id) {
 			return new KeycloakClientID(id);
 		}
+		public static KeycloakClientID fromSecurityPrincipalId(final SecurityPrincipalID id) {
+			return new KeycloakClientID(id.asString());
+		}
+		public SecurityPrincipalID asSecurityPrincipalId() {
+			return new SecurityPrincipalID(this.id.toUpperCase());	// keycloak username
+		}
 		
 		@Override
 		public String asString() {
@@ -42,14 +56,13 @@ public abstract class KeycloakIDs {
 			return this.id;
 		}
 	}
-	
-	/*
-	 * Keycloak Client Id : : El ID alfanumérico que usas en tus users (ej: mi-app-backend).
+	/**
+	 * Keycloak username
 	 */
 	@Immutable
 	@MarshallType(as="keycloakUserId")
 	public record KeycloakUserID(@Getter String id)
-	   implements IsIdentityBrokerObjectID {
+	   implements IsKeycloakID {
 		
 		public static KeycloakUserID from(final String id) {
 			return new KeycloakUserID(id);
@@ -63,7 +76,12 @@ public abstract class KeycloakIDs {
 		public static KeycloakUserID fromString(final String str) {
 			return new KeycloakUserID(str);
 		}
-		
+		public static KeycloakUserID fromSecurityPrincipalId(final SecurityPrincipalID id) {
+			return new KeycloakUserID(id.asString());
+		}
+		public SecurityPrincipalID asSecurityPrincipalId() {
+			return new SecurityPrincipalID(this.id.toUpperCase());	// keycloak username
+		}
 		@Override
 		public String asString() {
 			return this.id;
@@ -73,11 +91,13 @@ public abstract class KeycloakIDs {
 			return this.id;
 		}
 	}
-		
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////	
 	@Immutable
 	@MarshallType(as="keycloakAttributeId")
 	public record KeycloakAttributeID(@Getter String id)
-	    implements IsIdentityBrokerObjectID {
+	    implements IsKeycloakID {
 
 		public static KeycloakAttributeID from(final String id) {
 			return new KeycloakAttributeID(id);
@@ -101,15 +121,13 @@ public abstract class KeycloakIDs {
 			return this.id;
 		}
 	}
-		
-	
-  /*
+    /**
 	 * Keycloak Client Role
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientRole")
 	public record KeycloakRole(@Getter String id)
-	   implements IsIdentityBrokerObjectID {
+	   implements IsKeycloakID {
 		
 		public static KeycloakRole from(final String id) {
 			return new KeycloakRole(id);
@@ -133,16 +151,13 @@ public abstract class KeycloakIDs {
 			return this.id;
 		}
 	}
-	
-
-	
 	/**
 	 * Keycloak Client Secret
 	 */
 	@Immutable
 	@MarshallType(as="keycloakClientSecret")
 	public record KeycloakClientSecret(@Getter String id)
-	   implements IsIdentityBrokerObjectID {
+	   implements IsKeycloakID {
 		
 		public static KeycloakClientSecret from(final String id) {
 			return new KeycloakClientSecret(id);
@@ -166,15 +181,13 @@ public abstract class KeycloakIDs {
 			return this.id;
 		}
 	}
-	
-	
 	/**
 	 * Keycloak Realm
 	 */
 	@Immutable
 	@MarshallType(as="keycloakRealm")
 	public record KeycloakRealm(@Getter String id)
-	   implements IsIdentityBrokerObjectID {
+	   implements IsKeycloakID {
 		
 		public static KeycloakRealm from(final String id) {
 			return new KeycloakRealm(id);

@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import r01f.model.security.user.User;
+import r01f.model.security.IsSecurityPrincipal;
 import r01f.servlet.HttpServletSessionUtils;
 
 @Slf4j
@@ -19,7 +19,7 @@ public abstract class LoginSessionStore {
 //	LOGIN GETTERS
 /////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings("unchecked")
-	public static <U extends User> LoginSession<U> getFromSession(final HttpServletRequest request) {
+	public static <U extends IsSecurityPrincipal> LoginSession<U> getFromSession(final HttpServletRequest request) {
 		if (log.isTraceEnabled()) log.trace("Retrieve [login session] from http session ");
 		LoginSession<U> outSession = null;
 		HttpSession ses = request.getSession(false);	// do not create a new session
@@ -36,15 +36,15 @@ public abstract class LoginSessionStore {
 		}
 		return outSession;
 	}
-	public static <U extends User> LoginSession<U> getFromThreadLocalStorage() {
+	public static <U extends IsSecurityPrincipal> LoginSession<U> getFromThreadLocalStorage() {
 		if (log.isTraceEnabled()) log.trace("Retrieve [login session] from ThreadLocal storage ");
 		return LoginAuthContextThreadLocalManager.get();
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	LOGIN SETTERS
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public static <U extends User> void storeAtHttpSession(final HttpServletRequest request,
-														   final LoginSession<U> loginSession) {
+	public static <U extends IsSecurityPrincipal> void storeAtHttpSession(final HttpServletRequest request,
+														   				  final LoginSession<U> loginSession) {
 		 if (log.isTraceEnabled()) log.info("Storing [login session] on session.. {}",
 				  							loginSession.toString());
 		 HttpSession ses = request.getSession(true);
@@ -52,26 +52,26 @@ public abstract class LoginSessionStore {
 		 ses.setAttribute(LOGIN_CTX_SESSIONATTR, loginSession);
 	}
 	/**
-	 * When user data (ie name) is updated, the [session-stored] data should also
+	 * When [principal] is updated, the [session-stored] data should also be updated
 	 * be updated
-	 * @param <U>
+	 * @param <P>
 	 * @param request
-	 * @param updatedUser
+	 * @param updatedPrincipal
 	 */
-	public static <U extends User> void updateAtHttpSessionFrom(final HttpServletRequest request,
-														 		final U updatedUser) {
-		// Update the user data stored at the [LoginSession]
+	public static <P extends IsSecurityPrincipal> void updateAtHttpSessionFrom(final HttpServletRequest request,
+														 					   final P updatedPrincipal) {
+		// Update the [principal] data stored at the [LoginSession]
 		// (this object is used at the [LoginSessionServletFilter])
-		LoginSession<U> loginSession = LoginSessionStore.getFromSession(request);
-		LoginSession<U> updatedLoginSession = loginSession.cloneForUpdatedUser(updatedUser);
+		LoginSession<P> loginSession = LoginSessionStore.getFromSession(request);
+		LoginSession<P> updatedLoginSession = loginSession.cloneForUpdatedSecurityPrincipal(updatedPrincipal);
 		LoginSessionStore.storeAtHttpSession(request,updatedLoginSession);
 	}
-	public static <U extends User> void  storeAtThreadLocalStorage(final LoginSession<U> loginSession) {
+	public static <P extends IsSecurityPrincipal> void  storeAtThreadLocalStorage(final LoginSession<P> loginSession) {
 		 if (log.isTraceEnabled()) log.info("Storing [login session] on ThreadLocal.. {}",
 				 							loginSession.toString());
 		 LoginAuthContextThreadLocalManager.set(loginSession);
 	}
-	public static <U extends User> void removeFromHttpSession(final HttpServletRequest request) {
+	public static <P extends IsSecurityPrincipal> void removeFromHttpSession(final HttpServletRequest request) {
 		 if (log.isTraceEnabled()) log.info("Removing [login session] from session.");
 		 request.removeAttribute(LOGIN_CTX_SESSIONATTR);
 		 HttpSession ses = request.getSession(false);
@@ -79,7 +79,7 @@ public abstract class LoginSessionStore {
 			 ses.removeAttribute(LOGIN_CTX_SESSIONATTR);
 		 }
 	}
-	public static <U extends User> void  removeFromThreadLocalStorage() {
+	public static <U extends IsSecurityPrincipal> void  removeFromThreadLocalStorage() {
 		 if (log.isTraceEnabled()) log.info("Removing [login session] from ThreadLocal.");
 		 LoginAuthContextThreadLocalManager.remove();
 	}
@@ -98,12 +98,12 @@ public abstract class LoginSessionStore {
 			LOGIN_SESSION_STORAGE.remove();
 		}
 		//set
-		public static <U extends User> void set(final LoginSession<U> ses) {
+		public static <P extends IsSecurityPrincipal> void set(final LoginSession<P> ses) {
 			LOGIN_SESSION_STORAGE.set(ses);
 		}
 		@SuppressWarnings("unchecked")
-		public static <U extends User> LoginSession<U> get() {
-			return (LoginSession<U>)LOGIN_SESSION_STORAGE.get();
+		public static <P extends IsSecurityPrincipal> LoginSession<P> get() {
+			return (LoginSession<P>)LOGIN_SESSION_STORAGE.get();
 		}
 	}
 }

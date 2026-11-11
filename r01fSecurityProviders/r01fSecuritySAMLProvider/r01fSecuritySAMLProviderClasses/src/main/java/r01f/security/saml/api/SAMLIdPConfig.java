@@ -14,7 +14,7 @@ import org.opensaml.security.credential.Credential;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.security.saml.api.SAMLIDs.SAMLIdPID;
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
 import r01f.security.saml.api.SAMLIDs.SAMLRelyingPartyID;
 import r01f.types.url.Url;
@@ -26,7 +26,7 @@ public class SAMLIdPConfig {
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
 	@Getter private final SAMLRelyingPartyID _relyingPartyId;
-	@Getter private final SAMLIdPID _IdPNick;
+	@Getter private final IdentityProvider _IdPNick;
 	@Getter private final SAMLIssuerID _IdPIssuerId;
 	@Getter private final Url _IdPUrl;
 	@Getter private final Collection<Credential> _IdPCredentials;	
@@ -50,7 +50,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the provider information.
 	 */
 	public SAMLIdPConfig(final SAMLRelyingPartyID relyingPartyId,
-						 final SAMLIdPID idpNick,final SAMLIssuerID idpIssuerId,
+						 final IdentityProvider idpNick,final SAMLIssuerID idpIssuerId,
 				   		 final Url idpUrl,
 				   		 final Collection<X509Certificate> idpCertificates,
 				   		 final Url assertionConsumerServiceUrl,
@@ -82,7 +82,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the provider information.
 	 */
 	public SAMLIdPConfig(final SAMLRelyingPartyID relyingPartyId,
-				   		 final SAMLIdPID idpNick,final SAMLIssuerID idpIssuerId,
+				   		 final IdentityProvider idpNick,final SAMLIssuerID idpIssuerId,
 				   		 final Url idpUrl,
 				   		 final Collection<X509Certificate> idpCertificates,
 				   		 final Url assertionConsumerServiceUrl) throws SAMLException {
@@ -105,7 +105,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the provider information.
 	 */
 	public SAMLIdPConfig(final SAMLRelyingPartyID relyingPartyId,
-						 final SAMLIdPID idpNick,final SAMLIssuerID idpIssuerId,
+						 final IdentityProvider idpNick,final SAMLIssuerID idpIssuerId,
 				   		 final Url idpUrl,
 				   		 final Url assertionConsumerServiceUrl,
 				   		 final X509Certificate idpCertificates) throws SAMLException {
@@ -129,7 +129,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the metadata information.
 	 */
 	public static SAMLIdPConfig fromMetadata(final SAMLRelyingPartyID relyingPartyId,  
-									   		 final SAMLIdPID idpNick,final Reader idpMetaData,
+									   		 final IdentityProvider idpNick,final Reader idpMetaData,
 									   		 final Url assertionConsumerServiceUrl) {
 		return SAMLIdPConfig.fromMetadata(relyingPartyId, 
 										  idpNick,idpMetaData, 
@@ -149,7 +149,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the metadata information.
 	 */
 	public static SAMLIdPConfig fromMetadata(final SAMLRelyingPartyID relyingPartyId,
-									   		 final SAMLIdPID idpNick,final Reader idpMetaData,
+									   		 final IdentityProvider idpNick,final Reader idpMetaData,
 									   		 final Url assertionConsumerServiceUrl,
 									   		 final SAMLIdPBinding samlBinding) {
 		SAMLAPI.ensureOpenSAMLIsInitialized();
@@ -173,7 +173,7 @@ public class SAMLIdPConfig {
 	 * @throws SAMLException thrown if any error occur while loading the metadata information.
 	 */
 	public static SAMLIdPConfig fromMetadata(final SAMLRelyingPartyID relyingPartyId,
-									   		 final SAMLIdPID idpNick,final Reader idpMetaData,
+									   		 final IdentityProvider idpNick,final Reader idpMetaData,
 									   		 final Url assertionConsumerServiceUrl,
 									   		 final SAMLIdPBinding samlBinding,
 									   		 final Collection<X509Certificate> idpCertificates) {

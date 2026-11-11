@@ -4,8 +4,8 @@ import java.util.Set;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRole;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
 
 @Accessors(prefix = "_")
 public class KeycloakAccessToken

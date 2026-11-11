@@ -5,20 +5,16 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-
 import lombok.experimental.Accessors;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.giltza.GiltzaLogin;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.giltza.GiltzaCallBackOnLoginHandler;
 import r01f.security.handler.giltza.GiltzaLoginEntryPointHandler;
-import r01f.security.handler.giltza.GiltzaUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.giltza.GiltzaSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTResourceForSecurityServicesBase;
-import r01f.securitycontext.SecurityContext;
 
 /**
  * The implementation must follow the HTTP 1.1 spec (http://www.w3.org/Protocols/rfc2616/rfc2616.html), specifically
@@ -28,29 +24,27 @@ import r01f.securitycontext.SecurityContext;
  */
 @Path("api/giltza/users")
 @Accessors(prefix="_")
-public class RESTResourceForGiltzaSecurityProvider<U extends User,L extends GiltzaLogin,
-												   E extends UserLoginEntry>
+public class RESTResourceForGiltzaSecurityProvider<P extends IsSecurityPrincipal>
 	 extends RESTResourceForSecurityServicesBase {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public RESTResourceForGiltzaSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-												 final SecurityProviderSecretConfig securityProviderSecretConfig,
+												 final AuthenticationProviderSecretConfig authnProviderSecretConfig,
 												 final GiltzaLoginEntryPointHandler loginEntryPointHandler,
 									  			 final GiltzaCallBackOnLoginHandler callbackOnLoginHandler,
-									  			 final GiltzaUserDataFetchHandler<U,L> fetchUserDataHandler,
+									  			 final GiltzaSecurityPrincipalDataFetchHandler<P> fetchPrincipalDataHandler,
 									  			 final Marshaller marshaller,
 									  			 // used to create [login entries] when the user logs-in
-									  			 final Factory<E> loginEntryFactory,
-									  			 final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
-		super(new RESTDelegateForGiltzaSecurityProvider<U,L,E>(sysSecurityContextProvider,
-															   securityProviderSecretConfig,
-															   loginEntryPointHandler,
-														   	   callbackOnLoginHandler,
-														   	   fetchUserDataHandler,
-														   	   marshaller,
-														   	   loginEntryFactory,loginEntryCrud));
+									  			 final CRUDServicesForLoginEntry loginEntryCrud) {
+		super(new RESTDelegateForGiltzaSecurityProvider<>(sysSecurityContextProvider,
+														  authnProviderSecretConfig,
+														  loginEntryPointHandler,
+													   	  callbackOnLoginHandler,
+													   	  fetchPrincipalDataHandler,
+													   	  marshaller,
+													   	  loginEntryCrud));
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	Redirected after a successful google login

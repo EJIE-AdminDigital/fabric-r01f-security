@@ -20,11 +20,11 @@ import r01f.httpclient.HttpResponseResult;
 import r01f.httpclient.HttpSSLContextBuilder;
 import r01f.internal.Env;
 import r01f.mime.MimeTypes;
-import r01f.security.provider.SecurityProviderException;
-import r01f.security.provider.SecurityProviderSecretConfig;
-import r01f.security.user.google.GoogleUserData;
-import r01f.security.user.google.GoogleUserDataBuilder;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.security.authn.handler.AuthenticationProviderException;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
+import r01f.security.principal.google.SecurityPrincipalDataFromGoogle;
+import r01f.security.principal.google.GoogleUserDataBuilder;
 import r01f.types.contact.EMail;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
@@ -37,11 +37,11 @@ public class GoogleApi {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	private final SecurityProviderSecretConfig  _securityProviderSecretConfig;
+	private final AuthenticationProviderSecretConfig  _securityProviderSecretConfig;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public GoogleApi(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public GoogleApi(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		_securityProviderSecretConfig = securityProviderSecretConfig;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ public class GoogleApi {
 					  authorizationCodeURI,
 					  th.getLocalizedMessage(),
 					  th);
-			throw new SecurityProviderException("Could NOT create google's authorization code url: " + authorizationCodeURI,
+			throw new AuthenticationProviderException("Could NOT create google's authorization code url: " + authorizationCodeURI,
 					  							th);
 		}
 	}
@@ -105,7 +105,7 @@ public class GoogleApi {
 			String errorStream = accessTokenResponse.loadAsString();
 			log.error("Remote Server Error int Google Auth Service: (code={}) > {}",
 					  accessTokenResponse.getCode(),errorStream);
-			throw new SecurityProviderException(Strings.customized("Remote Server error at Google Service (code={}): {}",
+			throw new AuthenticationProviderException(Strings.customized("Remote Server error at Google Service (code={}): {}",
 																   accessTokenResponse.getCode(),errorStream));
 		}
 		String accessTokenResponseStr = accessTokenResponse.loadAsString();
@@ -155,7 +155,7 @@ public class GoogleApi {
 					  accessTokenURI,
 					  _securityProviderSecretConfig.isProxyEnabled(),
 					  th.getLocalizedMessage(),th);
-			throw new SecurityProviderException(Throwables.message("Could NOT access google url at {} (using proxy={}): {}",
+			throw new AuthenticationProviderException(Throwables.message("Could NOT access google url at {} (using proxy={}): {}",
 					  											accessTokenURI,
 					  											_securityProviderSecretConfig.isProxyEnabled(),
 					  											th.getLocalizedMessage()),
@@ -191,7 +191,7 @@ public class GoogleApi {
 					  userInfoUrl,
 					  _securityProviderSecretConfig.isProxyEnabled(),
 					  th.getLocalizedMessage(),th);
-			throw new SecurityProviderException(Throwables.message("Could NOT access google url at {} (using proxy={}): {}",
+			throw new AuthenticationProviderException(Throwables.message("Could NOT access google url at {} (using proxy={}): {}",
 					  											userInfoUrl,
 					  											_securityProviderSecretConfig.isProxyEnabled(),
 					  											th.getLocalizedMessage()),
@@ -199,12 +199,12 @@ public class GoogleApi {
 		}
 	}
 	
-	public GoogleUserData getGoogleUserInfoUsing(final SecurityToken accessToken) {
+	public SecurityPrincipalDataFromGoogle getGoogleUserInfoUsing(final SecurityToken accessToken) {
 		HttpResponseResult result =  getGoogleUserInfoHttpResponseUsing( accessToken);
 		if (result.isSuccess()) {
 			return _from(result.loadAsString());
 		} 
-		throw new SecurityProviderException(Throwables.message("Could NOT access Google USER info, error/data {}",
+		throw new AuthenticationProviderException(Throwables.message("Could NOT access Google USER info, error/data {}",
 					                                               result.loadAsString()));
 		
 	}
@@ -219,7 +219,7 @@ public class GoogleApi {
 			log.info("Remote Server Error  Google Auth Service  getting user info with token={}: (code={}) > {}",
 					 accessToken,
 					 userInfoResponse.getCode(),errorStream);
-			throw new SecurityProviderException(Strings.customized("Remote Server error at Google Service using access token={} (code={}): {}",
+			throw new AuthenticationProviderException(Strings.customized("Remote Server error at Google Service using access token={} (code={}): {}",
 																accessToken,
 																userInfoResponse.getCode(),errorStream));
 		}
@@ -246,11 +246,11 @@ public class GoogleApi {
 			                 	.sslContext(HttpSSLContextBuilder.buildSSlContextForUnstrustedCerts())
 			                 .build();
 		} catch (final Throwable e) {
-			throw new SecurityProviderException(e.getLocalizedMessage());
+			throw new AuthenticationProviderException(e.getLocalizedMessage());
 		}
 	}
 	
-	private GoogleUserData _from (final String userInfoResponseAsJson) {
+	private SecurityPrincipalDataFromGoogle _from (final String userInfoResponseAsJson) {
 
 		GoogleJSonFieldAccessor jsonFieldAccessor = fieldsAccessorFor(userInfoResponseAsJson);
 		EMail googleMail = EMail.of(jsonFieldAccessor.getValueOfFieldNamed("email"));
@@ -261,7 +261,7 @@ public class GoogleApi {
 												givenName,familyName);
 
 		// [3] - Return the third-party user data
-		GoogleUserData googleUserData = 
+		SecurityPrincipalDataFromGoogle googleUserData = 
 				GoogleUserDataBuilder.createForMail(googleMail)
 										 .givenName(givenName)
 										 .familiyName(familyName)

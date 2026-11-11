@@ -11,6 +11,7 @@ import org.keycloak.representations.idm.RoleRepresentation;
 
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.security.keycloak.api.interfaces.KeycloakManagementServicesForClients;
 import r01f.security.keycloak.client.api.KeycloakClientConfig;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
@@ -28,7 +29,6 @@ import r01f.security.keycloak.model.clients.KeycloakClientRequestCriteria.Keyclo
 import r01f.security.keycloak.model.clients.KeycloakClientUpdateRequest;
 import r01f.security.keycloak.model.clients.KeycloakClientUpdateResult;
 import r01f.security.keycloak.model.clients.KeycloakToClientModelTransferDelegate;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
 
 
 @Slf4j

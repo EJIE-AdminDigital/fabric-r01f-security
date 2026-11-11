@@ -168,7 +168,7 @@ public abstract class EventListenersForSecurityEvents {
 // PAIRED PHONE LOGIN
 /////////////////////////////////////////////////////////////////////////////////////////
 	private static abstract class EventListenerForUserPairedPhoneLoginMessageBase
-	  extends EventListenerForUserLoginMessageBase<PairedPhoneLoginConsentMessage> {
+	  					  extends EventListenerForUserLoginMessageBase<PairedPhoneLoginConsentMessage> {
 
 		private final PairedPhoneLoginConsentNotifier _loginConsentNotifier;
 
@@ -178,23 +178,21 @@ public abstract class EventListenersForSecurityEvents {
 
 		@Subscribe	// subscribes this event listener at the EventBus
 		public void onUserPairedPhoneLoginConsent(final PairedPhoneLoginConsentMessage consentNotificationMsg) {
-			 log.info("...received on event bus {} ",consentNotificationMsg.getPushMesagge().getTitle());
-			 _loginConsentNotifier.sendNotification(consentNotificationMsg);
+			log.info("...received on event bus {} ",consentNotificationMsg.getPushMesagge().getTitle());
+			_loginConsentNotifier.sendNotification(consentNotificationMsg);
 		}
 	 }
 
 	public static class EventListenerForUserPairedPhoneLoginMessagePush
-		extends EventListenerForUserPairedPhoneLoginMessageBase {
+				extends EventListenerForUserPairedPhoneLoginMessageBase {
 
 		@Inject
 		public EventListenerForUserPairedPhoneLoginMessagePush(@UsePushMessageNotifier final PairedPhoneLoginConsentNotifier notifierServices) {
 			super(notifierServices);
 		}
-
 		@Subscribe
 		public void onDeadEvent(final DeadEvent deadEvent) {
 			// for debugging purposes
 		}
 	}
-
 }

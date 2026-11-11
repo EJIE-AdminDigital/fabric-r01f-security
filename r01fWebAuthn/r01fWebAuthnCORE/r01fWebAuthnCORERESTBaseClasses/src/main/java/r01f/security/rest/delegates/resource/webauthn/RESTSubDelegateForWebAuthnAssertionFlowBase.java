@@ -17,32 +17,30 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.api.interfaces.security.user.CRUDServicesForUser;
+import r01f.api.interfaces.security.login.CRUDServicesForLogin;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.api.interfaces.security.principal.CRUDServicesForPrincipal;
 import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredential;
 import r01f.internal.R01FAppCodes;
 import r01f.jwt.JWT;
 import r01f.jwt.JWTBuilder;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.user.User;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.WebAuthnIDS.CredentialID;
 import r01f.model.security.webauthn.config.WebAuthnConfig;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.LoginID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.security.handler.webauthn.CredentialFactoryFromRegistrationResponse;
 import r01f.security.handler.webauthn.utils.WebAuthnByteStreamUtils;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
 import r01f.types.url.UrlQueryStringParam;
 
 @Slf4j
-public class RESTSubDelegateForWebAuthnAssertionFlowBase<U extends User,
-											             E extends UserLoginEntry, C extends AuthenticatorCredential>
-		   extends RESTSubDelegateForWebAuthnAbstractBase<U,E,C> {
+public class RESTSubDelegateForWebAuthnAssertionFlowBase<U extends IsSecurityPrincipal,C extends AuthenticatorCredential>
+		   extends RESTSubDelegateForWebAuthnAbstractBase<U,C> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -50,14 +48,14 @@ public class RESTSubDelegateForWebAuthnAssertionFlowBase<U extends User,
 		                                               final Marshaller marshaller,
 		                                               final WebAuthnConfig webAuthnConfig,
 		                                               final RelyingParty relyingParty,
-		                                               final CRUDServicesForUser<U> userCrud ,
-		                                               final CRUDServicesForUserLoginEntry<E> loginEntryCrud,final Factory<E> loginEntryFactory,
-		                                               final CRUDServicesForAuthenticatorCredential<C> authenticatorCredentialCrud,  final CredentialFactoryFromRegistrationResponse<U, C> credentialFactoyFromRegistrationResponse) {
+		                                               final CRUDServicesForPrincipal<U> principalCrud ,
+		                                               final CRUDServicesForLogin loginCrud,final CRUDServicesForLoginEntry loginEntryCrud,
+		                                               final CRUDServicesForAuthenticatorCredential<C> authenticatorCredentialCrud,final CredentialFactoryFromRegistrationResponse<U,C> credentialFactoyFromRegistrationResponse) {
 		super(sysSecurityContextProvider,
 			  marshaller,
 			  webAuthnConfig,relyingParty,
-			  userCrud,
-			  loginEntryCrud,loginEntryFactory,
+			  principalCrud,
+			  loginCrud,loginEntryCrud,
 			  authenticatorCredentialCrud,
 			  credentialFactoyFromRegistrationResponse);
 	}
@@ -144,7 +142,7 @@ public class RESTSubDelegateForWebAuthnAssertionFlowBase<U extends User,
 	protected JWT _createJWT(final AssertionResult result,
  							 final Map<String,String> otherFieldsAsClaims) {
         // ..parse data to r01f model
-		UserOID userOid = UserOID.fromString(WebAuthnByteStreamUtils.from(result.getCredential().getUserHandle()));
+		SecurityPrincipalOID userOid = SecurityPrincipalOID.fromString(WebAuthnByteStreamUtils.from(result.getCredential().getUserHandle()));
 		LoginID loginId = LoginID.forId(result.getUsername());
 		CredentialID  credentialId  = CredentialID.fromBase64RawString(result.getCredential().getCredentialId().getBase64());
         // .. build a r01.webauth  token (jwt)

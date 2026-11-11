@@ -7,12 +7,12 @@ import lombok.experimental.Accessors;
 import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredential;
 import r01f.eventbus.EventBus;
 import r01f.model.persistence.CRUDResult;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.WebAuthnIDS.CredentialID;
 import r01f.model.security.webauthn.WebAuthnOIDs.CredentialOID;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.persistence.CoreCRUDServicesForModelObjectBase;
 
@@ -39,30 +39,29 @@ public abstract class CoreCRUDServicesImplForAuthenticatorCredential<C extends A
 	@Transactional
 	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-								final UserOID userOid) {
+								final SecurityPrincipalOID securityPrincipalOid) {
 		return this.forSecurityContext(securityContext)
-				.createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
-					.loadBy(securityContext,
-							userOid);
+				   .createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
+				   .loadBy(securityContext,
+						   securityPrincipalOid);
 	}
 	@Transactional
 	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
 								final CredentialID id) {
 		return this.forSecurityContext(securityContext)
-				.createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
-					.loadBy(securityContext,
-							id);
+				   .createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
+				   .loadBy(securityContext,
+						   id);
 	}
-
 	@Transactional
 	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-								final CredentialID id, final UserOID oid) {
+								final CredentialID id,final SecurityPrincipalOID securityPrincipalOid) {
 		return this.forSecurityContext(securityContext)
-				.createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
-					.loadBy(securityContext,
-							id, oid);
+				   .createDelegateAs(CRUDServicesForAuthenticatorCredential.class)
+				   .loadBy(securityContext,
+						   id,securityPrincipalOid);
 	}
 }
 

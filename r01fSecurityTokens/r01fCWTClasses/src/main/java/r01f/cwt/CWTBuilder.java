@@ -24,8 +24,8 @@ import r01f.cwt.model.CWTPayload;
 import r01f.cwt.model.CWTProtectedHeader;
 import r01f.cwt.model.CWTUnprotectedHeader;
 import r01f.cwt.model.transformers.CWTPayloadTransformer;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
 import r01f.patterns.IsBuilder;
 
 /**

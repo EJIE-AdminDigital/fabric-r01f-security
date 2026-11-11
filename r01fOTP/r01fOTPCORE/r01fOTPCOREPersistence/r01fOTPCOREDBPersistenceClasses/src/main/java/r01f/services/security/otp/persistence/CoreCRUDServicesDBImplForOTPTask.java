@@ -2,7 +2,6 @@ package r01f.services.security.otp.persistence;
 
 import java.util.concurrent.TimeUnit;
 
-
 import com.google.inject.Singleton;
 
 import jakarta.inject.Inject;
@@ -14,14 +13,14 @@ import lombok.experimental.Accessors;
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.client.api.otp.internal.OTPModuleCodes;
 import r01f.eventbus.EventBus;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
 import r01f.model.annotations.ModelObjectsMarshaller;
 import r01f.model.persistence.CRUDResult;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.otp.OTPTask;
 import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
-import r01f.model.security.otp.task.OTPTask;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
 import r01f.services.bootstrap.annotations.core.CoreService;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.annotations.ServicesCoreConfigFor;
@@ -29,15 +28,14 @@ import r01f.services.core.persistence.CoreCRUDServicesForModelObjectBase;
 import r01f.services.core.persistence.ServiceDelegateProvider;
 import r01f.services.core.persistence.db.annotations.EntityManagerFor;
 import r01f.services.delegate.security.otp.persistence.CRUDServicesDelegateForOTPTask;
-import r01f.types.contact.EMail;
-import r01f.types.contact.Phone;
+import r01f.types.contact.IsContactMean;
 
 @CoreService @Singleton
 @Accessors(prefix="_")
 public class CoreCRUDServicesDBImplForOTPTask
 	extends CoreCRUDServicesForModelObjectBase<OTPTaskOID,OTPTask>
 		implements CRUDServicesForOTPTask,
-		           CoreOTPDBPersistenceService {
+		           IsCoreOTPDBPersistenceService {
 /////////////////////////////////////////////////////////////////////////////////////////
 // DELEGATE PROVIDER :
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +61,7 @@ public class CoreCRUDServicesDBImplForOTPTask
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	METHODS
-/////////////////////////////////////////////////////////////////////////////////////////	
+/////////////////////////////////////////////////////////////////////////////////////////
 	@Transactional
 	@Override
 	public CRUDResult<OTPTask> create(final SecurityContext securityContext,
@@ -73,42 +71,15 @@ public class CoreCRUDServicesDBImplForOTPTask
 								.create(securityContext,
 										task,ttl,timeUnit);
 	}
-	//@Transactional
+	
 	@Override
-	public CRUDResult<OTPTask> loadByEMail(final SecurityContext securityContext,
-			                               final AppCode appCode, final AppComponent appComponent,
-			                               final EMail eMail) {
+	public <C extends IsContactMean> CRUDResult<OTPTask> loadByContactMean(final SecurityContext securityContext, 
+			                                	 						   final AppCode appCode,final AppComponent appComponent,
+			                                	 						   final C contactMean) {
 		return this.forSecurityContext(securityContext)
 					.createDelegateAs(CRUDServicesForOTPTask.class)
-						.loadByEMail(securityContext,
-								     appCode,appComponent,eMail);
-	}
-	//@Transactional
-	@Override
-	public CRUDResult<OTPTask> loadByPhone(final SecurityContext securityContext,
-			                               final AppCode appCode, final AppComponent appComponent,
-			                               final Phone phone) {
-		return this.forSecurityContext(securityContext)
-					.createDelegateAs(CRUDServicesForOTPTask.class)
-						.loadByPhone(securityContext,
-								     appCode,appComponent,phone);
-	}
-	//@Transactional
-	@Override
-	public CRUDResult<OTPTask> loadByPhone(final SecurityContext securityContext,
-			                               final Phone phone) {
-		return this.forSecurityContext(securityContext)
-					.createDelegateAs(CRUDServicesForOTPTask.class)
-						.loadByPhone(securityContext,
-								     phone);
-	}
-	//@Transactional
-	@Override
-	public CRUDResult<OTPTask> loadByEmail(final SecurityContext securityContext,
-			                               final EMail email) {
-		return this.forSecurityContext(securityContext)
-					.createDelegateAs(CRUDServicesForOTPTask.class)
-						.loadByEmail(securityContext,
-								      email);
+						.loadByContactMean(securityContext,
+								     	   appCode,appComponent,
+								     	   contactMean);
 	}
 }

@@ -59,7 +59,7 @@ public abstract class RESTResourceForSecurityServicesBase
 	@Path("/login/{jwt}")
 	public Response fetchUser(@PathParam("jwt") final JWT jwt) {
 		return this.getDelegateAs(RESTDelegateForLoginBase.class)
-				   .fetchUser(jwt,
+				   .fetchPrincipal(jwt,
 						   	  null);	// no [security provider]'s session data
 	}
 	@POST	// usually called from the security filter (see UserDataFromJWT)
@@ -68,7 +68,7 @@ public abstract class RESTResourceForSecurityServicesBase
 													   					 final String securityProviderSessionBase64) {
 		log.info("...call fetchUserUsingSecurityProviderData!!");
 		return this.getDelegateAs(RESTDelegateForLoginBase.class)
-				   .fetchUser(jwt,
+				   .fetchPrincipal(jwt,
 						      StringBase64.fromBase64EncodedString(securityProviderSessionBase64));	// this DOES NOT encode or decode the received param to BASE64
 																									// ... it JUST ASSUMES the received param is BASE64 encoded
 	}

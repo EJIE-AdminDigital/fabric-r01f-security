@@ -4,8 +4,6 @@
 package r01f.security.keycloak.model.clients;
 
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import r01f.objectstreamer.annotations.MarshallPolymorphicTypeInfo;
 import r01f.objectstreamer.annotations.MarshallType;

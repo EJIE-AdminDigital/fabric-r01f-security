@@ -1,13 +1,13 @@
 package r01f.api.interfaces.security.otp;
 
-import r01f.model.security.otp.dispatch.OTPDispatchRequest;
-import r01f.model.security.otp.dispatch.OTPDispatchResponse;
-import r01f.model.security.otp.generation.OTPGenerationRequest;
-import r01f.model.security.otp.generation.OTPGenerationResponse;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.otp.operations.OTPOperationExecResult;
-import r01f.model.security.otp.validation.OTPValidationRequest;
-import r01f.model.security.otp.validation.OTPValidationResponse;
-import r01f.securitycontext.SecurityContext;
+import r01f.model.security.otp.task.dispatch.IsOTPDispatchRequest;
+import r01f.model.security.otp.task.dispatch.OTPDispatchResponse;
+import r01f.model.security.otp.task.generation.OTPGenerationRequest;
+import r01f.model.security.otp.task.generation.OTPGenerationResponse;
+import r01f.model.security.otp.task.validation.IsOTPValidationRequest;
+import r01f.model.security.otp.task.validation.OTPValidationResponse;
 import r01f.services.interfaces.ExposedServiceInterface;
 
 /**
@@ -81,7 +81,7 @@ import r01f.services.interfaces.ExposedServiceInterface;
 @ExposedServiceInterface
 public interface OTPService
 		 extends OTPServiceBase,
-				 OTPServiceInterface {
+				 IsOTPServiceInterface {
 /////////////////////////////////////////////////////////////////////////////////////////
 // OTP SERVICES
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -89,9 +89,9 @@ public interface OTPService
 	public OTPOperationExecResult<OTPGenerationResponse> generate(final SecurityContext securityContext,
 																  final OTPGenerationRequest otpRequest);
 	
-	public <R extends OTPDispatchRequest<?,?,?>> OTPOperationExecResult<OTPDispatchResponse> dispatch(final SecurityContext securityContext,
+	public <R extends IsOTPDispatchRequest<?,?,?>> OTPOperationExecResult<OTPDispatchResponse> dispatch(final SecurityContext securityContext,
 																									  final R otpRequest);
 	
-	public <R extends OTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
-																									  final R validationReq);
+	public <R extends IsOTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
+																									    final R validationReq);
 }

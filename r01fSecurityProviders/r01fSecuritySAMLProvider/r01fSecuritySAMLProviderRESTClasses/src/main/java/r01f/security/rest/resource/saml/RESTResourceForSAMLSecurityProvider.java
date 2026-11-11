@@ -8,23 +8,19 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-
 import lombok.experimental.Accessors;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.saml.SAMLLogin;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.saml.SAMLCallBackOnLoginHandler;
 import r01f.security.handler.saml.SAMLLoginEntryPointHandler;
-import r01f.security.handler.saml.SAMLUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.saml.SAMLSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTResourceForSecurityServicesBase;
 import r01f.security.saml.api.SAMLAPI;
-import r01f.security.saml.api.SAMLIDs.SAMLIdPID;
 import r01f.security.saml.api.SAMLIdPBinding;
-import r01f.securitycontext.SecurityContext;
 import r01f.types.url.Url;
 
 /**
@@ -35,50 +31,52 @@ import r01f.types.url.Url;
  */
 @Path("api/saml/users")
 @Accessors(prefix="_")
-public class RESTResourceForSAMLSecurityProvider<U extends User,L extends SAMLLogin,
-												 E extends UserLoginEntry>
+public class RESTResourceForSAMLSecurityProvider<P extends IsSecurityPrincipal>
 	 extends RESTResourceForSecurityServicesBase {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public RESTResourceForSAMLSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-											   final SecurityProviderSecretConfig securityProviderSecretConfig,
+											   final IdentityProvider identityProvider,
+											   final AuthenticationProviderSecretConfig securityProviderSecretConfig,
+											   // handlers
 											   final SAMLLoginEntryPointHandler loginEntryPointHandler,
 									  		   final SAMLCallBackOnLoginHandler callbackOnLoginHandler,
-									  		   final SAMLUserDataFetchHandler<U,L> fetchUserDataHandler,
+									  		   final SAMLSecurityPrincipalDataFetchHandler<P> fetchPrincipalDataHandler,
+									  		   // marshaller
 									  		   final Marshaller marshaller,
 									  		   // used to create [login entries] when the user logs-in
-									  		   final Factory<E> loginEntryFactory,
-									  		   final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
+									  		   final CRUDServicesForLoginEntry loginEntryCrud) {
 		super(new RESTDelegateForSAMLSecurityProvider<>(sysSecurityContextProvider,
+														identityProvider,
 													    securityProviderSecretConfig,
 														loginEntryPointHandler,
 														callbackOnLoginHandler,
-														fetchUserDataHandler,
+														fetchPrincipalDataHandler,
 														marshaller,
-														loginEntryFactory,loginEntryCrud));
+														loginEntryCrud));
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	Redirected after a successful saml login
 /////////////////////////////////////////////////////////////////////////////////////////
 	@GET
 	@Path("/login/callback/{idp}")
-	public Response loginCallBackGET(@PathParam("idp") final SAMLIdPID idp,
+	public Response loginCallBackGET(@PathParam("idp") final IdentityProvider identityProvider,
 									 @QueryParam(SAMLAPI.HTTP_RESP_SAML_PARAM) final String samlResponse,
 									 @QueryParam(SAMLAPI.HTTP_RELAY_STATE_PARAM) final Url afterLoginRedirToUrl) {
 		return this.getDelegateAs(RESTDelegateForSAMLSecurityProvider.class)
-				   .loginCallBack(idp,SAMLIdPBinding.REDIRECT,
+				   .loginCallBack(identityProvider,SAMLIdPBinding.REDIRECT,
 						   		  samlResponse,
 						   		  afterLoginRedirToUrl);
 	}
 	@POST
 	@Path("/login/callback/{idp}")
-	public Response loginCallBackPOST(@PathParam("idp") final SAMLIdPID idp,
+	public Response loginCallBackPOST(@PathParam("idp") final IdentityProvider identityProvider,
 									  @FormParam(SAMLAPI.HTTP_RESP_SAML_PARAM) final String samlResponse,
 									  @FormParam(SAMLAPI.HTTP_RELAY_STATE_PARAM) final Url afterLoginRedirToUrl) {
 		return this.getDelegateAs(RESTDelegateForSAMLSecurityProvider.class)
-				   .loginCallBack(idp,SAMLIdPBinding.POST,
+				   .loginCallBack(identityProvider,SAMLIdPBinding.POST,
 								  samlResponse,
 								  afterLoginRedirToUrl);
 	}

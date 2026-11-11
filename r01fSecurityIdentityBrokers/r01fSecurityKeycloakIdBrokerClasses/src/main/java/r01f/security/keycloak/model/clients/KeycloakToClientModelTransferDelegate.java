@@ -2,9 +2,9 @@ package r01f.security.keycloak.model.clients;
 
 import org.keycloak.representations.idm.ClientRepresentation;
 
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakClientID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakClientOID;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
 
 /**
  * Utility class responsible for transforming between different representations of keycloak objects.

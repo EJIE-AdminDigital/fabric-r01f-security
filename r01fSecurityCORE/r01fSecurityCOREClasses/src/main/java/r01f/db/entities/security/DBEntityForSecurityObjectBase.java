@@ -1,14 +1,13 @@
 package r01f.db.entities.security;
 
+//import org.eclipse.persistence.annotations.Multitenant;
+//import org.eclipse.persistence.annotations.MultitenantType;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Lob;
 import jakarta.persistence.MappedSuperclass;
-
-import org.eclipse.persistence.annotations.Multitenant;
-import org.eclipse.persistence.annotations.MultitenantType;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,12 +16,12 @@ import r01f.services.core.persistence.db.DBEntityHasModelObjectDescriptor;
 import r01f.services.core.persistence.db.entities.DBEntityBaseWithOID;
 
 @MappedSuperclass
-@Multitenant(MultitenantType.SINGLE_TABLE)
+//@Multitenant(MultitenantType.SINGLE_TABLE)
 @Accessors(prefix="_")
 @NoArgsConstructor
 public abstract class DBEntityForSecurityObjectBase
 			  extends DBEntityBaseWithOID
-		   implements DBEntityForSecurityObject,
+		   implements IsDBEntityForSecurityObject,
 		   			  DBEntityHasModelObjectDescriptor {
 
 	private static final long serialVersionUID = -187718742261139982L;

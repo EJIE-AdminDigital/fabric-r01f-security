@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import r01f.model.services.COREServiceErrorType;
 import r01f.model.services.COREServiceMethod;
+import r01f.model.services.COREServiceMethodExecError;
 import r01f.patterns.IsBuilder;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)
@@ -49,6 +50,10 @@ public abstract class SecurityOperationExecResultBuilder
 	public class SecurityOperationExecResultBuilderErrorStep {
 		protected final COREServiceMethod _requestedOp;
 
+		public <T> SecurityOperationExecError<T> because(final COREServiceMethodExecError<?> otherError) {
+			SecurityOperationExecError<T> outError = new SecurityOperationExecError<T>(otherError);
+			return outError;
+		}
 		public <T> SecurityOperationExecError<T> because(final COREServiceErrorType errType,
 														 final String error) {
 			SecurityOperationExecError<T> outError = new SecurityOperationExecError<T>(_requestedOp,

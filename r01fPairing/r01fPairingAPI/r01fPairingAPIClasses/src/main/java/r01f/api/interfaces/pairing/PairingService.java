@@ -1,17 +1,17 @@
 package r01f.api.interfaces.pairing;
 
-import r01f.model.security.pairing.PairingRequest;
-import r01f.model.security.pairing.PairingResult;
-import r01f.model.security.pairing.UnpairingRequest;
-import r01f.model.security.pairing.UnpairingResult;
-import r01f.model.security.pairing.operations.PairingOperationExecResult;
-import r01f.securitycontext.SecurityContext;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.pairing.IsPairingRequest;
+import r01f.model.security.pairing.IsPairingResult;
+import r01f.model.security.pairing.IsUnpairingRequest;
+import r01f.model.security.pairing.IsUnpairingResult;
+import r01f.model.security.pairing.operations.IsPairingOperationExecResult;
 import r01f.services.interfaces.ExposedServiceInterface;
 import r01f.services.interfaces.ServiceInterface;
 
 @ExposedServiceInterface
-public interface PairingService<P extends PairingRequest,
-								U extends UnpairingRequest>
+public interface PairingService<P extends IsPairingRequest,
+								U extends IsUnpairingRequest>
 		 extends ServiceInterface,
 				 PairingServiceInterface {
 	
@@ -24,7 +24,7 @@ public interface PairingService<P extends PairingRequest,
 	 * @param apiKeyPublicationRequest
 	 * @return
 	 */
-	public PairingOperationExecResult<PairingResult> pair(final SecurityContext securityContext,
+	public IsPairingOperationExecResult<IsPairingResult> pair(final SecurityContext securityContext,
 														  final P pairingRequest);
 		
 	/**
@@ -33,6 +33,6 @@ public interface PairingService<P extends PairingRequest,
 	 * @param apiKeyPublicationRequest
 	 * @return
 	 */
-	public PairingOperationExecResult<UnpairingResult> unpair(final SecurityContext securityContext,
+	public IsPairingOperationExecResult<IsUnpairingResult> unpair(final SecurityContext securityContext,
 															  final U unpairingRequest);
 }

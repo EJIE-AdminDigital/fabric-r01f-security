@@ -5,32 +5,29 @@ import com.yubico.webauthn.RelyingParty;
 import jakarta.inject.Provider;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.api.interfaces.security.user.CRUDServicesForUser;
+import r01f.api.interfaces.security.login.CRUDServicesForLogin;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.api.interfaces.security.principal.CRUDServicesForPrincipal;
 import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredential;
-import r01f.facets.HasLangIndependentDisplayName;
 import r01f.jwt.JWT;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.user.User;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.config.WebAuthnConfig;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.LoginID;
 import r01f.rest.resources.delegates.RESTDelegate;
 import r01f.security.handler.webauthn.CredentialFactoryFromRegistrationResponse;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.LoginID;
 
 @RequiredArgsConstructor
-public abstract class RESTDelegateForWebAuthnBase<U extends User & HasLangIndependentDisplayName,
-											      E extends UserLoginEntry, C extends AuthenticatorCredential>
+public abstract class RESTDelegateForWebAuthnBase<P extends IsSecurityPrincipal,C extends AuthenticatorCredential>
 		   implements RESTDelegate {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	SUB-DELEGATE
 /////////////////////////////////////////////////////////////////////////////////////////
-	final RESTSubDelegateForWebAuthnAssertionFlowBase<U,E,C> _subDelegateForAssertionFlow;
-	final RESTSubDelegateForWebAuthnAttestationFlowBase<U,E,C> _subDelegateForAttestationFlow;
-	final RESTSubDelegateForWebAuthnLoginFlowBase<U,E,C> _subDelegateForLoginFlow;
+	final RESTSubDelegateForWebAuthnAssertionFlowBase<P,C> _subDelegateForAssertionFlow;
+	final RESTSubDelegateForWebAuthnAttestationFlowBase<P,C> _subDelegateForAttestationFlow;
+	final RESTSubDelegateForWebAuthnLoginFlowBase<P,C> _subDelegateForLoginFlow;
 /////////////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -38,43 +35,42 @@ public abstract class RESTDelegateForWebAuthnBase<U extends User & HasLangIndepe
 						               final Marshaller marshaller,
 						               final WebAuthnConfig webAuthnConfig,
 						               final RelyingParty relyingParty,
-						               final CRUDServicesForUser<U> userCrud ,
-						               final CRUDServicesForUserLoginEntry<E> loginEntryCrud, final Factory<E> loginEntryFactory,
+						               final CRUDServicesForPrincipal<P> principalCrud ,
+						               final CRUDServicesForLogin loginCrud,final CRUDServicesForLoginEntry loginEntryCrud,
 						               final CRUDServicesForAuthenticatorCredential<C> authenticatorCredentialCrud,
-						               final CredentialFactoryFromRegistrationResponse<U,C> credentialFactoyFromRegistrationResponse) {
+						               final CredentialFactoryFromRegistrationResponse<P,C> credentialFactoyFromRegistrationResponse) {
 
 		_subDelegateForAssertionFlow =    new RESTSubDelegateForWebAuthnAssertionFlowBase<>(sysSecurityContextProvider, 
 																							marshaller, 
 																							webAuthnConfig,
 																							relyingParty, 
-																							userCrud, 
-																							loginEntryCrud,loginEntryFactory, 
+																							principalCrud, 
+																							loginCrud,loginEntryCrud, 
 																							authenticatorCredentialCrud,credentialFactoyFromRegistrationResponse);
 		_subDelegateForAttestationFlow  = new  RESTSubDelegateForWebAuthnAttestationFlowBase<>(sysSecurityContextProvider, 
 																							   marshaller,  
 																							   webAuthnConfig,
 																							   relyingParty, 
-																							   userCrud, 
-																							   loginEntryCrud,loginEntryFactory,
+																							   principalCrud, 
+																							   loginCrud,loginEntryCrud,
 																							   authenticatorCredentialCrud,credentialFactoyFromRegistrationResponse);
 		_subDelegateForLoginFlow  = new  RESTSubDelegateForWebAuthnLoginFlowBase<>(sysSecurityContextProvider,
 																				   marshaller, 
 																				   webAuthnConfig,
 																				   relyingParty, 
-																				   userCrud, 
-																				   loginEntryCrud,loginEntryFactory,
+																				   principalCrud, 
+																				   loginCrud,loginEntryCrud,
 																				   authenticatorCredentialCrud,credentialFactoyFromRegistrationResponse);
-
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //   WEBAUTHN REGISTRATION
 /////////////////////////////////////////////////////////////////////////////////////////
-	public Response startWebAuthnRegistration(final LoginID  loginId) {
+	public Response startWebAuthnRegistration(final LoginID loginId) {
 		return _subDelegateForAttestationFlow.startWebAuthnRegistration(loginId);
 
 	}
 
-	public Response finishWebAuthnRegistration(final LoginID  loginId,
+	public Response finishWebAuthnRegistration(final LoginID loginId,
 			                                   final String credNameAsString,
 			                                   final String publicKeyCredentialRegistrationResponseAsString,
 			                                   final String publicKeyCredentialCreateOptionsAsJSON) {

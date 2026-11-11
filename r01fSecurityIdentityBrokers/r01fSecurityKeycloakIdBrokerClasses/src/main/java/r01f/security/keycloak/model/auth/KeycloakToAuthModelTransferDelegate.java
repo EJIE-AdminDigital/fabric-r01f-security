@@ -2,14 +2,13 @@ package r01f.security.keycloak.model.auth;
 
 import org.keycloak.representations.AccessTokenResponse;
 
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.types.TimeLapse;
 
 public class KeycloakToAuthModelTransferDelegate {
 	
 	public static KeycloakAuthRequestResponse toKeycloalAuthRequestResponse(final AccessTokenResponse source) {
-        if (source == null) {
-            return null;
-        }
+        if (source == null) return null;
         
         KeycloakAuthRequestResponse target = new KeycloakAuthRequestResponse();
 
@@ -19,8 +18,8 @@ public class KeycloakToAuthModelTransferDelegate {
         target.setIdToken(source.getIdToken() != null ? SecurityToken.from(source.getIdToken()) : null);
 
         // Mapping expiration times and policies.
-        target.setExpiresIn((int) source.getExpiresIn());
-        target.setRefreshExpiresIn((int) source.getRefreshExpiresIn());
+        target.setExpiresIn(source.getExpiresIn());
+        target.setRefreshExpiresIn(source.getRefreshExpiresIn());
         target.setNotBeforePolicy(source.getNotBeforePolicy());
 
         // Mapeo de Strings y Metadatos

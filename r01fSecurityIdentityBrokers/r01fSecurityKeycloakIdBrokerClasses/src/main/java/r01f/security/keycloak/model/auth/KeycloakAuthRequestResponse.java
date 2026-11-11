@@ -7,7 +7,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.model.ModelObject;
 import r01f.objectstreamer.annotations.MarshallField;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.types.TimeLapse;
 
 
 /**
@@ -15,10 +16,10 @@ import r01f.securitycontext.SecurityIDS.SecurityToken;
  * It contains information such as access token, refresh token, expiration times, and more.
  */
 @Accessors(prefix="_")
-@AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor @AllArgsConstructor
 public class KeycloakAuthRequestResponse
-        implements ModelObject {
+  implements ModelObject {
+	
 	private static final long serialVersionUID = 8705295055496765302L;
 //////////////////////////////////////////////////////////////////////////////
 //   FIELDS
@@ -33,13 +34,13 @@ public class KeycloakAuthRequestResponse
      * The expiration time of the access token in seconds.
      */
     @MarshallField(as="expires_in")
-    @Getter @Setter private int _expiresIn;
+    @Getter @Setter private long _expiresIn; // Don't use timelapse !
     
     /**
      * The expiration time of the refresh token in seconds.
      */
     @MarshallField(as="refresh_expires_in")
-    @Getter @Setter private int _refreshExpiresIn;
+    @Getter @Setter private long _refreshExpiresIn;  // Don't use timelapse !
     
     /**
      * The refresh token used to obtain a new access token.
@@ -82,4 +83,5 @@ public class KeycloakAuthRequestResponse
      */
     @MarshallField(as="issued_token_type")
     @Getter @Setter private String _issuedTokenType;
+    
 }

@@ -2,19 +2,9 @@ package r01f.db.entities.keystore;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Lob;
 import jakarta.persistence.MappedSuperclass;
-
-import org.eclipse.persistence.annotations.Multitenant;
-import org.eclipse.persistence.annotations.MultitenantType;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -22,7 +12,6 @@ import r01f.services.core.persistence.db.DBEntityHasModelObjectDescriptor;
 import r01f.services.core.persistence.db.entities.DBEntityBaseWithOID;
 import r01f.services.core.persistence.db.entities.DBEntityForModelObject;
 import r01f.services.core.persistence.db.entities.primarykeys.DBPrimaryKeyForModelObject;
-import r01f.services.core.persistence.db.entities.primarykeys.DBPrimaryKeyForModelObjectImpl;
 
 @MappedSuperclass
 //@Entity

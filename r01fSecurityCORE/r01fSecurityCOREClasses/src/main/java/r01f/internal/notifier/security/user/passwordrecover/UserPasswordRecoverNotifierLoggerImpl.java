@@ -2,7 +2,6 @@ package r01f.internal.notifier.security.user.passwordrecover;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-
 import lombok.extern.slf4j.Slf4j;
 import r01f.core.notifier.NotifierResponse;
 import r01f.core.services.notifier.config.NotifierConfigForLog;
@@ -31,10 +30,8 @@ public class UserPasswordRecoverNotifierLoggerImpl
 		boolean enabled = _config.isEnabled();
 		if (!enabled) return null;
 
-		log.info("[LogNotifier]: PASSWORD RECOVER EVENT: userOid={} using={}",
-				 pwdRecoverMsg.getUserOid(),pwdRecoverMsg.getMedium());
-		log.info("\t>Phone: {}",pwdRecoverMsg.getPhone());
-		log.info("\t>EMail: {}",pwdRecoverMsg.getEmail());
+		log.info("[LogNotifier]: PASSWORD RECOVER EVENT: principalOid={} using={}",
+				 pwdRecoverMsg.getPrincipalOid(),pwdRecoverMsg.getMedium());
 		return null;
 	}
 }

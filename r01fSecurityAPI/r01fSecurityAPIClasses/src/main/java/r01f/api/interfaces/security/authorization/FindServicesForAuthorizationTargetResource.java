@@ -1,19 +1,19 @@
 package r01f.api.interfaces.security.authorization;
 
-import r01f.api.interfaces.security.SecurityServiceInterface;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
+import r01f.api.interfaces.security.IsSecurityServiceInterface;
 import r01f.locale.Language;
 import r01f.model.persistence.FindResult;
 import r01f.model.persistence.FindSummariesResult;
 import r01f.model.security.authorization.AuthorizationTargetResource;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.AuthorizationTargetResourceOID;
+import r01f.model.security.context.SecurityContext;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
+import r01f.oids.SecurityOIDs.AuthorizationTargetResourceOID;
 import r01f.services.interfaces.FindServicesForModelObject;
 
-public interface FindServicesForAuthorizationTargetResource<R extends AuthorizationTargetResource>
-		 extends FindServicesForModelObject<AuthorizationTargetResourceOID,R>,
-				 SecurityServiceInterface {
+public interface FindServicesForAuthorizationTargetResource
+		 extends FindServicesForModelObject<AuthorizationTargetResourceOID,AuthorizationTargetResource>,
+				 IsSecurityServiceInterface {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	                                                                          
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ public interface FindServicesForAuthorizationTargetResource<R extends Authorizat
 	 * @param securityContext
 	 * @return
 	 */
-	public FindResult<R> findAllResources(final SecurityContext securityContext);
+	public FindResult<AuthorizationTargetResource> findAllResources(final SecurityContext securityContext);
 	
 	/**
 	 * Returns all app's secured resources
@@ -31,8 +31,8 @@ public interface FindServicesForAuthorizationTargetResource<R extends Authorizat
 	 * @param appComponent
 	 * @return
 	 */
-	public FindResult<R> findBy(final SecurityContext securityContext,
-								final AppCode appCode,final AppComponent appComponent);
+	public FindResult<AuthorizationTargetResource> findBy(final SecurityContext securityContext,
+														  final AppCode appCode,final AppComponent appComponent);
 /////////////////////////////////////////////////////////////////////////////////////////
 //	SUMMARIZED	
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -42,8 +42,8 @@ public interface FindServicesForAuthorizationTargetResource<R extends Authorizat
 	 * @param lang
 	 * @return
 	 */
-	public FindSummariesResult<R> findAllResourcesSummarized(final SecurityContext securityContext,
-															 final Language lang);
+	public FindSummariesResult<AuthorizationTargetResource> findAllResourcesSummarized(final SecurityContext securityContext,
+															 						   final Language lang);
 	/**
 	 * Returns secured resources summarized
 	 * @param securityContext
@@ -51,7 +51,7 @@ public interface FindServicesForAuthorizationTargetResource<R extends Authorizat
 	 * @param appComponent
 	 * @param lang
 	 */
-	public FindSummariesResult<R> findSummarizedBy(final SecurityContext securityContext,
-												   final AppCode appCode,final AppComponent appComponent,
-												   final Language lang);
+	public FindSummariesResult<AuthorizationTargetResource> findSummarizedBy(final SecurityContext securityContext,
+																		     final AppCode appCode,final AppComponent appComponent,
+																		     final Language lang);
 }

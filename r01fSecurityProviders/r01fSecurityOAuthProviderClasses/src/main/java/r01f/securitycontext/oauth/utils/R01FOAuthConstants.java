@@ -23,9 +23,8 @@ import lombok.NoArgsConstructor;
 public final class R01FOAuthConstants {
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//    CONSTANTS (parameter and credential keys)
+// 	CONSTANTS (parameter and credential keys)
 /////////////////////////////////////////////////////////////////////////////////////////
-
     public static final String K_TOKEN_URL        = "token_url";       // alias: auth_url
     public static final String K_AUTH_URL         = "auth_url";
     public static final String K_CLIENT_ID        = "client_id";

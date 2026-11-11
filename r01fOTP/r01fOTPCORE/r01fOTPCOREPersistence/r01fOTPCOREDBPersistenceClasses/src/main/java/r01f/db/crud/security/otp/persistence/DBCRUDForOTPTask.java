@@ -1,51 +1,48 @@
 package r01f.db.crud.security.otp.persistence;
 
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.db.entities.security.otp.persistence.DBEntityForOTPTask;
-import r01f.db.transfer.security.otp.persistence.OTPTaskToDBEntityTransferDelegate;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
+import r01f.db.transfer.security.otp.persistence.OTPTaskFromDBEntityTransformer;
+import r01f.db.transfer.security.otp.persistence.OTPTaskToDBEntityTransfer;
 import r01f.model.persistence.CRUDResult;
-import r01f.model.persistence.CRUDResultBuilder;
+import r01f.model.persistence.PersistenceRequestedOperation;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.otp.OTPTask;
 import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
-import r01f.model.security.otp.task.OTPTask;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
 import r01f.services.core.persistence.db.DBCRUDForModelObjectBase;
 import r01f.services.core.persistence.db.config.DBModuleConfig;
 import r01f.services.core.persistence.db.entities.primarykeys.DBPrimaryKeyForModelObject;
-import r01f.services.security.otp.persistence.CoreOTPDBPersistenceService;
-import r01f.types.contact.EMail;
-import r01f.types.contact.Phone;
+import r01f.services.security.otp.persistence.IsCoreOTPDBPersistenceService;
+import r01f.types.contact.IsContactMean;
 import r01f.util.types.Strings;
-import r01f.util.types.collections.CollectionUtils;
 
 /**
  * Persistence layer
  */
 public class DBCRUDForOTPTask
-	 extends DBCRUDForModelObjectBase<OTPTaskOID,OTPTask,DBPrimaryKeyForModelObject,DBEntityForOTPTask>
+	 extends DBCRUDForModelObjectBase<OTPTaskOID,OTPTask,
+	 								  DBPrimaryKeyForModelObject,DBEntityForOTPTask>
   implements CRUDServicesForOTPTask,
-  			 CoreOTPDBPersistenceService {
+  			 IsCoreOTPDBPersistenceService {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	private final OTPTaskToDBEntityTransferDelegate _transferDelegate;
+	private final OTPTaskToDBEntityTransfer _transferDelegate;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public DBCRUDForOTPTask( final DBModuleConfig dbCfg,
-						 	 final EntityManager entityManager,
-						 	 final Marshaller marshaller) {
-		super(OTPTask.class, DBEntityForOTPTask.class,
-		      new OTPTaskToDBEntityTransferDelegate(),
-		      dbCfg, entityManager, marshaller);
-		_transferDelegate = new OTPTaskToDBEntityTransferDelegate();
+	public DBCRUDForOTPTask(final DBModuleConfig dbCfg,
+						 	final EntityManager entityManager,
+						 	final Marshaller marshaller) {
+		super(OTPTask.class,DBEntityForOTPTask.class,
+		      new OTPTaskFromDBEntityTransformer(),				// from DB entity to model object
+		      dbCfg,entityManager, marshaller);
+		_transferDelegate = new OTPTaskToDBEntityTransfer();	// from model object to DB entity
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	EXTENSION METHODS
@@ -57,87 +54,34 @@ public class DBCRUDForOTPTask
 		_transferDelegate.setDBEntityFieldsFromModelObject(securityContext, modelObj, dbEntity);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//	API METHODS
+//	LOAD
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
-	public CRUDResult<OTPTask> create(final SecurityContext securityContext,
-			                          final OTPTask task, long ttl, final TimeUnit timeUnit) {
-		throw new IllegalStateException(" >>> Not implemented at this layer");
-	}
-
-	@Override
-	public CRUDResult<OTPTask> loadByPhone(final SecurityContext securityContext,
-										   final Phone phone) {
+	public <C extends IsContactMean> CRUDResult<OTPTask> loadByContactMean(final SecurityContext securityContext, 
+			                                	 						   final AppCode appCode,final AppComponent appComponent,
+			                                	 						   final C contactMean) {
+		String jpqlBase = "SELECT entity " +
+							      "FROM {} entity " +
+							     "WHERE entity._contactMean = :contactMean " +
+							       "AND entity._contactMeanType = :contactMeanType ";
+		if (appCode != null) jpqlBase += "AND entity._appCode = :appCode ";
+		if (appComponent != null) jpqlBase += "AND entity._appComponent = :appComponent ";
+		jpqlBase += "ORDER BY entity._createDate DESC ";
+		
+		String jpql = Strings.customized(jpqlBase,
+										 _DBEntityType.getSimpleName());
+		
 		TypedQuery<DBEntityForOTPTask> query = this.getEntityManager()
-												   .createQuery(Strings.customized("SELECT entity " +
-																					  "FROM {} entity " +
-																						"WHERE entity._phone = :phone " +
-																					  "ORDER BY entity._createDate DESC ",
-																					_DBEntityType.getSimpleName()),
-																					_DBEntityType)
-												   .setParameter("phone", phone.asString());
-
-		DBEntityForOTPTask dbEntity = (CollectionUtils.hasData(query.getResultList())) ? query.getResultList().get(0) : null;
-		if (dbEntity == null) {
-			return CRUDResultBuilder.using(securityContext)
-										.on(_modelObjectType)
-										.notLoaded()
-										.becauseClientRequestedEntityWasNOTFound()
-									.build();
-		}
-		return CRUDResultBuilder.using(securityContext)
-									.on(_modelObjectType)
-									.loaded()
-									.dbEntity(dbEntity)
-								.transformedToModelObjectUsing(_transferDelegate);
-	}
-
-	@Override
-	public CRUDResult<OTPTask> loadByEmail(final SecurityContext securityContext,
-										   final EMail email) {
-		TypedQuery<DBEntityForOTPTask> query = this.getEntityManager()
-												   .createQuery(Strings.customized("SELECT entity " +
-																					  "FROM {} entity " +
-																						"WHERE entity._email = :email " +
-																					  "ORDER BY entity._createDate DESC ",
-																					_DBEntityType.getSimpleName()),
-																					_DBEntityType)
-												   .setParameter("email", email.asString());
-
-		DBEntityForOTPTask dbEntity = (CollectionUtils.hasData(query.getResultList())) ? query.getResultList().get(0) : null;
-		if (dbEntity == null) {
-			return CRUDResultBuilder.using(securityContext)
-										.on(_modelObjectType)
-										.notLoaded()
-										.becauseClientRequestedEntityWasNOTFound()
-									.build();
-		} else if (dbEntity.getExpirationDate().isBefore(Instant.now())) {
-			return CRUDResultBuilder.using(securityContext)
-										.on(_modelObjectType)
-										.notLoaded()
-										.because(new Exception("OTP has expired"))
-									.build();
-		} else {
-			return CRUDResultBuilder.using(securityContext)
-										.on(_modelObjectType)
-										.loaded()
-										.dbEntity(dbEntity)
-									.transformedToModelObjectUsing(_transferDelegate);
-		}
-	}
-
-	@Override
-	public CRUDResult<OTPTask> loadByEMail(final SecurityContext securityContext,
-			                               final AppCode appCode, final AppComponent appComponent,
-			                               final EMail eMail) {
-		throw new IllegalStateException(" >>> Not implemented at this layer");
-	}
-
-	@Override
-	public CRUDResult<OTPTask> loadByPhone(final SecurityContext securityContext,
-			                               final AppCode appCode, final  AppComponent appComponent,
-			                               final Phone phone) {
-		throw new IllegalStateException(" >>> Not implemented at this layer");
+												   .createQuery(jpql,
+																_DBEntityType)
+												   .setParameter("contactMean",contactMean.asString())
+												   .setParameter("contactMeanType",contactMean.getType());
+		if (appCode != null) query.setParameter("appCode",appCode.asString());
+		if (appComponent != null) query.setParameter("appComponent",appComponent.asString());
+		
+		return _crudResultForSingleEntity(securityContext,
+										  PersistenceRequestedOperation.LOAD,
+										  query.getResultList());
 	}
 }
 

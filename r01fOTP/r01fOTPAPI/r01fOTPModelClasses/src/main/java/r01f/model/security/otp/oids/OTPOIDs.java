@@ -2,10 +2,11 @@ package r01f.model.security.otp.oids;
 
 import lombok.Getter;
 import r01f.annotations.Immutable;
-import r01f.guids.JavaOIDDispenser;
-import r01f.guids.OID;
-import r01f.guids.OIDs;
-import r01f.guids.PersistableObjectOID;
+import r01f.oids.JavaOIDDispenser;
+import r01f.oids.OID;
+import r01f.oids.OIDs;
+import r01f.oids.PersistableObjectOID;
+import r01f.types.jobs.JobOID;
 
 public abstract class OTPOIDs {
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ public abstract class OTPOIDs {
 		public static OTPTaskOID fromString(final String otpOid) {
 			return new OTPTaskOID(otpOid);
 		}
-		public static OTPTaskOID supplyOid() {
+		public static OTPTaskOID supply() {
 			return OTPTaskOID.forId(JavaOIDDispenser.generateGUID());
 		}
 		
@@ -50,6 +51,12 @@ public abstract class OTPOIDs {
 		@Override
 		public String toString() {
 			return this.id;
+		}
+		public JobOID asJobOID() {
+			return JobOID.forId(this.id);
+		}
+		public static OTPTaskOID from(final JobOID jobOid) {
+			return OTPTaskOID.forId(jobOid.asString());
 		}
 	}	
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +78,7 @@ public abstract class OTPOIDs {
 		public static OTPNotifierTaskOID fromString(final String otpOid) {
 			return new OTPNotifierTaskOID(otpOid);
 		}
-		public static OTPNotifierTaskOID supplyOid() {
+		public static OTPNotifierTaskOID supply() {
 			return OTPNotifierTaskOID.forId(JavaOIDDispenser.generateGUID());
 		}
 		

@@ -1,0 +1,24 @@
+package r01f.model.security.pairing;
+
+import r01f.model.ModelObject;
+import r01f.model.security.keystore.key.PublicKey;
+import r01f.objectstreamer.annotations.MarshallPolymorphicTypeInfo;
+
+@MarshallPolymorphicTypeInfo
+public interface IsPairingRequest
+         extends ModelObject {
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////	
+	public PublicKey getPublicKey();
+	
+	public boolean usingOTP();
+	
+/////////////////////////////////////////////////////////////////////////////////////////
+//	
+/////////////////////////////////////////////////////////////////////////////////////////
+	@SuppressWarnings("unchecked") 
+	public default <R extends IsPairingRequest> R as(final Class<R> type) {	
+		return (R) this;
+	}
+}

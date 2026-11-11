@@ -2,8 +2,8 @@ package r01f.db.transfer.security.webauthn;
 
 import r01f.db.entities.security.webauthn.DBEntityForAuthenticatorCredentialBase;
 import r01f.model.ModelObject;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.core.persistence.db.DBEntity;
 import r01f.services.core.persistence.db.TransfersModelObjectStateToDBEntity;
 
@@ -30,7 +30,7 @@ public abstract class AuthenticatorCredentialTransferToDBBase<C extends Authenti
 
 		dbEntity.setCredentialId(modelObj.getCredentialId() != null ? modelObj.getCredentialId().asString()
 														            : null);
-		dbEntity.setUserOid(modelObj.getUserOid() != null ? modelObj.getUserOid().asString()
-													   	  : null);
+		dbEntity.setSecurityPrincipalOid(modelObj.getSecurityPrincipalOid() != null ? modelObj.getSecurityPrincipalOid().asString()
+													   	  						    : null);
 	}
 }

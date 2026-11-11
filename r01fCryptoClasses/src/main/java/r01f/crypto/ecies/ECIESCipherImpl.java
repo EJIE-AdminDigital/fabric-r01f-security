@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 
 import org.bouncycastle.util.Arrays;
 
+import r01f.crypto.CryptoKeyPair;
 import r01f.crypto.aes.AESCipher;
 import r01f.crypto.aes.AESCipherBuilder;
 import r01f.crypto.aes.AESSecretKey;
@@ -16,7 +17,6 @@ import r01f.crypto.aes.AESSecretKeyGenerator;
 import r01f.crypto.ecc.ECCCipher;
 import r01f.crypto.ecc.ECCKeyGenerator;
 import r01f.crypto.exceptions.CipherException;
-import r01f.crypto.model.CryptoKeyPair;
 import r01f.crypto.model.ECCEncryptedMessage;
 import r01f.crypto.utils.CBCMode;
 

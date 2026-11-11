@@ -3,20 +3,19 @@ package r01f.client.api.security.sub.pushtoken;
 import java.util.Map;
 
 import jakarta.inject.Provider;
-
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import r01f.api.interfaces.security.pushtoken.CRUDServicesForPushToken;
 import r01f.api.interfaces.security.pushtoken.CountServicesForPushToken;
 import r01f.api.interfaces.security.pushtoken.FindServicesForPushToken;
-import r01f.model.security.pushtoken.PushToken;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.pushtoken.IsPushToken;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.api.ClientSubAPIBase;
 import r01f.services.interfaces.ServiceInterface;
 
 @Accessors(prefix="_")
-public class PhoneTokenSubApi<T extends PushToken>
+public class PhoneTokenSubApi<T extends IsPushToken>
 	 extends ClientSubAPIBase {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	DELEGATE APIS

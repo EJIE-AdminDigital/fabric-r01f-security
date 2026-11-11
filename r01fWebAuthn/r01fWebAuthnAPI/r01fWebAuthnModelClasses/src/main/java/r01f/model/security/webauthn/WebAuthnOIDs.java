@@ -2,10 +2,10 @@ package r01f.model.security.webauthn;
 
 import lombok.Getter;
 import r01f.annotations.Immutable;
-import r01f.guids.JavaOIDDispenser;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.JavaOIDDispenser;
+import r01f.oids.SecurityOIDs.IsSecurityPersistableObjectOID;
 import r01f.patterns.FactoryFrom;
-import r01f.securitycontext.SecurityOIDs.IsSecurityObjectOID;
 
 public abstract class WebAuthnOIDs {
 
@@ -15,7 +15,7 @@ public abstract class WebAuthnOIDs {
 	@Immutable
 	@MarshallType(as="loginOid")
 	public record CredentialOID(@Getter String id)
-	   implements IsSecurityObjectOID {
+	   implements IsSecurityPersistableObjectOID {
 
 		public static final CredentialOID ALL = CredentialOID.forId("*");
 

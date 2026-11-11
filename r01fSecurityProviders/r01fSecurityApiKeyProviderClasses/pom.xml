@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ====================================================================== -->
+    <!-- PARENT                                                                 -->
+    <!-- ====================================================================== -->
+    <parent>
+        <groupId>r01.fabric.security.providers</groupId>
+        <artifactId>r01fSecurityProviders</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <!-- ====================================================================== -->
+    <!-- ARTIFACT                                                               -->
+    <!-- ====================================================================== -->
+    <name>r01fSecurityApiKeyProviderClasses</name>
+    <artifactId>r01fSecurityApiKeyProviderClasses</artifactId>
+
+    <!-- ====================================================================== -->
+    <!-- DEPENDENCIES                                                           -->
+    <!-- ====================================================================== -->
+    <dependencies>
+        <!-- ///////////////////////////////////////// -->
+        <!-- R01F: Base Classes (StringBase64, etc.)   -->
+        <!-- ///////////////////////////////////////// -->
+        <dependency>
+            <groupId>r01.fabric.base</groupId>
+            <artifactId>r01fBaseClasses</artifactId>
+            <version>${r01f.base.version}</version>
+        </dependency>
+    </dependencies>
+</project>

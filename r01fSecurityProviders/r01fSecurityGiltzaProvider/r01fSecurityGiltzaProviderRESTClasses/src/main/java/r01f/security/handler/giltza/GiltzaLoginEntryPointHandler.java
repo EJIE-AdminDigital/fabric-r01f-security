@@ -1,7 +1,7 @@
 package r01f.security.handler.giltza;
 
-import r01f.security.handler.LoginEntryPointHandlerBase;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.authn.handler.LoginEntryPointHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.types.url.Url;
 
 public class GiltzaLoginEntryPointHandler
@@ -13,7 +13,7 @@ public class GiltzaLoginEntryPointHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public GiltzaLoginEntryPointHandler(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public GiltzaLoginEntryPointHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		super(securityProviderSecretConfig);
 		_giltzaOAuth = new GiltzaApi(_securityProviderSecretConfig);
 	}

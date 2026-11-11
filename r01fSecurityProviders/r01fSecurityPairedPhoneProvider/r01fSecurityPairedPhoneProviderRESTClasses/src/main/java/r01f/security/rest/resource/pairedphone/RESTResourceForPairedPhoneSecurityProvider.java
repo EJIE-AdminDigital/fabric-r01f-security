@@ -1,40 +1,21 @@
 package r01f.security.rest.resource.pairedphone;
 
 import jakarta.inject.Provider;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import lombok.experimental.Accessors;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.api.interfaces.security.login.pairedphone.CRUDServicesForPairedPhoneLogin;
-import r01f.api.interfaces.security.login.pairedphone.CRUDServicesForPairedPhoneLoginConsent;
-import r01f.api.interfaces.security.login.pairedphone.PairedPhoneLoginConsentServices;
-import r01f.api.interfaces.security.user.CRUDServicesForUser;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.pairedphone.PairedPhoneLogin;
-import r01f.model.security.login.pairedphone.PairedPhoneLoginConsent;
-import r01f.model.security.login.pairedphone.PairedPhoneLoginConsentRequest;
-import r01f.model.security.login.pairedphone.PairedPhoneLoginConsentResponse;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.CRUDServicesForLogin;
+import r01f.api.interfaces.security.login.PairedPhoneLoginServices;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.api.interfaces.security.principal.CRUDServicesForPrincipal;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
-import r01f.patterns.FactoryFrom;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.pairedphone.PairedPhoneCallBackOnLoginHandler;
 import r01f.security.handler.pairedphone.PairedPhoneLoginConsentHandler;
 import r01f.security.handler.pairedphone.PairedPhoneLoginEntryPointHandler;
-import r01f.security.handler.pairedphone.PairedPhoneUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.pairedphone.PairedPhoneSecurityPrincipalPrincipalFetchHandler;
 import r01f.security.rest.resource.RESTResourceForSecurityServicesBase;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.PairedPhoneLoginConsentOID;
-import r01f.types.contact.Phone;
-import r01f.types.url.Url;
 
 /*
 **
@@ -45,67 +26,65 @@ import r01f.types.url.Url;
 */
 @Path("api/pairedphone/users")
 @Accessors(prefix="_")
-public class RESTResourceForPairedPhoneSecurityProvider<U extends User,L extends PairedPhoneLogin,
-														E extends UserLoginEntry,
-														C extends PairedPhoneLoginConsent>
+public class RESTResourceForPairedPhoneSecurityProvider<P extends IsSecurityPrincipal>
 	 extends RESTResourceForSecurityServicesBase {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public RESTResourceForPairedPhoneSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-													  final SecurityProviderSecretConfig securityProviderSecretConfig,
-													  // used to create [login entries] when the user logs-in
-													  final Factory<E> loginEntryFactory,
-													  final CRUDServicesForUserLoginEntry<E> loginEntryCrud,
-													  // used to create delegated services
-													  final Class<U> userType,final Class<L> loginType,
-													  final CRUDServicesForUser<U> userCrud,final CRUDServicesForPairedPhoneLogin<L> loginCrud,
-													  final CRUDServicesForPairedPhoneLoginConsent<C> consentServices,
-													  final PairedPhoneLoginConsentServices<C> loginServices,
+													  final AuthenticationProviderSecretConfig authnProviderSecretConfig,
+													  // marshaller
 													  final Marshaller marshaller,
-													  final FactoryFrom<U,L> loginFactoryFromUser) {
+													  // used to create delegated services
+													  final Class<P> principalType,
+													  // services
+													  final CRUDServicesForPrincipal<P> principalCrud,
+													  final CRUDServicesForLogin loginCrud,final CRUDServicesForLoginEntry loginEntryCrud,
+													  final PairedPhoneLoginServices pairedPhoneLoginServices) {
 		this(sysSecurityContextProvider,
-			 securityProviderSecretConfig,
-			 new PairedPhoneLoginEntryPointHandler(securityProviderSecretConfig),
-			 new PairedPhoneCallBackOnLoginHandler<>(securityProviderSecretConfig),
-			 new PairedPhoneUserDataFetchHandler<>(userType,loginType,
-					  								  sysSecurityContextProvider,
-					  								  userCrud,loginCrud,
-					  								  securityProviderSecretConfig,
-					  								  loginFactoryFromUser),
-			  new PairedPhoneLoginConsentHandler<>(sysSecurityContextProvider,
-					                                consentServices,
-					  					            loginServices),
-			  marshaller,
-			  loginEntryFactory,loginEntryCrud);
+			 authnProviderSecretConfig,
+			 marshaller,
+			 // handlers
+			 new PairedPhoneLoginEntryPointHandler(authnProviderSecretConfig),
+			 new PairedPhoneCallBackOnLoginHandler(authnProviderSecretConfig),
+			 new PairedPhoneSecurityPrincipalPrincipalFetchHandler<>(principalType,
+					 												 authnProviderSecretConfig,
+					  								  				 sysSecurityContextProvider,
+					  								  				 principalCrud,
+					  								  				 loginCrud),
+			  new PairedPhoneLoginConsentHandler(sysSecurityContextProvider,
+					  					         pairedPhoneLoginServices),
+			  // services
+			  loginEntryCrud);
 	}
-
-
 	public RESTResourceForPairedPhoneSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-													  final SecurityProviderSecretConfig securityProviderSecretConfig,
+													  final AuthenticationProviderSecretConfig securityProviderSecretConfig,
+													  // marshaller
+													  final Marshaller marshaller,
+													  // handlers
 													  final PairedPhoneLoginEntryPointHandler loginEntryPointHandler,
-									  				  final PairedPhoneCallBackOnLoginHandler<C> callbackOnLoginHandler,
-									  				  final PairedPhoneUserDataFetchHandler<U,L> fetchUserDataHandler,
-									  				  final PairedPhoneLoginConsentHandler<C> userPasswordLoginHandler,
-									  				  final Marshaller marshaller,
-									  				  // used to create [login entries] when the user logs-in
-									  				  final Factory<E> loginEntryFactory,
-									  				  final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
+									  				  final PairedPhoneCallBackOnLoginHandler callbackOnLoginHandler,
+									  				  final PairedPhoneSecurityPrincipalPrincipalFetchHandler<P> fetchPrincipalDataHandler,
+									  				  final PairedPhoneLoginConsentHandler pairedPhoneLoginHandler,
+									  				  final CRUDServicesForLoginEntry loginEntryCrud) {
 		super(new RESTDelegateForPairedPhoneSecurityProvider<>(sysSecurityContextProvider,
 															   securityProviderSecretConfig,
+															   marshaller,
+															   // handlers
 															   loginEntryPointHandler,
 													  		   callbackOnLoginHandler,
-													  		   fetchUserDataHandler,
-													  		   userPasswordLoginHandler,
-													  		    marshaller,
-													  		   loginEntryFactory,loginEntryCrud));
+													  		   fetchPrincipalDataHandler,
+													  		   pairedPhoneLoginHandler,
+													  		   // services
+													  		   loginEntryCrud));
 	}
-	public <D extends RESTDelegateForPairedPhoneSecurityProvider<U,L,E,C> > RESTResourceForPairedPhoneSecurityProvider(final D restDelegateForUserPasswordSecurityProvider) {
+	public <D extends RESTDelegateForPairedPhoneSecurityProvider<P>> RESTResourceForPairedPhoneSecurityProvider(final D restDelegateForUserPasswordSecurityProvider) {
 		super(restDelegateForUserPasswordSecurityProvider);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////	
+/*
 	@GET @Path("/consent/{oid}")
 	public Response load(@PathParam("oid") final PairedPhoneLoginConsentOID oid) {
 		return this.getDelegateAs(RESTDelegateForPairedPhoneSecurityProvider.class)
@@ -125,7 +104,7 @@ public class RESTResourceForPairedPhoneSecurityProvider<U extends User,L extends
 	}
 	@POST @Path("/consent/response")
 	@Consumes(MediaType.APPLICATION_JSON) @Produces(MediaType.APPLICATION_JSON)
-	public Response consentRequest(final PairedPhoneLoginConsentResponse response) {
+	public Response consentRequest(final PairedPhoneLoginConsentResponseFromPairedPhone response) {
 		return this.getDelegateAs(RESTDelegateForPairedPhoneSecurityProvider.class)
 							.response(response);
 	}
@@ -135,4 +114,5 @@ public class RESTResourceForPairedPhoneSecurityProvider<U extends User,L extends
 				   .loginCallBack(_req,oid, urlTo);
 
 	}
+*/
 }

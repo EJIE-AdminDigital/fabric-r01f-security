@@ -4,22 +4,20 @@ import com.yubico.webauthn.RelyingParty;
 
 import jakarta.inject.Provider;
 import lombok.RequiredArgsConstructor;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.api.interfaces.security.user.CRUDServicesForUser;
+import r01f.api.interfaces.security.login.CRUDServicesForLogin;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.api.interfaces.security.principal.CRUDServicesForPrincipal;
 import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredential;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.user.User;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.config.WebAuthnConfig;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
 import r01f.security.handler.webauthn.CredentialFactoryFromRegistrationResponse;
-import r01f.securitycontext.SecurityContext;
 
 
 @RequiredArgsConstructor
-public abstract class RESTSubDelegateForWebAuthnAbstractBase<U extends User,
-											                 E extends UserLoginEntry, C extends AuthenticatorCredential> {
+public abstract class RESTSubDelegateForWebAuthnAbstractBase<U extends IsSecurityPrincipal,C extends AuthenticatorCredential> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -34,16 +32,16 @@ public abstract class RESTSubDelegateForWebAuthnAbstractBase<U extends User,
 	// relyingParty  ( build at bootstraping)
 	protected final RelyingParty _relyingParty;
 
-	// user  CRUD
-	protected final CRUDServicesForUser<U> _userCrud;
+	// principal  CRUD
+	protected final CRUDServicesForPrincipal<U> _principalCrud;
 
-	// user login CRUD & factory
-	protected final CRUDServicesForUserLoginEntry<E> _loginEntryCrud;
-	protected final Factory<E> _loginEntryFactory;
+	// login CRUD & factory
+	protected final CRUDServicesForLogin _loginCrud;
+	protected final CRUDServicesForLoginEntry _loginEntryCrud;
 
 	// credentials CRUD & factory
-	protected final CRUDServicesForAuthenticatorCredential<C>        _authenticatorCredentialCrud;
-	protected final CredentialFactoryFromRegistrationResponse<U,C>   _credentialFactoyFromRegistrationResponse;
+	protected final CRUDServicesForAuthenticatorCredential<C> _authenticatorCredentialCrud;
+	protected final CredentialFactoryFromRegistrationResponse<U,C> _credentialFactoyFromRegistrationResponse;
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -2,8 +2,8 @@ package r01f.security.handler.webauthn.utils;
 
 import com.yubico.webauthn.data.ByteArray;
 
-import r01f.guids.OID;
 import r01f.model.security.keystore.key.PublicKey;
+import r01f.oids.OID;
 import r01f.types.StringBase64;
 
 public class WebAuthnByteStreamUtils {

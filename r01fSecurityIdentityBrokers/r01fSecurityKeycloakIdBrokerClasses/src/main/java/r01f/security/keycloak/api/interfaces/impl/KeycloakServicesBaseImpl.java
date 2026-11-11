@@ -40,7 +40,8 @@ abstract class KeycloakServicesBaseImpl {
 // CONSTRUCTORS
 /////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings("static-method")
-	protected ClientRepresentation _clientRepresentation(final ClientsResource clientsResource, final KeycloakClientRequestCriteria criteria) {
+	protected ClientRepresentation _clientRepresentation(final ClientsResource clientsResource,
+														 final KeycloakClientRequestCriteria criteria) {
 		 try {
 			if (criteria.byOid()) {
 		        //[] Direct fetch using the Internal UUID (KeycloakClientOID)
@@ -57,7 +58,8 @@ abstract class KeycloakServicesBaseImpl {
 	}
 
 	@SuppressWarnings("static-method")
-	protected UserRepresentation _userRepresentation(final UsersResource usersResource, final KeycloakUserRequestCriteria criteria) {
+	protected UserRepresentation _userRepresentation(final UsersResource usersResource,
+													 final KeycloakUserRequestCriteria criteria) {
 		  try {
 			if (criteria.byOid()) {
 		        // Direct fetch using the Internal UUID (KeycloakUserOID)
@@ -66,10 +68,13 @@ abstract class KeycloakServicesBaseImpl {
 		    // Search using Username (KeycloakUserID) with exact match = true
 		    log.warn("...Search using Username [ KeycloakUserID ] ='{}'",criteria.getKeycloakUserId().asString() );
 		    List<UserRepresentation> users = usersResource.searchByUsername(criteria.getKeycloakUserId().asString(), 
-                                                  true);//exact    
+                                                  							true);//exact    
 		    return (users == null 
     					|| users.isEmpty()) ? null : users.get(0);
 	    } catch ( final jakarta.ws.rs.ProcessingException proceEx) {
+	    	proceEx.printStackTrace();
+	    	throw new IllegalStateException("Cannot process request against KeyCloak: " +proceEx.getLocalizedMessage());
+	    } catch ( final Throwable proceEx) {
 	    	proceEx.printStackTrace();
 	    	throw new IllegalStateException("Cannot process request against KeyCloak: " +proceEx.getLocalizedMessage());
 	    }		

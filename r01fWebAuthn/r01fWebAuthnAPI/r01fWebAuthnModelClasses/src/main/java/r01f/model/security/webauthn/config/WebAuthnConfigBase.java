@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.types.url.Url;
 import r01f.util.types.StringCustomizeUtils;
 
@@ -24,7 +24,7 @@ public abstract class WebAuthnConfigBase {
 /////////////////////////////////////////////////////////////////////////////////////////
 	@MarshallField(as="id",
 				   whenXml=@MarshallFieldAsXml(attr=true))
-	@Getter @Setter protected SecurityProviderID _id;
+	@Getter @Setter protected IdentityProvider _id;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	URL VARS: avoid repeating things in other urls

@@ -5,12 +5,12 @@ import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredent
 import r01f.eventbus.EventBus;
 import r01f.model.persistence.CRUDResult;
 import r01f.model.persistence.CRUDResultBuilder;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.WebAuthnIDS.CredentialID;
 import r01f.model.security.webauthn.WebAuthnOIDs.CredentialOID;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.delegates.persistence.CRUDServicesForModelObjectDelegateBase;
 
@@ -33,54 +33,45 @@ public abstract class CRUDServicesDelegateForAuthenticatorCredential<C extends A
 ///////////////////////////////////////////////////////////////////////////////////////
 // 	EXTENSION
 ///////////////////////////////////////////////////////////////////////////////////////
-	@Override
+	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-								final UserOID userOid) {
-		if (userOid == null) {
-			return CRUDResultBuilder.using(securityContext)
-									.on(_modelObjectType)
-									.notLoaded()
-									.becauseClientBadRequest("The userOid MUST not be null")
-									.build();
-		}
-		@SuppressWarnings("unchecked")
+								final SecurityPrincipalOID securityPrincipalOid) {
+		if (securityPrincipalOid == null) return CRUDResultBuilder.using(securityContext)
+																  .on(_modelObjectType)
+																  .notLoaded()
+																  .becauseClientBadRequest("The userOid MUST not be null")
+																  .build();
 		CRUDResult<C> outResult = this.getServiceImplAs(CRUDServicesForAuthenticatorCredential.class)
-												.loadBy(securityContext,
-														userOid);
+									  .loadBy(securityContext,
+											  securityPrincipalOid);
 		return outResult;
 	}
 
-	@Override
+	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
 								final CredentialID login) {
-		if (login == null) {
-			return CRUDResultBuilder.using(securityContext)
-									.on(_modelObjectType)
-									.notLoaded()
-									.becauseClientBadRequest("The login MUST not be null")
-									.build();
-		}
-		@SuppressWarnings("unchecked")
+		if (login == null) return CRUDResultBuilder.using(securityContext)
+												   .on(_modelObjectType)
+												   .notLoaded()
+												   .becauseClientBadRequest("The login MUST not be null")
+												   .build();
 		CRUDResult<C> outResult = this.getServiceImplAs(CRUDServicesForAuthenticatorCredential.class)
-												.loadBy(securityContext,
-														login);
+									  .loadBy(securityContext,
+											  login);
 		return outResult;
 	}
 
-	@Override
+	@Override @SuppressWarnings("unchecked")
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-								final CredentialID id, final UserOID oid) {
-		if (id == null) {
-			return CRUDResultBuilder.using(securityContext)
-									.on(_modelObjectType)
-									.notLoaded()
-									.becauseClientBadRequest("The login MUST not be null")
-									.build();
-		}
-		@SuppressWarnings("unchecked")
+								final CredentialID id,final SecurityPrincipalOID securityPrincipalOid) {
+		if (id == null) return CRUDResultBuilder.using(securityContext)
+												.on(_modelObjectType)
+												.notLoaded()
+												.becauseClientBadRequest("The login MUST not be null")
+												.build();
 		CRUDResult<C> outResult = this.getServiceImplAs(CRUDServicesForAuthenticatorCredential.class)
-												.loadBy(securityContext,
-														oid);
+									  .loadBy(securityContext,
+											  securityPrincipalOid);
 		return outResult;
 	}
 }

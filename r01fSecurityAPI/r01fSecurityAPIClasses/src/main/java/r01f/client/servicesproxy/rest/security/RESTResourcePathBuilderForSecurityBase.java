@@ -2,7 +2,7 @@ package r01f.client.servicesproxy.rest.security;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import r01f.guids.OID;
+import r01f.oids.OID;
 import r01f.services.client.servicesproxy.rest.RESTServiceResourceUrlPathBuilders.RESTServiceEndPointUrl;
 import r01f.services.client.servicesproxy.rest.RESTServiceResourceUrlPathBuilders.RESTServiceResourceUrlPathBuilderBase;
 import r01f.services.client.servicesproxy.rest.RESTServiceResourceUrlPathBuilders.RESTServiceResourceUrlPathBuilderForModelObjectPersistenceBase;

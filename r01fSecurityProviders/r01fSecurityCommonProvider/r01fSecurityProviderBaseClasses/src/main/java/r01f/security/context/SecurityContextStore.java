@@ -5,9 +5,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import r01f.model.security.context.SecurityContext;
 import r01f.security.login.LoginSessionStore.LoginAuthContextThreadLocalManager;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityContextStoreAtThreadLocalStorage;
 import r01f.servlet.HttpServletSessionUtils;
 
 @Slf4j
@@ -51,8 +50,8 @@ public abstract class SecurityContextStore {
 /////////////////////////////////////////////////////////////////////////////////////////	
 	public static <S extends SecurityContext> void storeAtHttpSession(final HttpServletRequest request,
 																	  final S securityContext) {
-		 if (log.isTraceEnabled()) log.info("Storing [security context] on session for login={}",
-				  							securityContext.getLoginId());
+		 if (log.isTraceEnabled()) log.info("Storing [security context] on session for [principal]={}",
+				  							securityContext.getSecurityPrincipalId());
 		 HttpSession ses = request.getSession(true);
 		 request.setAttribute(SECURITY_CONTEXT_SESSIONATTR,securityContext);
 		 ses.setAttribute(SECURITY_CONTEXT_SESSIONATTR,securityContext);

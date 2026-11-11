@@ -3,8 +3,7 @@ package r01f.security.accessgrantedtoken;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
-
-import com.google.common.collect.Lists;
+import java.util.Collections;
 
 import jakarta.inject.Provider;
 import jakarta.servlet.ServletException;
@@ -17,17 +16,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import r01f.api.interfaces.security.authorization.FindServicesForUserAuthorizationOnResource;
+import r01f.api.interfaces.security.authorization.FindServicesForAuthorizationOnResource;
 import r01f.crypto.CryptoKeyPair;
 import r01f.crypto.CryptoKeyPairBuilder;
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
 import r01f.jwt.JWT;
 import r01f.model.persistence.FindResult;
-import r01f.model.security.authorization.UserAuthorizationOnResource;
-import r01f.model.security.user.User;
-import r01f.model.security.user.UserRoleInModule;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.SecurityRoleInModule;
+import r01f.model.security.authorization.SecurityPrincipalAuthorizationOnResource;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
+import r01f.security.authn.provider.cookie.AuthenticationProviderCookieStore;
 import r01f.security.base.SecuritySessionHandler;
 import r01f.security.base.StoresSecurityDataAtThreadLocalStorage;
 import r01f.security.context.SecurityContextStore;
@@ -38,12 +42,8 @@ import r01f.security.login.filter.AfterLoginJWTStore;
 import r01f.security.login.filter.LoginPageUtil;
 import r01f.security.login.filter.LoginPageUtil.LoginPageUtilUrlToStep;
 import r01f.security.login.filter.SecurityLoginFilterConfig;
+import r01f.security.login.filter.SecurityPrincipalDataFromAfterLoginJWT;
 import r01f.security.login.filter.SecurityProviderSessionFromRequestProvider;
-import r01f.security.login.filter.UserDataFromAfterLoginJWT;
-import r01f.security.provider.SecurityProviderIdCookieStore;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.servlet.HttpRequestParamsWrapper;
 import r01f.servlet.HttpServletRequestUtils;
 import r01f.types.StringBase64;
@@ -63,15 +63,14 @@ import r01f.util.types.Strings;
  * [5] >            redir access token servlet: /r01PLATEAWebCMSLoginUIWar/cms-preview-access-granted?jwt=<>   					<--- restore pagA from session
  * [6] >                                 redir: pagA
  *
- * @param <U>
+ * @param <P>
  * @param <A>
  */
 @Slf4j
 @Accessors(prefix="_")
-public abstract class AccessGrantedTokenServlet<U extends User,
-												A extends UserAuthorizationOnResource>
+public abstract class AccessGrantedTokenServlet<P extends IsSecurityPrincipal>
   		      extends HttpServlet
-  		   implements StoresSecurityDataAtThreadLocalStorage<U> {
+  		   implements StoresSecurityDataAtThreadLocalStorage<P> {
 
 	private static final long serialVersionUID = -4196196155556215637L;
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -83,12 +82,12 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	@Getter protected final Class<U> _userType;
+	@Getter protected final Class<P> _securityPrincipalType;
 
 	// used to find [user auths]
 	@Getter protected final Provider<SecurityContext> _sysSecurityContextProvider;
 
-	@Getter protected final FindServicesForUserAuthorizationOnResource<A> _userAuthOnResourceFind;
+	@Getter protected final FindServicesForAuthorizationOnResource _authzOnResourceFind;
 	@Getter protected final AppCode _appCode;
 	@Getter protected final AppComponent _appComponent;
 
@@ -100,7 +99,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 	// 		The LOCAL [user data] IS NOT the same as the one returned by a [security provider] (ie google, xlnets, etc)
 	// 		Usually the LOCAL [user data] is created FROM the one returned by google, xlnets, etc,
 	// 		BUT might have more (or less) properties
-	@Getter protected final UserDataFromAfterLoginJWT<U> _userDataFromAfterLoginJWT;
+	@Getter protected final SecurityPrincipalDataFromAfterLoginJWT<P> _userDataFromAfterLoginJWT;
 
 	// After a user is logged-in, it's redirected to the [Security REST Services WAR] where a [JWT Token] is created and then
 	// the [user] is redirected to the [UI]
@@ -120,7 +119,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public AccessGrantedTokenServlet(final Class<U> userType,
+	public AccessGrantedTokenServlet(final Class<P> principalType,
 									 // system [security context] provider used to access the [authorizations] on [resources]
 									 final Provider<SecurityContext> sysSecurityContextProvider,
 									 final Marshaller marshaller,
@@ -130,7 +129,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 									 final SecurityProviderSessionFromRequestProvider securityProviderSessionFromRequestProvider,
 									 // used to generate the [access granted token]
 									 final AccessGrantedTokenSpec accessGrantedTokenSpec) {
-		this(userType,
+		this(principalType,
 			 sysSecurityContextProvider,
 			 marshaller,
 			 null,		// finder
@@ -139,7 +138,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 			 securityProviderSessionFromRequestProvider,
 			 accessGrantedTokenSpec);
 	}
-	public AccessGrantedTokenServlet(final Class<U> userType,
+	public AccessGrantedTokenServlet(final Class<P> principalType,
 									 // system [security context] provider used to access the [authorizations] on [resources]
 									 final Provider<SecurityContext> sysSecurityContextProvider,
 									 final Marshaller marshaller,
@@ -147,7 +146,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 // used to generate the [access granted token]
 									 final AccessGrantedTokenSpec accessGrantedTokenSpec) {
-		this(userType,
+		this(principalType,
 			 sysSecurityContextProvider,
 			 marshaller,
 			 null,		// finder
@@ -156,31 +155,31 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 			 (SecurityProviderSessionFromRequestProvider)null,
 			 accessGrantedTokenSpec);
 	}
-	public AccessGrantedTokenServlet(final Class<U> userType,
+	public AccessGrantedTokenServlet(final Class<P> principalType,
 									 // system [security context] provider used to access the [authorizations] on [resources]
 									 final Provider<SecurityContext> sysSecurityContextProvider,
 									 final Marshaller marshaller,
 									 // used to find [authorizations] on [resource]
-									 final FindServicesForUserAuthorizationOnResource<A> userAuthOnResourceFind,
+									 final FindServicesForAuthorizationOnResource AuthzOnResourceFind,
 									 final AppCode appCode,final AppComponent appComponent,
 									 // login filter config (used to get the login page url)
 									 final SecurityLoginFilterConfig loginFilterConfig,
 									 // used to generate the [access granted token]
 									 final AccessGrantedTokenSpec accessGrantedTokenSpec) {
-		this(userType,
+		this(principalType,
 			 sysSecurityContextProvider,
 			 marshaller,
-			 userAuthOnResourceFind,appCode,appComponent,
+			 AuthzOnResourceFind,appCode,appComponent,
 			 loginFilterConfig,
 			 (SecurityProviderSessionFromRequestProvider)null,
 			 accessGrantedTokenSpec);
 	}
-	public AccessGrantedTokenServlet(final Class<U> userType,
+	public AccessGrantedTokenServlet(final Class<P> userType,
 									 // system [security context] provider used to access the [authorizations] on [resources]
 									 final Provider<SecurityContext> sysSecurityContextProvider,
 									 final Marshaller marshaller,
 									 // used to find [authorizations] on [resource]
-									 final FindServicesForUserAuthorizationOnResource<A> userAuthOnResourceFind,
+									 final FindServicesForAuthorizationOnResource authzOnResourceFind,
 									 final AppCode appCode,final AppComponent appComponent,
 									 // login filter config (used to get the login page url)
 									 final SecurityLoginFilterConfig loginFilterConfig,
@@ -188,11 +187,11 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 									 final SecurityProviderSessionFromRequestProvider securityProviderSessionFromRequestProvider,
 									 // used to generate the [access granted token]
 									 final AccessGrantedTokenSpec accessGrantedTokenSpec) {
-		_userType = userType;
+		_securityPrincipalType = userType;
 
 		// used to get the [authorizations]
 		_sysSecurityContextProvider = sysSecurityContextProvider;
-		_userAuthOnResourceFind = userAuthOnResourceFind;
+		_authzOnResourceFind = authzOnResourceFind;
 		_appCode = appCode;
 		_appComponent = appComponent;
 
@@ -200,7 +199,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 		_loginFilterConfig = loginFilterConfig;
 
 		// used to query the [security rest services] and create the [user]
-		_userDataFromAfterLoginJWT = new UserDataFromAfterLoginJWT<>(_userType,
+		_userDataFromAfterLoginJWT = new SecurityPrincipalDataFromAfterLoginJWT<>(_securityPrincipalType,
 												 					 _loginFilterConfig,
 												 					 marshaller);
 		_securityProviderSessionFromRequestProvider = securityProviderSessionFromRequestProvider;
@@ -343,7 +342,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 			// 	  here just an [after login JWT] ia available but in order to create the [Login Session], the [user data] is needed
 			// 	  ... and to get the [user data], the [filter] calls back the [security REST services] with the [after login JWT] token
 			//     	  that "tells" the [security REST services] it's a legitimate request and just returns the [user data]
-			LoginSession<U> loginSession = _userDataFromAfterLoginJWT.getLoginSessionFormJWT(request,
+			LoginSession<P> loginSession = _userDataFromAfterLoginJWT.getLoginSessionFormJWT(request,
 																			 			  	 afterLoginJWT,
 																			 			  	 _securityProviderSessionFromRequestProvider);
 			// c) now the http session contains the [loginSession]
@@ -374,7 +373,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 			if (log.isInfoEnabled()) log.info("[access granted token servlet] > authorize url={}",urlToBeAuthorized);
 
 			// a) login???
-			boolean loginExists = this.chekUserLogin(request);
+			boolean loginExists = this.chekLogin(request);
 
 			if (log.isDebugEnabled()) log.debug("\tlogin exists={}",loginExists);
 			if (!loginExists) {
@@ -392,7 +391,7 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 			}
 
 			// b) authorization???
-			boolean authorized = this.checkUserAuthorization(urlToBeAuthorized,
+			boolean authorized = this.checkAuthorization(urlToBeAuthorized,
 															 request);
 			if (log.isDebugEnabled()) log.debug("\tauthorized={}",authorized);
 			if (!authorized) {
@@ -435,31 +434,31 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 /////////////////////////////////////////////////////////////////////////////////////////
 	private void _cleanupSession(final HttpServletRequest request,final HttpServletResponse response) {
 		// create an utility that encapsulates the [security session] handling
-		SecuritySessionHandler<U> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
+		SecuritySessionHandler<P> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
 																				this,
 																				// SecurityContext from LoginSession)
 																				theLoginSession -> this.createSecurityContextFromLoginSession(theLoginSession),
 																				// providerId cookie name
-																				this.securityProviderIdCookieName());
+																				this.authenticationProviderIdCookieName());
 		sessionHandler.cleanupSession(request,response);
 	}
-	private SecurityContext _onLoginSessionExists(final LoginSession<U> loginSession,
+	private SecurityContext _onLoginSessionExists(final LoginSession<P> loginSession,
 									   			  final HttpServletRequest request,final HttpServletResponse response) {
 		// create an utility that encapsulates the [security session] handling
-		SecuritySessionHandler<U> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
+		SecuritySessionHandler<P> sessionHandler = new SecuritySessionHandler<>(// StoresSecurityDataAtThreadLocalStorage
 																				this,
 																				// SecurityContext from LoginSession)
 																				theLoginSession -> this.createSecurityContextFromLoginSession(theLoginSession),
 																				// providerId cookie name
-																				this.securityProviderIdCookieName());
+																				this.authenticationProviderIdCookieName());
 		// create a [security context] from the [login session]
 		SecurityContext outSecurityContext = sessionHandler.securityContextFromLoginSession(loginSession,
 												   											request,response);
 		// store a [cookie] that sets the [security provider id] that the [user] used to log-in
 		// (this cookie is used to re-create the [security session] when the [user] goes from one [webapp]
 		// where he/she has been authenticated to another were he/she has not
-		sessionHandler.setSecurityProviderIdCookie(loginSession.getSecurityProviderId(),
-												   request,response);
+		sessionHandler.setAuthnProviderCookie(loginSession.getIdentityProvider(),loginSession.getAuthenticationMethod(),
+											   request,response);
 		// return
 		return outSecurityContext;
 	}
@@ -476,17 +475,17 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 								  final HttpServletRequest request) {
 
 		Cookie providerIdCookie = null;
-		SecurityProviderIdCookieStore securityProviderIdCookieStore = SecurityProviderIdCookieStore.createWithCookieName(this.securityProviderIdCookieName());
-		LoginPageUtilUrlToStep forSecurityProviderIdStoredAt = LoginPageUtil.forSecurityProviderIdStoredAt(securityProviderIdCookieStore);
+		AuthenticationProviderCookieStore authnProviderCookieStore = AuthenticationProviderCookieStore.createWithCookieName(this.authenticationProviderIdCookieName());
+		LoginPageUtilUrlToStep forAuthnProviderStoredAt = LoginPageUtil.forIdentityProviderStoredAt(authnProviderCookieStore);
 
-		if (securityProviderIdCookieStore == null) {
+		if (authnProviderCookieStore == null) {
 			// Do nothing
 		} else {
-			providerIdCookie = securityProviderIdCookieStore.getProviderIdCookieFrom(request);
+			providerIdCookie = authnProviderCookieStore.getAuthnProviderCookieFrom(request);
 			if (providerIdCookie == null) {
 				Cookie xlnetsCookie = null;
-				if ( request.getCookies() != null ) {
-					for (  Cookie cookie : request.getCookies() ) {
+				if (request.getCookies() != null) {
+					for (Cookie cookie : request.getCookies()) {
 						if( cookie.getName().equals("n38UidSesion") ) {
 							xlnetsCookie = cookie;
 							break;
@@ -494,29 +493,29 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 					}
 				}
 				if (xlnetsCookie != null) {
-					forSecurityProviderIdStoredAt = LoginPageUtil.forSecurityProviderId(SecurityProviderID.XLNETS);
+					forAuthnProviderStoredAt = LoginPageUtil.forAuthenticationProvider(IdentityProvider.XLNETS,AuthenticationMethod.UNKNOWN);
 					if (log.isDebugEnabled()) log.debug("[access granted token servlet] > No exists provider, but XLNETS session exists.");
 				}
 			}
 		}
 
-		Url loginPageUrl = forSecurityProviderIdStoredAt
-										// after being logged-in the request MUST be redirected to THIS servlet with the jwt that
-										// is used to create the login session
-										.usingUrlToProvider(theReq -> {
-																	Host host = HttpServletRequestUtils.clientRequestedHost(request); 	// BEWARE!! this method takes proxies into account in order to get the REAL client url
-																	UrlPath requestedUrlPath = UrlPath.from(request.getRequestURI());	// {webApp}/{urlPath}	(does NOT include query string)
+		Url loginPageUrl = forAuthnProviderStoredAt
+								// after being logged-in the request MUST be redirected to THIS servlet with the jwt that
+								// is used to create the login session
+								.usingUrlToProvider(theReq -> {
+															Host host = HttpServletRequestUtils.clientRequestedHost(request); 	// BEWARE!! this method takes proxies into account in order to get the REAL client url
+															UrlPath requestedUrlPath = UrlPath.from(request.getRequestURI());	// {webApp}/{urlPath}	(does NOT include query string)
 
-																	// once authorized, the flow will return to THIS servlet but the [url to be authorized]
-																	// is needed so it's stored as [extended url to info]
-																	Url toUrl = Url.from(host).joinWith(requestedUrlPath);
-																	Url outUrl = AfterLoginRedirUrlExtraInfoStore.addAsUrlQueryStringParam(StringBase64.encode(urlToBeAuthorized.asString()))
-																												 .to(toUrl);
-																	if (log.isInfoEnabled()) log.info("... after being logged-in the request will be redirected to: {}",outUrl);
-																	return outUrl;
-															})
-									    .loginPageUrl(_loginFilterConfig,
-													  request);
+															// once authorized, the flow will return to THIS servlet but the [url to be authorized]
+															// is needed so it's stored as [extended url to info]
+															Url toUrl = Url.from(host).joinWith(requestedUrlPath);
+															Url outUrl = AfterLoginRedirUrlExtraInfoStore.addAsUrlQueryStringParam(StringBase64.encode(urlToBeAuthorized.asString()))
+																										 .to(toUrl);
+															if (log.isInfoEnabled()) log.info("... after being logged-in the request will be redirected to: {}",outUrl);
+															return outUrl;
+													})
+							    .loginPageUrl(_loginFilterConfig,
+											  request);
 		return loginPageUrl;
 	}
 	/**
@@ -524,65 +523,66 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 	 * @param request
 	 * @return
 	 */
-	protected boolean chekUserLogin(final HttpServletRequest request) {
+	protected boolean chekLogin(final HttpServletRequest request) {
 		// check if there's a [web session] for the user
-		LoginSession<U> loginSession = LoginSessionStore.getFromSession(request);
+		LoginSession<P> loginSession = LoginSessionStore.getFromSession(request);
 		SecurityContext securityContext = SecurityContextStore.getFromSession(request);
 		return loginSession != null && securityContext != null;
 	}
-	protected boolean checkUserAuthorization(final Url targetUrl,
-											 final HttpServletRequest request) {
-		LoginSession<U> loginSession = LoginSessionStore.getFromSession(request);
+	protected boolean checkAuthorization(final Url targetUrl,
+									     final HttpServletRequest request) {
+		LoginSession<P> loginSession = LoginSessionStore.getFromSession(request);
 		SecurityContext securityContext = SecurityContextStore.getFromSession(request);
 		if (loginSession == null || securityContext == null) throw new IllegalStateException("NO login: cannot access " + targetUrl);
-		return this.checkUserAuthorization(securityContext,
-										   loginSession);
+		return this.checkAuthorization(securityContext,
+									   loginSession);
 	}
 	/**
-	 * Gives the application an opportunity to check the [user auths]
+	 * Gives the application an opportunity to check the [authzs]
 	 * @param securityContext
 	 * @param loginSession
 	 * @return
 	 */
-	protected boolean checkUserAuthorization(final SecurityContext securityContext,final LoginSession<U> loginSession) {
+	protected boolean checkAuthorization(final SecurityContext securityContext,final LoginSession<P> loginSession) {
 		// [1] - Get the user from the [loginSession]
 		// 		 (usually THIS filter MUST be AFTER the LoginSessionFilter)
 		//		 (see LoginServletFilter)
-		UserOID userOid = loginSession.getUserOid();
-		if (userOid == null) throw new IllegalStateException("Could NOT get the userOid from the [loginSession] " +
-														     "(the [loginSession] is present at the web session, " +
-															 "BUT the userOid could NOT be get)");
-		U user = loginSession.getUser();
-		Collection<UserRoleInModule> systemWideUserRoles = user.getUserSystemWideRoles() != null ? user.getUserSystemWideRoles() : Lists.newArrayList();
+		SecurityPrincipalOID principalOid = loginSession.getSecurityPrincipalOid();
+		if (principalOid == null) throw new IllegalStateException("Could NOT get the [security principal] oid from the [loginSession] " +
+														     	  "(the [loginSession] is present at the web session, " +
+															 	  "BUT the [security principal] oid could NOT be get)");
+		P principal = loginSession.getSecurityPrincipal();
+		Collection<SecurityRoleInModule> systemWideRoles = principal.getSystemWideRoles() != null ? principal.getSystemWideRoles() 
+																								  : Collections.emptyList();
 
 		// [2] - find the [user auths]
-		FindResult<A> userAuthsFind = _userAuthOnResourceFind.findBy(_sysSecurityContextProvider.get(),
-																  	 userOid,
-																  	 _appCode,_appComponent);
-		Collection<A> userAuths = userAuthsFind.hasSucceeded() ? userAuthsFind.getOrThrow()
-												 			   : null;
-		if (log.isInfoEnabled()) log.info("[access granted token servlet] > user oid={} has {} sys-wide roles and {} auths",
-				 userOid,
-				 systemWideUserRoles != null ? systemWideUserRoles.size() : 0,
-				 userAuths != null ? userAuths.size() : 0);
+		FindResult<SecurityPrincipalAuthorizationOnResource> authzFind = _authzOnResourceFind.findBy(_sysSecurityContextProvider.get(),
+																  									 principalOid,
+																  									 _appCode,_appComponent);
+		Collection<SecurityPrincipalAuthorizationOnResource> principalAuthzs = authzFind.hasSucceeded() ? authzFind.getOrThrow()
+																										: null;
+		if (log.isInfoEnabled()) log.info("[access granted token servlet] > [principal] oid={} has {} sys-wide roles and {} auths",
+										  principalOid,
+										  systemWideRoles != null ? systemWideRoles.size() : 0,
+										  principalAuthzs != null ? principalAuthzs.size() : 0);
 
 		// [99] - Delegate
-		return this.checkUserAuthorization(securityContext,
-										   userOid,
-										   systemWideUserRoles,userAuths);
+		return this.checkAuthorization(securityContext,
+									   principalOid,
+									   systemWideRoles,principalAuthzs);
 	}
 	/**
 	 * Gives the application an opportunity to check the [user auths]
 	 * @param securityContext
-	 * @param userOid
-	 * @param systemWideUserRoles
-	 * @param userAuths
+	 * @param principalOid
+	 * @param systemWideRoles
+	 * @param authzs
 	 * @return
 	 */
-	protected boolean checkUserAuthorization(final SecurityContext securityContext,
-											 final UserOID userOid,
-											 final Collection<UserRoleInModule> systemWideUserRoles,final Collection<A> userAuths) {
-		if (log.isDebugEnabled()) log.debug("[access granted token servlet] > user auths NOT checked!!! > override this method to check the auth; for now just return AUTHORIZED");
+	protected boolean checkAuthorization(final SecurityContext securityContext,
+										 final SecurityPrincipalOID principalOid,
+										 final Collection<SecurityRoleInModule> systemWideRoles,final Collection<SecurityPrincipalAuthorizationOnResource> authzs) {
+		if (log.isDebugEnabled()) log.debug("[access granted token servlet] > [security principal] authzs NOT checked!!! > override this method to check the auth; for now just return AUTHORIZED");
 		return true;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -593,16 +593,14 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 	 * (the [security provider] used to log-in)
 	 * @return
 	 */
-	@SuppressWarnings("static-method")
-	protected String securityProviderIdCookieName() {
-		return SecurityProviderIdCookieStore.SECURITY_PROVIDER_COOKIE_DEFAULT_NAME;
+	protected String authenticationProviderIdCookieName() {
+		return AuthenticationProviderCookieStore.AUTH_PROVIDER_COOKIE_DEFAULT_NAME;
 	}
 	/**
 	 * Returns the name of the [cookie] used to store the [security provider id]
 	 * (the [security provider] used to log-in)
 	 * @return
 	 */
-	@SuppressWarnings("static-method")
 	protected String accessGrantedTokenCookieName() {
 		return AccessGrantedTokenCookieStore.ACCESS_GRANTED_COOKIE_DEFAULT_NAME;
 	}
@@ -618,5 +616,5 @@ public abstract class AccessGrantedTokenServlet<U extends User,
 	 * @param loginSession
 	 * @return
 	 */
-	protected abstract SecurityContext createSecurityContextFromLoginSession(final LoginSession<U> loginSession);
+	protected abstract SecurityContext createSecurityContextFromLoginSession(final LoginSession<P> loginSession);
 }

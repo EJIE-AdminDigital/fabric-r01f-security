@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
-import r01f.guids.OIDTyped;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.OIDTyped;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)
 public abstract class SAMLIDs {
@@ -15,36 +15,6 @@ public abstract class SAMLIDs {
 	public static interface IsSAMLID
 					extends OIDTyped<String> {
 		// just a marker interface
-	}
-/////////////////////////////////////////////////////////////////////////////////////////
-//	SAML Issuer Nick > a "sort" saml issuer nick like okta or something like that
-/////////////////////////////////////////////////////////////////////////////////////////
-	@Immutable
-	@MarshallType(as="samlIdPId")
-	public record SAMLIdPID(@Getter String id)
-	   implements IsSAMLID {
-
-		public static SAMLIdPID from(final String id) {
-			return new SAMLIdPID(id);
-		}
-		public static SAMLIdPID forId(final String id) {
-			return new SAMLIdPID(id);
-		}
-		public static SAMLIdPID valueOf(final String id) {
-			return SAMLIdPID.forId(id);
-		}
-		public static SAMLIdPID fromString(final String id) {
-			return SAMLIdPID.forId(id);
-		}
-		
-		@Override
-		public String asString() {
-			return this.id;
-		}
-		@Override
-		public String toString() {
-			return this.id;
-		}
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	The SAML issuer id > ussually an uri

@@ -3,41 +3,39 @@ package r01f.model.security.pushtoken;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import r01f.guids.CommonOIDs.SystemID;
 import r01f.model.PersistableModelObjectBase;
-import r01f.model.metadata.annotations.ModelObjectData;
-import r01f.model.security.pushtoken.IsPushTokenID.PushTokenIDByPhone;
+import r01f.model.security.pushtoken.IsPushDestinationID.PushTokenIDByPhone;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.CommonOIDs.SystemID;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.types.contact.Phone;
 import r01f.validation.ObjectValidationResult;
 import r01f.validation.SelfValidates;
 
-@ModelObjectData(MetaDataForPushToken.class)
 @Accessors(prefix="_")
 public abstract class PushTokenBase<SELF_TYPE extends PushTokenBase<SELF_TYPE>> 
      		  extends PersistableModelObjectBase<PushTokenOID,SELF_TYPE> 
-  		   implements PushToken,
+  		   implements IsPushToken,
   		   			  SelfValidates<SELF_TYPE> {
 	
 	private static final long serialVersionUID = 1558766009933119379L;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	@MarshallField(as="systemId",
+	@MarshallField(as="sourceSystemId",
 				   whenXml=@MarshallFieldAsXml(attr=true))
-	@Getter @Setter private SystemID _systemId;
+	@Getter @Setter private SystemID _sourceSystemId;
 	
-	@MarshallField(as="tokenId",
-			         whenXml=@MarshallFieldAsXml(attr=true))
-	@Getter @Setter private IsPushTokenID  _pushTokenId;
+	@MarshallField(as="destinationId",
+			       whenXml=@MarshallFieldAsXml(attr=true))
+	@Getter @Setter private IsPushDestinationID  _destinationId;
 	
-	@MarshallField(as="plataform",
-	         whenXml=@MarshallFieldAsXml(attr=true))
-	@Getter @Setter private PushTokenDevicePlataform  _plataform;	
+	@MarshallField(as="destinationPlatform",
+	         	   whenXml=@MarshallFieldAsXml(attr=true))
+	@Getter @Setter private PushDestinationPlatform _destinationPlatform;
 	
-	@MarshallField(as="token")
+	@MarshallField(as="token",escape = true)
 	@Getter @Setter private SecurityToken _token;	
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
@@ -52,16 +50,18 @@ public abstract class PushTokenBase<SELF_TYPE extends PushTokenBase<SELF_TYPE>>
 		     null);		// no token
 	}
 	public PushTokenBase(final SystemID systemId,
-						 final Phone phone, final SecurityToken token) {
+						 final Phone phone, 
+						 final SecurityToken token) {
 		this(systemId,
-			PushTokenIDByPhone.forPhone(phone),
-			token);		
+			 PushTokenIDByPhone.forPhone(phone),
+			 token);		
 	}
 
 	public PushTokenBase(final SystemID systemId,
-					  	 final IsPushTokenID phone,  final SecurityToken token) {
-		_systemId = systemId;
-		_pushTokenId = phone;
+					  	 final IsPushDestinationID phone, 
+					  	 final SecurityToken token) {
+		_sourceSystemId = systemId;
+		_destinationId = phone;
 		_token = token;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,6 @@ public abstract class PushTokenBase<SELF_TYPE extends PushTokenBase<SELF_TYPE>>
 	@Override @SuppressWarnings("unchecked")
 	public ObjectValidationResult<SELF_TYPE> validate() {
 		return PushTokenValidators.<SELF_TYPE>createPhoneTokenObjectValidator()
-								   .validate((SELF_TYPE)this);
+								  .validate((SELF_TYPE)this);
 	}
 }

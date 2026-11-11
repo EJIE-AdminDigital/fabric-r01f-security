@@ -9,7 +9,7 @@ import com.google.common.hash.Hashing;
 
 import lombok.experimental.Accessors;
 import r01f.crypto.signature.SignerService.SignerServiceException;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.types.StringBase64;
 
 @Accessors(prefix="_")

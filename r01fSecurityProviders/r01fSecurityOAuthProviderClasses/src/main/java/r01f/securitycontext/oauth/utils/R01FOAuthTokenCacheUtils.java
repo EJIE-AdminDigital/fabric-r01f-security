@@ -1,9 +1,9 @@
 package r01f.securitycontext.oauth.utils;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * R01FOAuthTokenCacheUtils
@@ -25,16 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class R01FOAuthTokenCacheUtils {
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//    STATE
+//  STATE
 /////////////////////////////////////////////////////////////////////////////////////////
-
     /** Thread-safe map holding tokens by cache key. */
     private static final ConcurrentHashMap<String, CachedToken> _map = new ConcurrentHashMap<>();
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //    METHODS
 /////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Retrieves a token from the cache by key.
      *
@@ -44,7 +42,6 @@ public final class R01FOAuthTokenCacheUtils {
     public static CachedToken get(final String key) {
         return _map.get(key);
     }
-
     /**
      * Stores a token in the cache.
      *
@@ -55,7 +52,6 @@ public final class R01FOAuthTokenCacheUtils {
     public static void put(final String key, final String token, final long expiresAt) {
         _map.put(key, new CachedToken(token, expiresAt));
     }
-
     /**
      * Clears all cached tokens.
      * Primarily used for testing or maintenance purposes.
@@ -63,11 +59,9 @@ public final class R01FOAuthTokenCacheUtils {
     public static void clear() {
         _map.clear();
     }
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //    INNER CLASS
 /////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Represents a cached OAuth2 token with expiration information.
      */
@@ -79,7 +73,6 @@ public final class R01FOAuthTokenCacheUtils {
             this.token = token;
             this.expiresAt = expiresAt;
         }
-
         /**
          * Checks if the token is expired considering a leeway period.
          *

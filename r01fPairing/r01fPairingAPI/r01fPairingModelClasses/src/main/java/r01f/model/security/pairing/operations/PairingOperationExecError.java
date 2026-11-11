@@ -10,7 +10,7 @@ import r01f.objectstreamer.annotations.MarshallType;
 @Accessors(prefix="_")
 public class PairingOperationExecError<T>
 	 extends COREServiceMethodExecError<T>
-  implements PairingOperationExecResult<T> {
+  implements IsPairingOperationExecResult<T> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////

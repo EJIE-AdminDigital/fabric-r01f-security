@@ -14,7 +14,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import r01f.security.saml.api.SAMLIDs.SAMLIdPID;
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.security.saml.api.SAMLIDs.SAMLIssuerID;
 import r01f.types.url.Url;
 import r01f.util.types.collections.CollectionUtils;
@@ -170,7 +170,7 @@ public class SAMLAPI {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	IdP configs
 /////////////////////////////////////////////////////////////////////////////////////////
-	public SAMLIdPConfig getIdPConfigFor(final SAMLIdPID idpId) {
+	public SAMLIdPConfig getIdPConfigFor(final IdentityProvider idpId) {
 		if (CollectionUtils.isNullOrEmpty(_IdPConfigs)) throw new IllegalStateException("NO idp config for " + idpId);
 		return _IdPConfigs.stream()
 						  .filter(idpConfig -> idpConfig.getIdPNick().is(idpId))
@@ -195,7 +195,7 @@ public class SAMLAPI {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	SUB APIS
 /////////////////////////////////////////////////////////////////////////////////////////
-	public SAMLAPIBuilderSubAPIStep usingIdP(final SAMLIdPID idpId) {
+	public SAMLAPIBuilderSubAPIStep usingIdP(final IdentityProvider idpId) {
 		SAMLIdPConfig idpConfig = this.getIdPConfigFor(idpId);
 		return new SAMLAPIBuilderSubAPIStep(idpConfig);
 	}

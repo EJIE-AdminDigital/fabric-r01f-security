@@ -4,16 +4,15 @@ package r01f.services.delegates.sub.security.otp;
 import lombok.extern.slf4j.Slf4j;
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.eventbus.EventBus;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.otp.OTPTask;
 import r01f.model.security.otp.operations.OTPErrorTypes;
 import r01f.model.security.otp.operations.OTPOperation;
 import r01f.model.security.otp.operations.OTPOperationExecResult;
 import r01f.model.security.otp.operations.OTPOperationExecResultBuilder;
-import r01f.model.security.otp.task.OTPTask;
-import r01f.model.security.otp.validation.OTPValidationRequest;
-import r01f.model.security.otp.validation.OTPValidationResponse;
+import r01f.model.security.otp.task.validation.IsOTPValidationRequest;
+import r01f.model.security.otp.task.validation.OTPValidationResponse;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.util.types.Strings;
 
@@ -24,7 +23,7 @@ public class OTPServicesSubDelegateForValidation
 //CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public OTPServicesSubDelegateForValidation(final ServicesCoreModuleConfig coreConfig,
-											   final Marshaller modelObjectsMarshaller, EventBus eventBus,
+											   final Marshaller modelObjectsMarshaller, final EventBus eventBus,
 											   final CRUDServicesForOTPTask taskPersistenceService) {
 			super(coreConfig, modelObjectsMarshaller, eventBus, taskPersistenceService);
 
@@ -32,11 +31,11 @@ public class OTPServicesSubDelegateForValidation
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public <R extends OTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
+	public <R extends IsOTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
 			                                                                                          final R validationReq) {
 		// [1] - Get the OTP task either by taskOid, phone or email
 		log.info("[1][OTPValidation]: validate otp task ({}) of type {}={}",
-				 validationReq.getTaskOid(),validationReq.getKeyType().getCode(),validationReq.getKey());
+				 validationReq.getTaskOid(),validationReq.getKeyType(),validationReq.getKey());
 
 //		OTPTask otpTask = loadTaskBy( securityContext,
 //				                      validationReq.getAppCode(),validationReq.getAppComponent(),
@@ -61,7 +60,7 @@ public class OTPServicesSubDelegateForValidation
 		boolean taskValidationOk = validateRequest(validationReq.getKey(), otpTask);
 		if (!taskValidationOk) {
 			String msg = Strings.customized("Otp task with oid= {} not valid for key {}={}",
-											validationReq.getTaskOid(),validationReq.getKeyType().getCode(),validationReq.getKey());
+											validationReq.getTaskOid(),validationReq.getKeyType(),validationReq.getKey());
 			log.info("[3][OTPValidation]: {}",msg);
 			return OTPOperationExecResultBuilder.notExecuted(OTPOperation.VALIDATION)
 												.because(OTPErrorTypes.OTP_VALIDATION_ERROR_OTP_DOES_NOT_EXISTS_OR_EXPIRED,
@@ -69,7 +68,7 @@ public class OTPServicesSubDelegateForValidation
 
 		}
 		log.info("[3][OTPValidation]: valid otp request task with oid {} and key {}={",
-				 otpTask.getOid(),validationReq.getKeyType().getCode(),validationReq.getKey()
+				 otpTask.getOid(),validationReq.getKeyType(),validationReq.getKey()
 				 );
 
 		// [4] - Check the number of retries

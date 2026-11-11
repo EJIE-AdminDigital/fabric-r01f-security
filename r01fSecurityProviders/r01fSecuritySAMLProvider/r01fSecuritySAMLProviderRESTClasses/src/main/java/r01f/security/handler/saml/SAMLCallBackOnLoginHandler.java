@@ -11,17 +11,16 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import r01f.debug.Debuggable;
 import r01f.jwt.JWT;
-import r01f.security.handler.CallBackOnLoginHandlerBase;
-import r01f.security.provider.SecurityProvider;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.LoginID;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
+import r01f.security.authn.handler.CallBackOnLoginHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.saml.api.SAMLAPI;
 import r01f.security.saml.api.SAMLAPIForIdPResponse;
-import r01f.security.saml.api.SAMLEuskadiConstants;
-import r01f.security.saml.api.SAMLIDs.SAMLIdPID;
 import r01f.security.saml.api.SAMLIdPBinding;
 import r01f.security.saml.api.SAMLResponse;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
 import r01f.types.contact.EMail;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
@@ -55,7 +54,7 @@ public class SAMLCallBackOnLoginHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public SAMLCallBackOnLoginHandler(final SecurityProviderSecretConfig securityProviderSecretConfig,
+	public SAMLCallBackOnLoginHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig,
 									  final SAMLAPI samlAPI) {
 		super(securityProviderSecretConfig);
 		_samlAPI = samlAPI;
@@ -71,11 +70,11 @@ public class SAMLCallBackOnLoginHandler
 	 * @param afterLoginRedirToUrl
 	 * @return
 	 */
-	public Response loginCallBack(final SAMLIdPID idp,final SAMLIdPBinding idpBinding,
+	public Response loginCallBack(final IdentityProvider idp,final SAMLIdPBinding idpBinding,
 								  final String samlResponse,
 								  final Url afterLoginRedirToUrl) {
 		log.info("=========================================================");
-		log.warn("INFORMATIVE Purpose: AFTER LOGIN, by provider type: SAML (idp={})", idp);
+		log.warn("INFORMATIVE Purpose: AFTER LOGIN, by provider type: SAML (idp={})",idp);
 		log.info("=========================================================");
 
 		// [0] - Get the SAML API
@@ -96,22 +95,10 @@ public class SAMLCallBackOnLoginHandler
 		log.debug("{}",samlAttributes.debugInfo());
 
 		// The attribute names (assertions) are configured at OKTA console
-		SecurityProviderID finalSecurityProviderId; 
-		// returns the identifier of the IdP in the JWT to set the cookie that identifies the IdP
-		// "elkarlan2" is the identifier of ADFS not productive and "elkarlan" is the identifier of ADFS productive.
-		// But once the data sent by the provider is read, it is treated in the same way, which is why the SAML value is returned for both cases. 
-		if (idp.isContainedIn(SAMLEuskadiConstants.ELKARLAN, SAMLEuskadiConstants.ELKARLAN2)) {
-			finalSecurityProviderId = SecurityProvider.SAML.getCode();
-		} else if (idp.isContainedIn(SAMLEuskadiConstants.OSAAZUREAD, SAMLEuskadiConstants.OSAAZUREAD_PD)) {
-			finalSecurityProviderId = SecurityProvider.OSAKIDETZA_AZURE_AD.getCode();
-		} else {
-			finalSecurityProviderId = SecurityProviderID.forId(idp.getId());
-		}
-		
 		JWT jwt = _createJWT(_securityProviderSecretConfig.getKeyData()
 														  .asString(),
-							 finalSecurityProviderId,
-							 samlAttributes.getLogin(),
+							 idp,AuthenticationMethod.SAML,
+							 SecurityPrincipalID.fromLoginId(samlAttributes.getLogin()),
 							 samlAttributes.getEmail(),
 							 samlAttributes.createJWTClaims());
 
@@ -146,18 +133,18 @@ public class SAMLCallBackOnLoginHandler
 		@Getter private String _displayName;
 		@Getter private String _userPrincipalName;
 
-		SAMLAttributes(final SAMLIdPID samlIdp,
+		SAMLAttributes(final IdentityProvider samlIdp,
 					   final Map<String,String> attrs) {
 			// Map the attrs
-			if (samlIdp.is(SAMLEuskadiConstants.OKTA)) {
-				// The attribute names (assertions) are configured at OKTA console
-				_login = attrs.get("login") != null ? LoginID.forId(attrs.get("login")) : null;
-				_email = attrs.get("email") != null ? EMail.of(attrs.get("email")) : null;
-				_name = attrs.get("user-fisrt-name");
-				_lastName = attrs.get("user-last-name");
-			}
-			else if (samlIdp.isContainedIn(SAMLEuskadiConstants.ELKARLAN,
-									   SAMLEuskadiConstants.ELKARLAN2)) {
+//			if (samlIdp.is(SAMLEuskadiConstants.OKTA)) {
+//				// The attribute names (assertions) are configured at OKTA console
+//				_login = attrs.get("login") != null ? LoginID.forId(attrs.get("login")) : null;
+//				_email = attrs.get("email") != null ? EMail.of(attrs.get("email")) : null;
+//				_name = attrs.get("user-fisrt-name");
+//				_lastName = attrs.get("user-last-name");
+//			}
+			if (samlIdp.isIn(IdentityProvider.ELKARLAN_AZURE_AD,
+							 IdentityProvider.ELKARLAN2_AZURE_AD)) {
 				// The attribute names (assertions) are configured at ADFS console
 				_login = attrs.get(MS_ASSERTION_NAME_PREFIX + "windowsaccountname") != null ? LoginID.forId(attrs.get(MS_ASSERTION_NAME_PREFIX + "windowsaccountname")) : null;
 				_email = attrs.get(STD_ASSERTION_NAME_PREFIX + "emailaddress") != null ? EMail.of(attrs.get(STD_ASSERTION_NAME_PREFIX + "emailaddress")) : null;
@@ -166,17 +153,17 @@ public class SAMLCallBackOnLoginHandler
 				_displayName = attrs.get(STD_ASSERTION_NAME_PREFIX + "name");
 				_userPrincipalName = attrs.get(STD_ASSERTION_NAME_PREFIX + "upn");
 			}
-			else if (samlIdp.isContainedIn(SAMLEuskadiConstants.OSAAZUREAD,
-										SAMLEuskadiConstants.OSAAZUREAD_PD)) {
+			else if (samlIdp.isIn(IdentityProvider.OSAKIDETZA_AZURE_AD,
+								  IdentityProvider.OSAKIDETZA_PD_AZURE_AD)) {
 				// The attribute names (assertions) are configured at Azure AD service
 				// for example http://schemas.microsoft.com/identity/claims/displayname = R01PLATEAWeb - Test User
 				// Claims básicos de identidad:
-				//sub: Identificador del sujeto (usuario). Es único para cada usuario dentro del inquilino.
-				//name: Nombre completo del usuario.
-				//preferred_username: Nombre de usuario preferido, a menudo es la dirección de correo electrónico.
-				//given_name: Nombre de pila del usuario.
-				//family_name: Apellido del usuario.
-				//email: Dirección de correo electrónico del usuario.
+				//	- sub: Identificador del sujeto (usuario). Es único para cada usuario dentro del inquilino.
+				//	- name: Nombre completo del usuario.
+				//	- preferred_username: Nombre de usuario preferido, a menudo es la dirección de correo electrónico.
+				//	- given_name: Nombre de pila del usuario.
+				//	- family_name: Apellido del usuario.
+				//	- email: Dirección de correo electrónico del usuario.
 				//TODO revisar parámetros
 				_login = attrs.get(AZUREAD_ASSERTION_NAME_PREFIX + "displayname") != null ? LoginID.forId(attrs.get(AZUREAD_ASSERTION_NAME_PREFIX + "displayname")) : null;
 				_email = attrs.get(STD_ASSERTION_NAME_PREFIX + "emailaddress") != null ? EMail.of(attrs.get(STD_ASSERTION_NAME_PREFIX + "emailaddress")) : null;
@@ -188,7 +175,6 @@ public class SAMLCallBackOnLoginHandler
 				throw new IllegalArgumentException(samlIdp + " is NOT a supported [SAML Identity Provider]!");
 			}
 		}
-		@SuppressWarnings("serial")
 		public Map<String,String> createJWTClaims() {
 			return new HashMap<String,String>() {{
 							put(JWT_CUSTOM_CLAIM_FOR_USER_NAME,Strings.isNOTNullOrEmpty(_name) ? _name : "");

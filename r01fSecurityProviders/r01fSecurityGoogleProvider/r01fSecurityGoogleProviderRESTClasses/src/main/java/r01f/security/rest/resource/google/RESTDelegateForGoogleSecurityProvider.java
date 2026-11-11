@@ -2,27 +2,24 @@ package r01f.security.rest.resource.google;
 
 import jakarta.inject.Provider;
 import jakarta.ws.rs.core.Response;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.google.GoogleLogin;
-import r01f.model.security.user.User;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.google.GoogleCallBackOnLoginHandler;
 import r01f.security.handler.google.GoogleLoginEntryPointHandler;
-import r01f.security.handler.google.GoogleUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.google.GoogleSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTDelegateForLoginBase;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
 
 
 /**
  * Google base login: https://developers.google.com/actions/identity/oauth2-code-flow
  */
-  class RESTDelegateForGoogleSecurityProvider<U extends User,L extends GoogleLogin,
-  											  E extends UserLoginEntry>
-extends RESTDelegateForLoginBase<U,L,E> {
+  class RESTDelegateForGoogleSecurityProvider<P extends IsSecurityPrincipal>
+extends RESTDelegateForLoginBase<P> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -31,23 +28,22 @@ extends RESTDelegateForLoginBase<U,L,E> {
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
 	public RESTDelegateForGoogleSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-												 final SecurityProviderSecretConfig securityProviderSecretConfig,
+												 final AuthenticationProviderSecretConfig authProviderSecretConfig,
 												 // handlers
 												 final GoogleLoginEntryPointHandler loginEntryPointHandler,
 									  			 final GoogleCallBackOnLoginHandler callbackOnLoginHandler,
-									  			 final GoogleUserDataFetchHandler<U,L> fetchUserDataHandler,
+									  			 final GoogleSecurityPrincipalDataFetchHandler<P> fetchPrincipalDataHandler,
 									  			 // marshaller
 									  			 final Marshaller marshaller,
 									  			 // used to create [login entries] when the user logs-in
-									  			 final Factory<E> loginEntryFactory,
-									  			 final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
-		super(SecurityProviderID.GOOGLE,
+									  			 final CRUDServicesForLoginEntry loginEntryCrud) {
+		super(IdentityProvider.GOOGLE,AuthenticationMethod.OAUTH_AUTH_CODE_FLOW,
 			  sysSecurityContextProvider,
-			  securityProviderSecretConfig,
+			  authProviderSecretConfig,
 			  loginEntryPointHandler,
-			  fetchUserDataHandler,
+			  fetchPrincipalDataHandler,
 			  marshaller,
-			  loginEntryFactory,loginEntryCrud);
+			  loginEntryCrud);
 		_callbackOnLoginHandler = callbackOnLoginHandler;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////

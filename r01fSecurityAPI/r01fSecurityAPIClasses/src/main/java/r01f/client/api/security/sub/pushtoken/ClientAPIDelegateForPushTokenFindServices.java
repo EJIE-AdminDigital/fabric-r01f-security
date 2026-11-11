@@ -2,17 +2,17 @@ package r01f.client.api.security.sub.pushtoken;
 
 import jakarta.inject.Provider;
 import r01f.api.interfaces.security.pushtoken.FindServicesForPushToken;
-import r01f.guids.CommonOIDs.SystemID;
 import r01f.model.persistence.FindResult;
-import r01f.model.security.pushtoken.PushToken;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.pushtoken.IsPushToken;
 import r01f.model.security.pushtoken.PushTokenOID;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.CommonOIDs.SystemID;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.services.api.delegates.ClientAPIDelegateForModelObjectFindServices;
 import r01f.types.contact.Phone;
 
-public class ClientAPIDelegateForPushTokenFindServices<T extends PushToken>
+public class ClientAPIDelegateForPushTokenFindServices<T extends IsPushToken>
      extends ClientAPIDelegateForModelObjectFindServices<PushTokenOID,T> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR

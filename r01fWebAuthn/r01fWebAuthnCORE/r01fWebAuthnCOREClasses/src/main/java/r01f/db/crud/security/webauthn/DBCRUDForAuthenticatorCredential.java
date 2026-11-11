@@ -6,20 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import r01f.api.interfaces.security.webauthn.CRUDServicesForAuthenticatorCredential;
 import r01f.db.entities.security.webauthn.DBEntityForAuthenticatorCredential;
 import r01f.model.persistence.CRUDResult;
-import r01f.model.persistence.CRUDResultBuilder;
+import r01f.model.persistence.PersistenceRequestedOperation;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.webauthn.AuthenticatorCredential;
 import r01f.model.security.webauthn.WebAuthnIDS.CredentialID;
 import r01f.model.security.webauthn.WebAuthnOIDs.CredentialOID;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.services.core.persistence.db.DBCRUDForModelObjectBase;
 import r01f.services.core.persistence.db.TransfersModelObjectStateToDBEntity;
 import r01f.services.core.persistence.db.TransformsDBEntityIntoModelObject;
 import r01f.services.core.persistence.db.config.DBModuleConfig;
 import r01f.services.core.persistence.db.entities.primarykeys.DBPrimaryKeyForModelObject;
 import r01f.util.types.Strings;
-import r01f.util.types.collections.CollectionUtils;
 
 @Slf4j
 public  class DBCRUDForAuthenticatorCredential<C extends AuthenticatorCredential,
@@ -66,84 +65,62 @@ public  class DBCRUDForAuthenticatorCredential<C extends AuthenticatorCredential
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-	@Override 	@SuppressWarnings("resource")
+	@Override 	
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-								final UserOID userOid) {
-		log.warn("DBCRUDForAuthenticatorCredential ( {} ) .loadBy userOid={} ",
-				                                             _DBEntityType, userOid.asString());
+								final SecurityPrincipalOID principalOid) {
+		log.warn("DBCRUDForAuthenticatorCredential ( {} ).loadBy securityPrincipalOid={} ",
+				 _DBEntityType, 
+				 principalOid.asString());
 		TypedQuery<DB> query = this.getEntityManager()
-									 .createQuery(Strings.customized("SELECT entity " +
-																	   "FROM {} entity " +
-																	  "WHERE entity._userOid = :userOid ",
+									 .createQuery(Strings.customized("SELECT dbCredential " +
+																	   "FROM {} dbCredential " +
+																	  "WHERE dbCredential._securityPrincipalOid = :securityPrincipalOid ",
 																	 _DBEntityType.getSimpleName()),
 												_DBEntityType)
-									 .setParameter("userOid",userOid.asString());
-		DB dbEntity = (CollectionUtils.hasData(query.getResultList()))? query.getResultList().get(0) : null;
-		return _buildCRUDResultFor(securityContext,
-								   dbEntity);
+									 .setParameter("securityPrincipalOid",principalOid.asString());
+		return _crudResultForSingleEntity(securityContext,
+										  PersistenceRequestedOperation.LOAD,
+								   		  query.getResultList());
 	}
 
-	@Override 	@SuppressWarnings("resource")
+	@Override 	
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
 								final CredentialID login) {
-		log.warn("DBCRUDForAuthenticatorCredential ( {} ) .loadBy _credentialId={} ",
+		log.warn("DBCRUDForAuthenticatorCredential ( {} ).loadBy _credentialId={} ",
 				                                                _DBEntityType, login.asString());
 		// Do the query
 		TypedQuery<DB> query = this.getEntityManager()
-										.createQuery(Strings.customized("SELECT entity " +
-																		  "FROM {} entity " +
-																		 "WHERE entity._credentialId = :credentialId",
+										.createQuery(Strings.customized("SELECT dbCredential " +
+																		  "FROM {} dbCredential " +
+																		 "WHERE dbCredential._credentialId = :credentialId",
 																		_DBEntityType.getSimpleName()),
 													 _DBEntityType)
 									.setParameter("credentialId",login.asString());
-		DB dbEntity = (CollectionUtils.hasData(query.getResultList()))? query.getResultList().get(0) : null;
-		return _buildCRUDResultFor(securityContext,
-								   dbEntity);
+		return _crudResultForSingleEntity(securityContext,
+										  PersistenceRequestedOperation.LOAD,
+								   		  query.getResultList());
 	}
 
-	@Override 	@SuppressWarnings("resource")
+	@Override 	
 	public CRUDResult<C> loadBy(final SecurityContext securityContext,
-			                    final CredentialID id, final UserOID userOid) {
-		log.warn("\nDBCRUDForAuthenticatorCredential ( {} ) .loadBy _credentialId={} / userOid ='{}' ",
+			                    final CredentialID id,final SecurityPrincipalOID securityPrincipalOid) {
+		log.warn("\nDBCRUDForAuthenticatorCredential ( {} ).loadBy _credentialId={} / securityPrincipalOid ='{}' ",
                                                                 _DBEntityType,
-                                                                id.asString(),userOid);
+                                                                id.asString(),securityPrincipalOid);
 		// Do the query
 		@SuppressWarnings("resource")
 		TypedQuery<DB> query = this.getEntityManager()
-											.createQuery(Strings.customized("SELECT entity " +
-																			  "FROM {} entity " +
-																			 "WHERE entity._credentialId = :credentialId",
-																			 " AND  entity._userOid = :userOid",
+											.createQuery(Strings.customized("SELECT dbCredential " +
+																			  "FROM {} dbCredential " +
+																			 "WHERE dbCredential._credentialId = :credentialId",
+																			 " AND  dbCredential._securityPrincipalOid = :securityPrincipalOid",
 																			_DBEntityType.getSimpleName()),
 														_DBEntityType)
 
 											.setParameter("credentialId",id.asString())
-										    .setParameter("userOid",userOid.asString());
-
-		DB dbEntity = (CollectionUtils.hasData(query.getResultList()))? query.getResultList().get(0) : null;
-		if ( dbEntity == null) {
-			log.warn("..not found any");
-		}
-		return _buildCRUDResultFor(securityContext,
-		                            dbEntity);
+										    .setParameter("securityPrincipalOid",securityPrincipalOid.asString());
+		return _crudResultForSingleEntity(securityContext,
+										  PersistenceRequestedOperation.LOAD,
+								   		  query.getResultList());
 	};
-///////////////////////////////////////////////////////////////////////////
-// PROTECTED
-///////////////////////////////////////////////////////////////////////////
-	protected CRUDResult<C> _buildCRUDResultFor(final SecurityContext securityContext,
-											  final DB dbEntity) {
-		if (dbEntity == null) {
-			return CRUDResultBuilder.using(securityContext)
-									.on(_modelObjectType)
-									.notLoaded()
-									.becauseClientRequestedEntityWasNOTFound()
-									.build();
-		}
-		CRUDResult<C> outCRUDResult = CRUDResultBuilder.using(securityContext)
-												 .on(_modelObjectType)
-												 .loaded()
-												 .dbEntity(dbEntity)
-												 .transformedToModelObjectUsing(this);
-		return outCRUDResult;
-	}
 }

@@ -14,15 +14,15 @@ import r01f.core.services.notifier.annotations.UseEMailNotifier;
 import r01f.core.services.notifier.annotations.UseMessagingNotifier;
 import r01f.eventbus.EventBus;
 import r01f.model.annotations.ModelObjectsMarshaller;
-import r01f.model.security.otp.dispatch.OTPDispatchRequest;
-import r01f.model.security.otp.dispatch.OTPDispatchResponse;
-import r01f.model.security.otp.generation.OTPGenerationRequest;
-import r01f.model.security.otp.generation.OTPGenerationResponse;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.otp.operations.OTPOperationExecResult;
-import r01f.model.security.otp.validation.OTPValidationRequest;
-import r01f.model.security.otp.validation.OTPValidationResponse;
+import r01f.model.security.otp.task.dispatch.IsOTPDispatchRequest;
+import r01f.model.security.otp.task.dispatch.OTPDispatchResponse;
+import r01f.model.security.otp.task.generation.OTPGenerationRequest;
+import r01f.model.security.otp.task.generation.OTPGenerationResponse;
+import r01f.model.security.otp.task.validation.IsOTPValidationRequest;
+import r01f.model.security.otp.task.validation.OTPValidationResponse;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.bootstrap.annotations.core.CoreService;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.annotations.ServicesCoreConfigFor;
@@ -71,7 +71,7 @@ public class CoreOTPServiceImpl
 	}
 	@Transactional
 	@Override
-	public <R extends OTPDispatchRequest<?, ?, ?>> OTPOperationExecResult<OTPDispatchResponse> dispatch(final SecurityContext securityContext,
+	public <R extends IsOTPDispatchRequest<?, ?, ?>> OTPOperationExecResult<OTPDispatchResponse> dispatch(final SecurityContext securityContext,
 			                                                                                            final R otpRequest) {
 		return this.forSecurityContext(securityContext)
 					.createDelegateAs(OTPService.class)
@@ -81,7 +81,7 @@ public class CoreOTPServiceImpl
 	
 	@Transactional
 	@Override
-	public <R extends OTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
+	public <R extends IsOTPValidationRequest<?>> OTPOperationExecResult<OTPValidationResponse> validate(final SecurityContext securityContext,
 			                                                                                          final R validationReq) {
 		return this.forSecurityContext(securityContext)
 					.createDelegateAs(OTPService.class)

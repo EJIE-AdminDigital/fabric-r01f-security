@@ -6,13 +6,13 @@ import jakarta.transaction.Transactional;
 import lombok.experimental.Accessors;
 import r01f.api.interfaces.pairing.PairingService;
 import r01f.eventbus.EventBus;
-import r01f.model.security.pairing.PairingRequest;
-import r01f.model.security.pairing.PairingResult;
-import r01f.model.security.pairing.UnpairingRequest;
-import r01f.model.security.pairing.UnpairingResult;
-import r01f.model.security.pairing.operations.PairingOperationExecResult;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.pairing.IsPairingRequest;
+import r01f.model.security.pairing.IsPairingResult;
+import r01f.model.security.pairing.IsUnpairingRequest;
+import r01f.model.security.pairing.IsUnpairingResult;
+import r01f.model.security.pairing.operations.IsPairingOperationExecResult;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.core.ServicesCoreModuleConfig;
 import r01f.services.core.persistence.CoreServicesBase;
 import r01f.services.delegates.pairing.PairingServiceDelegateBase;
@@ -23,11 +23,10 @@ import r01f.services.delegates.pairing.PairingServiceDelegateBase;
  */
 @Singleton
 @Accessors(prefix="_")
-public abstract class PairingServiceImplBase<P extends PairingRequest,
-										     U extends UnpairingRequest>
+public abstract class PairingServiceImplBase<P extends IsPairingRequest,U extends IsUnpairingRequest>
 			  extends CoreServicesBase
 		   implements PairingService<P,U>,
-		   			  PairingServiceInterfaceImpl {
+		   			  IsPairingServiceInterfaceImpl {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -37,15 +36,14 @@ public abstract class PairingServiceImplBase<P extends PairingRequest,
 		super(coreCfg,
 			  modelObjectsMarshaller,
 			  eventBus);
-
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //  METHODS TO IMPLEMENT
 /////////////////////////////////////////////////////////////////////////////////////////
 	@Override
 	@Transactional @SuppressWarnings("unchecked")
-	public PairingOperationExecResult<PairingResult> pair(final SecurityContext securityContext,
-			                                              final P pairingRequest) {
+	public IsPairingOperationExecResult<IsPairingResult> pair(final SecurityContext securityContext,
+			                                              	  final P pairingRequest) {
 		return  this.forSecurityContext(securityContext)
 						.createDelegateAs(PairingService.class)
 							.pair(securityContext,
@@ -53,8 +51,8 @@ public abstract class PairingServiceImplBase<P extends PairingRequest,
 	}
 	@Override
 	@Transactional @SuppressWarnings("unchecked")
-	public PairingOperationExecResult<UnpairingResult> unpair(final SecurityContext securityContext,
-			                                                  final UnpairingRequest unpairingRequest) {
+	public IsPairingOperationExecResult<IsUnpairingResult> unpair(final SecurityContext securityContext,
+			                                                  	  final IsUnpairingRequest unpairingRequest) {
 		return  this.forSecurityContext(securityContext)
 						.createDelegateAs(PairingService.class)
 							.unpair(securityContext,

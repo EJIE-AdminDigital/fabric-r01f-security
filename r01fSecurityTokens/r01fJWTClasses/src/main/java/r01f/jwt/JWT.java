@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import r01f.annotations.Immutable;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.types.CanBeRepresentedAsString;
 
 /**
@@ -59,6 +60,9 @@ public class JWT
 	public JWT(final String value) {
 		_value = value;
 	}
+	public static JWT from(final SecurityToken token) {
+		return new JWT(token.asString());
+	}
 	public static JWT forValue(final String value) {
 		return new JWT(value);
 	}
@@ -81,6 +85,9 @@ public class JWT
 	@Override
 	public String  toString() {
 		return asString();
+	}
+	public SecurityToken asSecurityToken() {
+		return SecurityToken.forId(this.asString());
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	EQUALS & HASHCODE

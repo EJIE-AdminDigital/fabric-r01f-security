@@ -9,7 +9,7 @@ import r01f.objectstreamer.annotations.MarshallType;
 @Accessors(prefix="_")
 public class PairingOperationExecOK<T>
 	 extends COREServiceMethodExecOK<T>
-  implements PairingOperationExecResult<T> {
+  implements IsPairingOperationExecResult<T> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////

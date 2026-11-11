@@ -3,7 +3,7 @@ package r01f.security.keycloak.model.auth;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 
 @Accessors(prefix = "_")
 @MarshallType(as="keycloakRefreshToken")

@@ -1,10 +1,9 @@
 package r01f.internal.notifier.security.user.registration;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
 import org.apache.velocity.app.VelocityEngine;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import r01f.core.notifier.NotifierResponse;
 import r01f.core.notifier.NotifierResponseResult;
@@ -14,9 +13,9 @@ import r01f.core.services.notifier.NotifierServiceResponse;
 import r01f.core.services.notifier.config.NotifierConfigForSMS;
 import r01f.events.security.UserRegistrationMessage;
 import r01f.internal.notifier.security.config.SecurityNotifierConfigForSMS;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.patterns.Factory;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.types.Path;
 import r01f.types.contact.Phone;
 import r01f.util.types.Strings;
@@ -87,7 +86,7 @@ public class UserRegistrationNotifierSMSImpl
 //	PRIVATE METHODS
 /////////////////////////////////////////////////////////////////////////////////////////
 	static String _composeIMMessage(final VelocityEngine velocityEngine,final Path alertMsgTemplatePath,
-									final UserOID userOid,final String userName,
+									final SecurityPrincipalOID userOid,final String userName,
 									final SecurityToken securityToken) {
 
 		return Strings.customized("Utiliza el token [{}] para recuperar tu password",

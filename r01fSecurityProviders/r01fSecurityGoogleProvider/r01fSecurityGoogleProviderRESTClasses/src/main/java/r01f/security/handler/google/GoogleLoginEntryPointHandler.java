@@ -1,7 +1,7 @@
 package r01f.security.handler.google;
 
-import r01f.security.handler.LoginEntryPointHandlerBase;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.authn.handler.LoginEntryPointHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.types.url.Url;
 
 public class GoogleLoginEntryPointHandler
@@ -13,7 +13,7 @@ public class GoogleLoginEntryPointHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public GoogleLoginEntryPointHandler(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public GoogleLoginEntryPointHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		super(securityProviderSecretConfig);
 		_googleOAuth = new GoogleApi(_securityProviderSecretConfig);
 	}

@@ -5,97 +5,105 @@ import java.util.Collection;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.guids.CommonOIDs.AppComponent;
-import r01f.guids.CommonOIDs.WebSessionID;
-import r01f.model.security.SecurityObject;
-import r01f.model.security.user.User;
-import r01f.model.security.user.UserRoleInModule;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
-import r01f.securitycontext.SecurityIDS.UserRole;
-import r01f.securitycontext.SecurityOIDs.UserOID;
+import r01f.model.security.HasSystemWideRoles;
+import r01f.model.security.IsSecurityObject;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.SecurityRoleInModule;
+import r01f.oids.CommonOIDs.AppComponent;
+import r01f.oids.CommonOIDs.WebSessionID;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
+import r01f.oids.SecurityIDs.SecurityRole;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 
 @Accessors(prefix="_")
-public class LoginSession<U extends User>
-  implements SecurityObject {
+public class LoginSession<P extends IsSecurityPrincipal>
+  implements HasSystemWideRoles,
+  			 IsSecurityObject {
 	
 	private static final long serialVersionUID = 4322523635887085378L;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
 	@Getter private final WebSessionID _sessionUID;
-	@Getter private final SecurityProviderID _securityProviderId;
-	@Getter private final LoginID _loginId;
-	@Getter private final U _user;
+	@Getter private final IdentityProvider _identityProvider;
+	@Getter private final AuthenticationMethod _authenticationMethod;
+	@Getter private final P _securityPrincipal;	
 	@Getter private final Instant _createdAt;
+	
+	@Getter private final Collection<SecurityRoleInModule> _systemWideRoles;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR																		  
 /////////////////////////////////////////////////////////////////////////////////////////
 	public LoginSession(final WebSessionID sessionOid,
-						final SecurityProviderID securityProviderId,final LoginID loginId,
-						final U user,
-						final Instant createDate) {
+						final IdentityProvider identityProvider,final AuthenticationMethod authenticationMethod,
+						final P securityPrincipal,
+						final Instant createDate,
+						final Collection<SecurityRoleInModule> systemWideRoles) {
 		_sessionUID = sessionOid;
-		_securityProviderId = securityProviderId;
-		_loginId = loginId;
-		_user = user;
+		_identityProvider = identityProvider;
+		_authenticationMethod = authenticationMethod;
+		_securityPrincipal = securityPrincipal;
 		_createdAt = createDate;
+		_systemWideRoles = systemWideRoles;
 	}
 	public LoginSession(final WebSessionID sessionOid,	// use: WebSessionOID.forId(request.getSession(true).getId()),	// get the web session id
-						final SecurityProviderID securityProviderId,final LoginID loginId,
-						final U user) {
-		_sessionUID = sessionOid;
-		_securityProviderId = securityProviderId;
-		_loginId = loginId;
-		_user = user;
-		_createdAt = Instant.now();
+						final IdentityProvider securityProviderId,final AuthenticationMethod authenticationMethod,
+						final P securityPrincipal,
+						final Collection<SecurityRoleInModule> systemWideRoles) {
+		this(sessionOid,
+			 securityProviderId,authenticationMethod,
+			 securityPrincipal,
+			 Instant.now(),
+			 systemWideRoles);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CLONE
 /////////////////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Creates a NEW {@link LoginSession} with an updated user
-	 * @param user
+	 * Creates a NEW {@link LoginSession} with an updated [principal]
+	 * @param principal
 	 * @return
 	 */
-	public LoginSession<U> cloneForUpdatedUser(final U user) {
-		if (user == null) throw new IllegalArgumentException("user is NOT valid!");
-		if (user.getOid() == null
-		 || user.getOid().isNOT(_user.getOid())) throw new IllegalArgumentException("The userOid=" + user.getOid() + " DOES NOT MATCH the actual userOid=" + _user.getOid());
+	public LoginSession<P> cloneForUpdatedSecurityPrincipal(final P principal) {
+		if (principal == null) throw new IllegalArgumentException("[security principal] is NOT valid!");
+		if (principal.getOid() == null
+		 || principal.getOid().isNOT(_securityPrincipal.getOid())) throw new IllegalArgumentException("The [principal]=" + principal.getOid() + " DOES NOT MATCH the actual [principal]=" + _securityPrincipal.getOid());
 		return new LoginSession<>(_sessionUID,
-								  _securityProviderId,_loginId,
-								  user,
-								  _createdAt);
+								  _identityProvider,_authenticationMethod,
+								  principal,
+								  _createdAt,
+								  _systemWideRoles);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-//																			  
+//	SECURITY PRINCIPAL																	  
 /////////////////////////////////////////////////////////////////////////////////////////
-	@Deprecated
-	public U getUserData() {
-		return _user;
-	}
-	public UserOID getUserOid() {
-		return _user != null ? _user.getOid()
+	public SecurityPrincipalOID getSecurityPrincipalOid() {
+		return _securityPrincipal != null ? _securityPrincipal.getOid()
 							 : null;
+	}
+	public SecurityPrincipalID getSecurityPrincipalId() {
+		return _securityPrincipal != null ? _securityPrincipal.getId()
+							 			  : null;
+	}
+	public IdentityProvider getSecurityPrincipalSourceIdentityProvider() {
+		return _securityPrincipal != null ? _securityPrincipal.getSourceIdentityProvider()
+							 	  : null;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public Collection<UserRoleInModule> getUserSystemWideRoles() {
-		return _user != null ? _user.getUserSystemWideRoles()
-							 : null;
+	public Collection<SecurityRoleInModule> getSecurityPrincipalSystemWideRoles() {
+		return _systemWideRoles;
 	}
-	public Collection<UserRole> getUserSystemWideRolesIn(final AppComponent module) {
-		return _user != null ? _user.getUserSystemWideRolesIn(module)
-							 : null;
+	public Collection<SecurityRole> getSecurityPrincipalSystemWideRolesIn(final AppComponent module) {
+		return this.getSystemWideRolesIn(module);
 	}
-	public boolean hasAnyUserSystemWideRoleIn(final AppComponent module) {
-		return _user != null ? _user.hasAnyUserSystemWideRoleIn(module)
-							 : false;
+	public boolean hasSecurityPrincipalAnySystemWideRoleIn(final AppComponent module) {
+		return this.hasAnySystemWideRoleIn(module);
 	}
-	public boolean hasUserSystemWideRoleIn(final AppComponent module,final UserRole userRole) {
-		return _user != null ? _user.hasUserSystemWideRoleIn(module,
-															 userRole)
-							 : false;
+	public boolean hasSecurityPrincipalSystemWideRoleIn(final AppComponent module,final SecurityRole userRole) {
+		return this.hasSystemWideRoleIn(module,userRole);
 	}
 }

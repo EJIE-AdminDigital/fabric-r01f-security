@@ -7,11 +7,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import r01f.jwt.JWT;
-import r01f.security.handler.CallBackOnLoginHandlerBase;
-import r01f.security.provider.SecurityProvider;
-import r01f.security.provider.SecurityProviderSecretConfig;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.LoginID;
+import r01f.oids.SecurityIDs.SecurityPrincipalID;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.security.authn.handler.CallBackOnLoginHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.types.contact.EMail;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
@@ -42,7 +44,7 @@ public class GoogleCallBackOnLoginHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
-	public GoogleCallBackOnLoginHandler(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public GoogleCallBackOnLoginHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		super(securityProviderSecretConfig);
 		_googleApi = new GoogleApi(securityProviderSecretConfig);
 	}
@@ -85,9 +87,10 @@ public class GoogleCallBackOnLoginHandler
 
 		// [3] - Create a JWT token that contains the google access-token and the user's email
 		log.info("### [3] - Create the JWT token");
-		@SuppressWarnings("serial")
 		JWT jwt = _createJWT(_securityProviderSecretConfig.getKeyData().asString(),
-							 SecurityProvider.GOOGLE.getCode(),LoginID.forId(userEMail.asString()),userEMail,		// google provider uses the email as [loginId]
+							 IdentityProvider.GOOGLE,AuthenticationMethod.OAUTH_AUTH_CODE_FLOW,
+							 SecurityPrincipalID.fromLoginId(LoginID.forId(userEMail.asString())),
+							 userEMail,		// google provider uses the email as [loginId]
 							 new HashMap<String,String>() {{
 									put(JWT_CUSTOM_CLAIM_FOR_GOOGE_ACCESS_TOKEN,googleAccessToken.asString());
 							 }});

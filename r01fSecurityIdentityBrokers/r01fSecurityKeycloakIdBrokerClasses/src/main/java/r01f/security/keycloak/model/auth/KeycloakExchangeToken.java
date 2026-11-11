@@ -2,7 +2,7 @@ package r01f.security.keycloak.model.auth;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 
 @Accessors(prefix = "_")
 public class KeycloakExchangeToken 

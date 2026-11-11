@@ -10,7 +10,7 @@ import r01f.objectstreamer.annotations.MarshallType;
 @Accessors(prefix="_")
 public class SecurityOperationExecOK<T>
 	 extends COREServiceMethodExecOK<T> 
-  implements SecurityOperationResult<T> {
+  implements IsSecurityOperationResult<T> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////

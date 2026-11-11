@@ -1,6 +1,6 @@
 package r01f.model.security.otp.oids;
 
-import r01f.guids.OIDs;
+import r01f.oids.OIDs;
 
 public class OTPGUIDDispenser {
 /////////////////////////////////////////////////////////////////////////////////////////

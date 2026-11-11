@@ -1,6 +1,6 @@
 package r01f.crypto.hmac;
 
-import r01f.securitycontext.SecurityIDS.SecurityToken;
+import r01f.oids.SecurityIDs.SecurityToken;
 
 public interface HMACService {
 /////////////////////////////////////////////////////////////////////////////////////////

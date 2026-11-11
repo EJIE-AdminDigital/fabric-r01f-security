@@ -2,7 +2,6 @@ package r01f.internal.notifier.security.user.registration;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-
 import lombok.extern.slf4j.Slf4j;
 import r01f.core.notifier.NotifierResponse;
 import r01f.core.services.notifier.config.NotifierConfigForLog;

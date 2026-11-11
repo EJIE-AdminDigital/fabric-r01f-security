@@ -1,0 +1,22 @@
+package r01f.security.authn.provider.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import jakarta.inject.Qualifier;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
+
+
+
+@Qualifier // @BindingAnnotation
+@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AuthnProviderConfig {
+	
+    IdentityProvider identityProvider();
+
+    AuthenticationMethod authnMethod();
+}

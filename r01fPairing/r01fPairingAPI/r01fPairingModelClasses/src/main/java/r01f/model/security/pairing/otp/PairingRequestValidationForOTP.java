@@ -2,8 +2,8 @@ package r01f.model.security.pairing.otp;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import r01f.model.security.otp.validation.OTPValidationResponse;
-import r01f.model.security.pairing.PairingRequestValidationResult;
+import r01f.model.security.otp.task.validation.OTPValidationResponse;
+import r01f.model.security.pairing.IsPairingRequestValidationResult;
 import r01f.model.security.pairing.PairingRequestValidationResultBase;
 import r01f.objectstreamer.annotations.MarshallType;
 import r01f.validation.ObjectValidationResultBuilder;
@@ -12,14 +12,14 @@ import r01f.validation.ObjectValidationResults.ObjectValidationResultOK;
 
 @Accessors(prefix="_")
 @MarshallType(as="pairingRequestValidationForOTP") 
-public class PairingRequestValidationForOTP<P extends PairingRequestByOTP>
+public class PairingRequestValidationForOTP<P extends IsPairingRequestUsingOTP>
 	 extends PairingRequestValidationResultBase<P>
-  implements PairingRequestValidationResult<P> {
+  implements IsPairingRequestValidationResult<P> {
 	
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////
-	private final P _pairingRequest;
+	@Getter private final P _pairingRequest;
 	@Getter private final OTPValidationResponse _otpValidationResponse;
 	
 /////////////////////////////////////////////////////////////////////////////////////////

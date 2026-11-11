@@ -10,7 +10,7 @@ import r01f.objectstreamer.annotations.MarshallField.MarshallFieldAsXml;
 @Accessors(prefix="_")
 @RequiredArgsConstructor
 public abstract class OTPResponseBase
-           implements OTPObject {
+           implements IsOTPObject {
 
 	private static final long serialVersionUID = 7766404476560739303L;
 /////////////////////////////////////////////////////////////////////////////////////////

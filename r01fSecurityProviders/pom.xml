@@ -32,5 +32,7 @@
 		<module>r01fSecurityPairedPhoneProvider</module>		
 		<module>r01fSecuritySAMLProvider</module>
 		<module>r01fSecurityOAuthProviderClasses</module>
+		<module>r01fSecurityApiKeyProviderClasses</module>
+		<module>r01fSecurityBearerProviderClasses</module>
 	</modules>
 </project>

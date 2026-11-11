@@ -8,7 +8,7 @@ import r01f.db.entities.security.otp.persistence.DBEntityForOTPTask;
 import r01f.internal.R01FAppCodes;
 import r01f.services.bootstrap.core.db.spring.CoreSpringBootstrapPersistenceModulePostProcessor;
 import r01f.services.ids.ServiceIDs.CoreAppCode;
-import r01f.services.security.otp.persistence.CoreOTPDBPersistenceService;
+import r01f.services.security.otp.persistence.IsCoreOTPDBPersistenceService;
 
 @Component
 public class OTPCORESpringCoreBootstrapPersistenceModulePostProcessor
@@ -18,8 +18,8 @@ public class OTPCORESpringCoreBootstrapPersistenceModulePostProcessor
 /////////////////////////////////////////////////////////////////////////////////////////  
     public OTPCORESpringCoreBootstrapPersistenceModulePostProcessor() {
 		super(CoreAppCode.of(R01FAppCodes.APP_CODE), OTPModuleCodes.SECURITY_SERVICES_PERSISTENCE_OTP_MOD, 
-				DBEntityForOTPTask.class, 
-				CoreOTPDBPersistenceService.class);		
+			  DBEntityForOTPTask.class, 
+			  IsCoreOTPDBPersistenceService.class);		
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
 // METHODS TO IMPLEMENT

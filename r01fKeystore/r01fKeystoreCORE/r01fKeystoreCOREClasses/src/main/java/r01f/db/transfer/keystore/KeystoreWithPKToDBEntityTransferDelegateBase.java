@@ -3,9 +3,9 @@ package r01f.db.transfer.keystore;
 import lombok.RequiredArgsConstructor;
 import r01f.db.entities.keystore.DBEntityKeystoreWithPKBase;
 import r01f.model.ModelObject;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.keystore.KeystoreWithPKBase;
 import r01f.model.security.keystore.oids.KeystoreOIDs.KeystoreOID;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.core.persistence.db.DBEntity;
 
 /**

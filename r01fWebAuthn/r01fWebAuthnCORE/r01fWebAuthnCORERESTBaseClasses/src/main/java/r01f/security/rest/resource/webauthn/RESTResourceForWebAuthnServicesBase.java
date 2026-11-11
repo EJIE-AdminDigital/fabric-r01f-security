@@ -12,10 +12,10 @@ import jakarta.ws.rs.core.Response;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import r01f.jwt.JWT;
+import r01f.oids.SecurityIDs.LoginID;
 import r01f.rest.RESTResourceBase;
 import r01f.rest.resources.delegates.RESTDelegate;
 import r01f.security.rest.delegates.resource.webauthn.RESTDelegateForWebAuthnBase;
-import r01f.securitycontext.SecurityIDS.LoginID;
 
 
 @Slf4j

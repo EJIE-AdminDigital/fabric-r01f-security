@@ -5,9 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.SecurityIDs.Password;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakClientID;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
-import r01f.securitycontext.SecurityIDS.Password;
 
 @Accessors(prefix = "_")
 @MarshallType(as="keycloakUserRefreshTokenRequest")

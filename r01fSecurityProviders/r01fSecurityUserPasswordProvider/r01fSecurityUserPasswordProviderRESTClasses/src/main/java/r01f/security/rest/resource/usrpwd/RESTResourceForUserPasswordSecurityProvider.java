@@ -10,29 +10,25 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import lombok.experimental.Accessors;
-import r01f.api.interfaces.security.login.entry.CRUDServicesForUserLoginEntry;
-import r01f.api.interfaces.security.login.userpassword.CRUDServicesForUserPasswordLogin;
-import r01f.api.interfaces.security.login.userpassword.UserPasswordLoginServices;
-import r01f.api.interfaces.security.user.CRUDServicesForUser;
-import r01f.model.security.login.entry.UserLoginEntry;
-import r01f.model.security.login.userpassword.UserPasswordLogin;
+import r01f.api.interfaces.security.login.CRUDServicesForLogin;
+import r01f.api.interfaces.security.login.UserPasswordLoginServices;
+import r01f.api.interfaces.security.login.entry.CRUDServicesForLoginEntry;
+import r01f.api.interfaces.security.principal.CRUDServicesForPrincipal;
+import r01f.model.security.IsSecurityPrincipal;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
-import r01f.model.security.user.User;
 import r01f.objectstreamer.Marshaller;
-import r01f.patterns.Factory;
+import r01f.oids.SecurityIDs.LoginID;
+import r01f.oids.SecurityIDs.Password;
+import r01f.oids.SecurityIDs.Secret;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.security.handler.usrpwd.UserPasswordCallBackOnLoginHandler;
 import r01f.security.handler.usrpwd.UserPasswordLoginEntryPointHandler;
-import r01f.security.handler.usrpwd.UserPasswordUserDataFetchHandler;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.handler.usrpwd.UserPasswordSecurityPrincipalDataFetchHandler;
 import r01f.security.rest.resource.RESTResourceForSecurityServicesBase;
-import r01f.securitycontext.SecurityContext;
-import r01f.securitycontext.SecurityIDS.LoginID;
-import r01f.securitycontext.SecurityIDS.Password;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.types.contact.EMail;
-import r01f.types.contact.HasMailAddress;
-import r01f.types.contact.HasPhoneNumber;
 import r01f.types.contact.Phone;
 import r01f.types.url.Url;
 
@@ -44,60 +40,61 @@ import r01f.types.url.Url;
  */
 @Path("api/usrpwd/users")
 @Accessors(prefix="_")
-public class RESTResourceForUserPasswordSecurityProvider<U extends User & HasMailAddress & HasPhoneNumber,L extends UserPasswordLogin,
-														 E extends UserLoginEntry>
+public class RESTResourceForUserPasswordSecurityProvider<P extends IsSecurityPrincipal>
 	 extends RESTResourceForSecurityServicesBase {
 
-	protected SecurityProviderSecretConfig _securityProviderSecretConfig;
+	protected AuthenticationProviderSecretConfig _securityProviderSecretConfig;
 /////////////////////////////////////////////////////////////////////////////////////////
 // 	CONSTRUCTOR /
 /////////////////////////////////////////////////////////////////////////////////////////
 	public RESTResourceForUserPasswordSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-													   final SecurityProviderSecretConfig securityProviderSecretConfig,
-													   // used to create delegates
-													   final Class<U> userType,final Class<L> loginType,
-													   final SecurityProviderSecretConfig config,
-													   final CRUDServicesForUser<U> userCrud,final CRUDServicesForUserPasswordLogin<L> loginCrud,
-													   final UserPasswordLoginServices<U,L> loginServices,
+													   final AuthenticationProviderSecretConfig securityProviderSecretConfig,
 													   final Marshaller marshaller,
-													   // used to create [login entries] when the user logs-in
-													   final Factory<E> loginEntryFactory,
-													   final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
+													   // used to create delegates
+													   final Class<P> principalType,
+													   // config
+													   final AuthenticationProviderSecretConfig config,
+													   // services
+													   final CRUDServicesForPrincipal<P> principalCrud,
+													   final CRUDServicesForLogin loginCrud,final CRUDServicesForLoginEntry loginEntryCrud,
+													   final UserPasswordLoginServices userPasswordLoginServices) {
 		this(sysSecurityContextProvider,
 			 securityProviderSecretConfig,
+			 marshaller,
 			 new UserPasswordLoginEntryPointHandler(config),
 			 new UserPasswordCallBackOnLoginHandler(config),
-			 new UserPasswordUserDataFetchHandler<>(userType,loginType,
-					  								sysSecurityContextProvider,
-					  								userCrud,loginCrud,
-					  								config),
-			 loginServices,
-			 marshaller,
-			 loginEntryFactory,loginEntryCrud);
-
+			 new UserPasswordSecurityPrincipalDataFetchHandler<>(principalType,
+					  											 sysSecurityContextProvider,
+					  											 principalCrud,loginCrud,
+					  											 config),
+			 userPasswordLoginServices,
+			 loginCrud,
+			 loginEntryCrud);
 		_securityProviderSecretConfig = securityProviderSecretConfig;
 	}
 	public RESTResourceForUserPasswordSecurityProvider(final Provider<SecurityContext> sysSecurityContextProvider,
-													   final SecurityProviderSecretConfig securityProviderSecretConfig,
+													   final AuthenticationProviderSecretConfig securityProviderSecretConfig,
+													   final Marshaller marshaller,
+													   // entry point handlers
 													   final UserPasswordLoginEntryPointHandler loginEntryPointHandler,
 									  				   final UserPasswordCallBackOnLoginHandler callbackOnLoginHandler,
-									  				   final UserPasswordUserDataFetchHandler<U,L> fetchUserDataHandler,
-									  				   final UserPasswordLoginServices<U,L> loginServices,
-									  				   final Marshaller marshaller,
+									  				   final UserPasswordSecurityPrincipalDataFetchHandler<P> fetchUserDataHandler,
+									  				   final UserPasswordLoginServices loginServices,
+									  				   final CRUDServicesForLogin loginCrud,
 									  				   // used to create [login entries] when the user logs-in
-									  				   final Factory<E> loginEntryFactory,
-									  				   final CRUDServicesForUserLoginEntry<E> loginEntryCrud) {
+									  				   final CRUDServicesForLoginEntry loginEntryCrud) {
 		this(new RESTDelegateForUserPasswordSecurityProvider<>(sysSecurityContextProvider,
 															   securityProviderSecretConfig,
+															   marshaller,
 															   loginEntryPointHandler,
 												  			   callbackOnLoginHandler,
 												  			   fetchUserDataHandler,
 												  			   loginServices,
-												  			   marshaller,
-												  			   loginEntryFactory,loginEntryCrud));
+												  			   loginCrud,
+												  			   loginEntryCrud));
 		_securityProviderSecretConfig = securityProviderSecretConfig;
 	}
-	public <D extends RESTDelegateForUserPasswordSecurityProvider<U,L,E>> RESTResourceForUserPasswordSecurityProvider(final D restDelegateForUserPasswordSecurityProvider) {
+	public <D extends RESTDelegateForUserPasswordSecurityProvider<P>> RESTResourceForUserPasswordSecurityProvider(final D restDelegateForUserPasswordSecurityProvider) {
 		super(restDelegateForUserPasswordSecurityProvider);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -105,69 +102,75 @@ public class RESTResourceForUserPasswordSecurityProvider<U extends User & HasMai
 /////////////////////////////////////////////////////////////////////////////////////////
 	@POST
 	@Path("/login")
-	public Response login(@FormParam("userCode") final LoginID userCode,
+	public Response login(@FormParam("userCode") final LoginID loginId,
 			              @FormParam("pass")     final Password pass,
 			              @FormParam("to")       final Url url) {
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .login(userCode,pass,url);
+				   .login(loginId,pass,
+						  url);
 	}
-
 	@POST
 	@Path("/login/usingOTPBySMS")
-	public Response loginUsingOTPBySMS(@FormParam("userCode") final LoginID userCode,
+	public Response loginUsingOTPBySMS(@FormParam("userCode") final LoginID loginId,
 			                           @FormParam("pass")     final Password pass,
 			                           @FormParam("phone")    final Phone phone,
 			                           @FormParam("to")       final Url url) {
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .loginUsingOTPBySMS(userCode,pass,phone,url);
+				   .loginUsingOTPBySMS(loginId,pass,
+						   			   phone,
+						   			   url);
 	}
-
 	@POST
 	@Path("/login/usingOTPByEMail")
-	public Response loginUsingOTPByEMail(@FormParam("userCode") final LoginID userCode,
+	public Response loginUsingOTPByEMail(@FormParam("userCode") final LoginID loginId,
 			                             @FormParam("pass")     final Password pass,
 			                             @FormParam("email")    final EMail email,
 			                             @FormParam("to")       final Url url) {
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .loginUsingOTPByEMail(userCode,pass,email,url);
+				   .loginUsingOTPByEMail(loginId,pass,
+						   				 email,
+						   				 url);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-// LOGIN AUTH FACTOR VALIDATION
+// 	LOGIN AUTH FACTOR VALIDATION
 /////////////////////////////////////////////////////////////////////////////////////////
 	@POST
 	@Path("/login/validate/authfactor/usingOTPBySMS")
-	public Response validateAuthFactorOTPBySMS(@FormParam("userCode") final LoginID userCode,
+	public Response validateAuthFactorOTPBySMS(@FormParam("userCode") final LoginID loginId,
 											   @FormParam("task")     final OTPTaskOID taskOid,
-											   @FormParam("secret")   final Password secret,
+											   @FormParam("secret")   final Secret secret,
 											   @FormParam("phone")    final Phone phone,
 											   @FormParam("to")       final Url url) {
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .validateAuthFactorOTPBySMS(taskOid,userCode,secret,phone,url);
+				   .validateAuthFactorOTPBySMS(taskOid,
+						   					   loginId,secret,
+						   					   phone,
+						   					   url);
 	}
 
 	@POST
 	@Path("/login/validate/authfactor/usingOTPByEMail")
-	public Response validateAuthFactorOTPByEMail(@FormParam("userCode") final LoginID userCode,
+	public Response validateAuthFactorOTPByEMail(@FormParam("userCode") final LoginID loginId,
 												 @FormParam("task")     final OTPTaskOID taskOid,
-												 @FormParam("secret")   final Password secret,
+												 @FormParam("secret")   final Secret secret,
 												 @FormParam("email")    final EMail email,
 												 @FormParam("to")       final Url url) {
-
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .validateAuthFactorOTPByEMail(taskOid,userCode,secret,email,url);
+				   .validateAuthFactorOTPByEMail(taskOid,
+						   						 loginId,secret,
+						   						 email,
+						   						 url);
 	}
-
 /////////////////////////////////////////////////////////////////////////////////////////
-// LOGIN PASSWORD RECOVERY
+// 	LOGIN PASSWORD RECOVERY
 /////////////////////////////////////////////////////////////////////////////////////////
 	@GET
 	@Path("/password/recovery")
-	public Response recoveryPassword(@QueryParam("id")       final UserOID userOid,
+	public Response recoveryPassword(@QueryParam("id")       final SecurityPrincipalOID loginId,
 									 @QueryParam("token")    final SecurityToken token,
 									 @QueryParam("to") 		 final Url url) throws IOException {
-
 		return this.getDelegateAs(RESTDelegateForUserPasswordSecurityProvider.class)
-				   .passwordReset(userOid,token,
+				   .passwordReset(loginId,token,
 						          url);
 	}
 }

@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import r01f.securitycontext.SecurityIDS.LoginID;
+import r01f.oids.SecurityIDs.LoginID;
 import r01f.types.url.Url;
 
 @RequiredArgsConstructor(access=AccessLevel.PACKAGE)

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import r01f.cache.DistributedCacheService;
-import r01f.guids.PersistableObjectOID;
 import r01f.model.PersistableModelObject;
 import r01f.model.persistence.CRUDResult;
 import r01f.model.persistence.CRUDResultBuilder;
@@ -14,8 +13,9 @@ import r01f.model.persistence.PersistenceOperationExecError;
 import r01f.model.persistence.PersistenceOperationExecOK;
 import r01f.model.persistence.PersistenceOperationResult;
 import r01f.model.persistence.PersistenceServiceErrorTypes;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.services.COREServiceMethod;
-import r01f.securitycontext.SecurityContext;
+import r01f.oids.PersistableObjectOID;
 import r01f.util.types.Strings;
 import r01f.util.types.datetime.DateTimeMarshaller;
 
@@ -38,7 +38,7 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 	 */
 	@Getter protected final Class<M> _modelObjectType;	
 /////////////////////////////////////////////////////////////////////////////////////////
-// CONSTRUCTOR
+// 	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////
 	public HZBaseForModelObjectBase(final Class<M> modelObjectType,
 			                        final DistributedCacheService cacheService) {
@@ -46,9 +46,8 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 		_modelObjectType = modelObjectType;
 	}
 /////////////////////////////////////////////////////////////////////////////////////////
-// METHODS
+// 	METHODS
 /////////////////////////////////////////////////////////////////////////////////////////
-
 	protected PersistenceOperationResult<Boolean> doCheckExistence(final SecurityContext securityContext,
 								   								   final O oid) {			
 		boolean exists = _cacheService.getOrCreateCacheFor(_modelObjectType).containsKey(oid);
@@ -63,8 +62,6 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 		} 
 		return outResult;
 	}
-	
-	
 	protected PersistenceOperationResult<Instant> lastUpdateTime(final SecurityContext securityContext,
 								   							  	 final O oid) {
 		//.. 1. Check existence		
@@ -81,7 +78,6 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 		return new PersistenceOperationExecOK<>(COREServiceMethod.named("lastUpdateDate"), DateTimeMarshaller.instantFromEPOCHMillis(lastUpdateTIme));		
 	
 	}
-	
 	@SuppressWarnings("unused")
 	protected PersistenceOperationResult<Boolean> doTouch(final SecurityContext securityContext,
 								   						  final O oid,final Instant date) {
@@ -105,7 +101,6 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 		 return  new PersistenceOperationExecOK<>(COREServiceMethod.named("touch"),
 				                                  true);
 	}
-	
 	protected CRUDResult<M> doLoad(final SecurityContext securityContext,
 			                       final O oid) {
 		// check the oid
@@ -121,15 +116,15 @@ public  abstract class HZBaseForModelObjectBase<O extends PersistableObjectOID,M
 		CRUDResult<M> outEntityLoadResult = null;
 		if (modelObj != null) {		
 			outEntityLoadResult = CRUDResultBuilder.using(securityContext)
-													  .on(_modelObjectType)
-													  .loaded()
-													 .entity(modelObj);
+												   .on(_modelObjectType)
+												   .loaded()
+												   .entity(modelObj);
 		} else {
 			outEntityLoadResult = CRUDResultBuilder.using(securityContext)
-													  .on(_modelObjectType)
-													  .notLoaded()
-													  .becauseClientRequestedEntityWasNOTFound()
-													 .about(oid).build();
+												   .on(_modelObjectType)
+												   .notLoaded()
+												   .becauseClientRequestedEntityWasNOTFound()
+												   .about(oid).build();
 			log.warn(outEntityLoadResult.getDetailedMessage());
 		}
 		return outEntityLoadResult;

@@ -4,9 +4,9 @@ import jakarta.persistence.EntityManager;
 
 import r01f.api.interfaces.keystore.CRUDServicesForKeystoreBase;
 import r01f.db.entities.keystore.DBEntityKeystoreBase;
+import r01f.model.security.context.SecurityContext;
 import r01f.model.security.keystore.KeystorePersistableObject;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.core.persistence.db.TransfersModelObjectStateToDBEntity;
 import r01f.services.core.persistence.db.config.DBModuleConfig;
 

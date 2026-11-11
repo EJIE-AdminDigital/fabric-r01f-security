@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import r01f.annotations.Immutable;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.securitycontext.SecurityIDS.IsSecurityObjectID;
+import r01f.oids.SecurityIDs.IsSecurityObjectID;
 import r01f.types.StringBase64;
 
 @NoArgsConstructor(access=AccessLevel.PRIVATE)

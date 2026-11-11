@@ -1,19 +1,13 @@
 package r01f.security.keycloak.model.users;
 
-import java.util.Collection;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import r01f.model.ModelObject;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
-import r01f.security.keycloak.model.KeycloakIDs.KeycloakAttributeID;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
 import r01f.security.keycloak.model.KeycloakOIDs.KeycloakUserOID;
-import r01f.security.keycloak.model.base.KeycloackIdentityModelAtttribute;
-import r01f.security.keycloak.model.base.KeycloackIdentityModelAtttribute.KeycloakAttributeValue;
 import r01f.security.keycloak.model.base.KeycloackIdentityModelObjectBase;
 import r01f.types.contact.EMail;
 
@@ -24,7 +18,9 @@ import r01f.types.contact.EMail;
 @Accessors(prefix="_")
 @MarshallType(as="keycloakUser")
 public class KeycloakUserModel
-		extends KeycloackIdentityModelObjectBase<KeycloakUserOID,KeycloakUserID,KeycloakUserModel> {
+     extends KeycloackIdentityModelObjectBase<KeycloakUserOID,KeycloakUserID,
+     										  KeycloakUserModel> {
+	
 	private static final long serialVersionUID = -8389048195998131206L;
 //////////////////////////////////////////////////////////////////////////////
 //  FIELDS

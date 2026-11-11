@@ -1,7 +1,7 @@
 package r01f.security.handler.usrpwd;
 
-import r01f.security.handler.LoginEntryPointHandlerBase;
-import r01f.security.provider.SecurityProviderSecretConfig;
+import r01f.security.authn.handler.LoginEntryPointHandlerBase;
+import r01f.security.authn.provider.config.AuthenticationProviderSecretConfig;
 import r01f.types.url.Url;
 
 public class UserPasswordLoginEntryPointHandler
@@ -9,7 +9,7 @@ public class UserPasswordLoginEntryPointHandler
 /////////////////////////////////////////////////////////////////////////////////////////
 //	CONSTRUCTOR
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public UserPasswordLoginEntryPointHandler(final SecurityProviderSecretConfig securityProviderSecretConfig) {
+	public UserPasswordLoginEntryPointHandler(final AuthenticationProviderSecretConfig securityProviderSecretConfig) {
 		super(securityProviderSecretConfig);
 	}
 /////////////////////////////////////////////////////////////////////////////////////////

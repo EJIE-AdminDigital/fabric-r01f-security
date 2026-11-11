@@ -1,14 +1,14 @@
 package r01f.model.security.pairing;
 
-public abstract class PairingRequestValidationResultBase<P extends PairingRequest> {
+public abstract class PairingRequestValidationResultBase<R extends IsPairingRequest> {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	FIELDS
 /////////////////////////////////////////////////////////////////////////////////////////	
-	final Class<P>  _pairingRequestModelObjectType;
+	private final Class<R> _pairingRequestModelObjectType;
 /////////////////////////////////////////////////////////////////////////////////////////
 //	
 /////////////////////////////////////////////////////////////////////////////////////////	
-	public PairingRequestValidationResultBase(final Class<P> pairingRequestModelObjectType) {
+	public PairingRequestValidationResultBase(final Class<R> pairingRequestModelObjectType) {
 		_pairingRequestModelObjectType = pairingRequestModelObjectType;
 	}
 }

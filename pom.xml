@@ -24,6 +24,8 @@
 		<r01f.businessservices.version>R01F-BUSINESS-SERVICES-VERSION</r01f.businessservices.version>
 		<r01f.coreservices.version>R01F-CORE-SERVICES-VERSION</r01f.coreservices.version>
 		<r01f.security.version>R01F-SECURITY-VERSION</r01f.security.version>
+
+		<keycloak.version>26.0.12</keycloak.version>
 	</properties>
 
 <!-- ====================================================================== -->
@@ -448,17 +450,18 @@
 			<id>batsdlc</id>
 			<properties>
 
-				<!-- Unified version for all r01f artifacts -->
-				<r01f.version>0.4.16</r01f.version>
-
 				<!--  Revion version for all modules -->
-				<revision>${r01f.version}</revision>
+				<!-- <revision>${r01f.version}</revision> -->
+				<revision>0.5.20</revision>
+
+				<!-- Unified version for all r01f artifacts -->
+				<r01f.version>${revision}</r01f.version>
 
 				<!-- Dependencies versions -->
 				<r01f.base.version>${r01f.version}</r01f.base.version>
 				<r01f.businessservices.version>${r01f.version}</r01f.businessservices.version>
 				<r01f.coreservices.version>${r01f.version}</r01f.coreservices.version>
-				<r01f.security.version>${r01f.version}</r01f.security.version>
+				<r01f.security.version>${revision}</r01f.security.version>
 			</properties>
 		</profile>
 

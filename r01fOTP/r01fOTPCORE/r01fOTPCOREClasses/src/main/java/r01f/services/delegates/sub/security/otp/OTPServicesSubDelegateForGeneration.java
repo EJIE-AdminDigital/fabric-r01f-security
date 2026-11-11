@@ -5,16 +5,16 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import r01f.api.interfaces.security.otp.persistence.CRUDServicesForOTPTask;
 import r01f.eventbus.EventBus;
-import r01f.model.security.otp.generation.OTPGenerationRequest;
-import r01f.model.security.otp.generation.OTPGenerationResponse;
-import r01f.model.security.otp.generation.OTPSecretFactory;
-import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
+import r01f.model.persistence.CRUDResult;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.otp.OTPTask;
 import r01f.model.security.otp.operations.OTPOperation;
 import r01f.model.security.otp.operations.OTPOperationExecResult;
 import r01f.model.security.otp.operations.OTPOperationExecResultBuilder;
-import r01f.model.security.otp.task.OTPTask;
+import r01f.model.security.otp.task.generation.OTPGenerationRequest;
+import r01f.model.security.otp.task.generation.OTPGenerationResponse;
+import r01f.model.security.otp.task.generation.OTPSecretFactory;
 import r01f.objectstreamer.Marshaller;
-import r01f.securitycontext.SecurityContext;
 import r01f.services.core.ServicesCoreModuleConfig;
 
 @Slf4j
@@ -40,7 +40,7 @@ public class OTPServicesSubDelegateForGeneration
 												.becauseClientBadRequest("Check the otp request: NO appCode provided");
 		}
 		//////////// 1  Generate OTP Task
-		OTPTask task = new OTPTask(OTPTaskOID.supplyOid());		// new task oid
+		OTPTask task = new OTPTask();		// new task oid
 		task.setAppCode(req.getAppCode());
 		task.setAppComponent(req.getAppComponent());
 		task.setRemainingRetryNum(req.getMaxRetries());
@@ -54,14 +54,15 @@ public class OTPServicesSubDelegateForGeneration
 														 req.getSecretLength()));
 		}
 		//////////// 2  Store at persistence layer
-		_taskPersistenceService.create(scx,
-									   task,
-									   req.getTTLSeconds(),TimeUnit.SECONDS).getOrThrow();
-
+		CRUDResult<OTPTask> crudResult = _taskPersistenceService.create(scx,
+																        task,
+																        req.getTTLSeconds(),TimeUnit.SECONDS);
+		OTPTask createdTask = crudResult.getOrThrow(); 
 		//////// 3 Generate Response
-		log.info("[OTPGenerator] > Created otp task with oid={} for from app/component={}/{}",
-				 task.getOid(),task.getAppCode(),task.getAppComponent());
-		OTPGenerationResponse response = new OTPGenerationResponse(task.getOid());
+		log.warn("[OTPGenerator] > Created otp task with oid={} for from app/component={}/{}",createdTask.getOid(),
+																							  req.getAppCode(),req.getAppComponent());
+
+		OTPGenerationResponse response = new OTPGenerationResponse(createdTask.getOid());
 		return OTPOperationExecResultBuilder.executed(OTPOperation.GENERATE)
 											.returning(response);
 	}

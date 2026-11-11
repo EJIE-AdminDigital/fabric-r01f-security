@@ -1,10 +1,10 @@
 package r01f.api.interfaces.security.otp;
 
-import r01f.guids.CommonOIDs.AppCode;
-import r01f.guids.CommonOIDs.AppComponent;
+import r01f.model.security.context.SecurityContext;
+import r01f.model.security.otp.OTPTask;
 import r01f.model.security.otp.oids.OTPOIDs.OTPTaskOID;
-import r01f.model.security.otp.task.OTPTask;
-import r01f.securitycontext.SecurityContext;
+import r01f.oids.CommonOIDs.AppCode;
+import r01f.oids.CommonOIDs.AppComponent;
 import r01f.services.interfaces.ServiceInterface;
 import r01f.types.contact.EMail;
 import r01f.types.contact.Phone;

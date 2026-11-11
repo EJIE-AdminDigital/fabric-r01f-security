@@ -6,10 +6,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import r01f.objectstreamer.annotations.MarshallField;
 import r01f.objectstreamer.annotations.MarshallType;
+import r01f.oids.SecurityIDs.IdentityProvider;
+import r01f.oids.SecurityIDs.SecurityToken;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakRealm;
 import r01f.security.keycloak.model.KeycloakIDs.KeycloakUserID;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
 
 @Accessors(prefix = "_")
 @MarshallType(as="keycloakUserExchangeTokenRequest")
@@ -24,12 +24,12 @@ public class KeycloakUserExchangeTokenRequest
     @Setter @Getter private SecurityToken _externalToken;
     
     @MarshallField(as="originProvider")
-    @Setter @Getter private SecurityProviderID  _originProvider; // Ej: "google", "oidc-customer", etc.
+    @Setter @Getter private IdentityProvider  _originProvider; // Ej: "google", "oidc-customer", etc.
 
     public KeycloakUserExchangeTokenRequest( final KeycloakRealm realm, 
     										 final KeycloakUserID userId, 
                                              final SecurityToken externalToken, 
-                                             final SecurityProviderID originProvider) {
+                                             final IdentityProvider originProvider) {
         super(realm);
 		 _userId = userId;
         _externalToken = externalToken;

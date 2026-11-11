@@ -4,14 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import r01f.model.security.IdentityProviderAndAuthnMethod;
+import r01f.oids.SecurityIDs.AuthenticationMethod;
+import r01f.oids.SecurityIDs.IdentityProvider;
 import r01f.patterns.ProviderFrom;
-import r01f.security.provider.SecurityProviderIdCookieStore;
-import r01f.securitycontext.SecurityIDS.SecurityProviderID;
+import r01f.security.authn.provider.cookie.AuthenticationProviderCookieStore;
 import r01f.servlet.HttpServletRequestUtils;
 import r01f.types.url.Host;
 import r01f.types.url.Url;
@@ -36,33 +37,33 @@ public abstract class LoginPageUtil {
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-	public static LoginPageUtilUrlToStep forSecurityProviderId(final SecurityProviderID securityProviderId) {
-		return new LoginPageUtilUrlToStep(req -> securityProviderId);
+	public static LoginPageUtilUrlToStep forAuthenticationProvider(final IdentityProvider identityProvider,final AuthenticationMethod authnMethod) {
+		return new LoginPageUtilUrlToStep(req -> new IdentityProviderAndAuthnMethod(identityProvider,authnMethod));
 	}
-	public static LoginPageUtilUrlToStep forSecurityProviderIdStoredAt(final SecurityProviderIdCookieStore securityProviderIdStore) {
-		return new LoginPageUtilUrlToStep(req -> securityProviderIdStore.getProviderIdFrom(req));
+	public static LoginPageUtilUrlToStep forIdentityProviderStoredAt(final AuthenticationProviderCookieStore authProviderCookieStore) {
+		return new LoginPageUtilUrlToStep(req -> authProviderCookieStore.getIdentityProviderAndAuthnMethodFrom(req));
 	}
-	public static LoginPageUtilUrlToStep forSecurityProviderId(final ProviderFrom<HttpServletRequest,SecurityProviderID> provider) {
+	public static LoginPageUtilUrlToStep forSecurityProvider(final ProviderFrom<HttpServletRequest,IdentityProviderAndAuthnMethod> provider) {
 		return new LoginPageUtilUrlToStep(provider);
 	}
 
 	@RequiredArgsConstructor
 	public static class LoginPageUtilUrlToStep {
-		private final ProviderFrom<HttpServletRequest,SecurityProviderID> _securityProviderId;
+		private final ProviderFrom<HttpServletRequest,IdentityProviderAndAuthnMethod> _identityProviderFromReq;
 
 		public LoginPageUtilUrlStep usingDefaultUrlToProvider() {
-			return new LoginPageUtilUrlStep(_securityProviderId,
+			return new LoginPageUtilUrlStep(_identityProviderFromReq,
 											request -> _defaultUrlToFor(request));
 		}
 		public LoginPageUtilUrlStep usingUrlToProvider(final ProviderFrom<HttpServletRequest,Url> urlToProvider) {
-			return new LoginPageUtilUrlStep(_securityProviderId,
+			return new LoginPageUtilUrlStep(_identityProviderFromReq,
 											urlToProvider);
 		}
 	}
 	@RequiredArgsConstructor
 	public static class LoginPageUtilUrlStep {
-		private final ProviderFrom<HttpServletRequest,SecurityProviderID> _securityProviderId;
-		private final ProviderFrom<HttpServletRequest,Url> _urlToFromRequestProvider;
+		private final ProviderFrom<HttpServletRequest,IdentityProviderAndAuthnMethod> _identityProviderAndAuthnMethodFromReq;
+		private final ProviderFrom<HttpServletRequest,Url> _urlToFromReq;
 
 		public Url loginPageUrl(final SecurityLoginFilterConfig loginFilterConfig,
 								final HttpServletRequest request) {
@@ -73,18 +74,19 @@ public abstract class LoginPageUtil {
 			//	   ... so the [user] is REDIRECTED to the /login [security REST service] endpoint
 			boolean isLogout = LoginPageUtil.isLogout(request);
 
-			SecurityProviderID securityProviderId = _securityProviderId.from(request);
+			IdentityProviderAndAuthnMethod identityProviderAndAuthnMethod = _identityProviderAndAuthnMethodFromReq.from(request);
 			if (!isLogout
-			 && securityProviderId != null
-			 && securityProviderId.isNOT(SecurityProviderID.USER_PASSWORD)) {
-				log.trace("[login filter] > user already logged-in using provider={} > redir the user to the [security provider]'s login page",
-										  securityProviderId);
+			 && identityProviderAndAuthnMethod != null
+			 && identityProviderAndAuthnMethod.getAuthnMethod()
+			 								  .isNOT(AuthenticationMethod.USER_PASSWORD)) {
+				log.trace("[login filter] > already logged-in using [identity provider / authn method]={} > redir to the [authn provider]'s login page",
+						  identityProviderAndAuthnMethod);
 
 				// compose the [security REST services] login endpoint url
 				// BEWARE! This url is a [security REST services] endpoint url like: https://host/xxxCORESecurityRESTServicesWar/api/google/users/login?to={urlTo}
 				//		   This is NOT the [security provider]'s login url (ie google login url is like: http://site/app/google/users/login?to={urlTo})
 				//		   ... the [security REST services] login endpoint will in-turn redir to the [security provider]'s login url (ie the google or xlnets one)
-				Url securityRESTServicesLoginEndPointForProvider = loginFilterConfig.getSecurityRESTServicesLoginEndPointForProviderWithId(securityProviderId);
+				Url securityRESTServicesLoginEndPointForProvider = loginFilterConfig.getSecurityRESTServicesLoginEndPointForProviderWithId(identityProviderAndAuthnMethod.getIdentityProvider(),identityProviderAndAuthnMethod.getAuthnMethod());
 
 				// the target url (the url to which the user will be redirected to after being logged-in)
 				Url urlTo = _defaultUrlToFor(request);
@@ -97,7 +99,7 @@ public abstract class LoginPageUtil {
 			else  {
 				// the login page (ui)
 				Url loginUIUrl = _loginPageUrl(loginFilterConfig,
-											   _urlToFromRequestProvider,
+											   _urlToFromReq,
 											   request);
 				urlToRedir = loginUIUrl;
 			}

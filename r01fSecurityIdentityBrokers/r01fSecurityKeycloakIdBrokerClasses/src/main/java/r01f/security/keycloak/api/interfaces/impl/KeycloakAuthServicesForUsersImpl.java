@@ -145,39 +145,38 @@ public class KeycloakAuthServicesForUsersImpl
 									                .header(KeycloakAuthConstants.CONTENT_TYPE_HEADER, KeycloakAuthConstants.APPLICATION_FORM_URLENCODED)
 									                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
 								                .build();
+	        
+	        HttpResponse<String> rawResponse = _httpClient.send(request,
+	        		                                         HttpResponse.BodyHandlers.ofString());
 	 
             //Make the HTTP request
-            HttpResponse<Supplier<KeycloakAuthRequestResponse>> response  = _httpClient.send(request,
+            /*HttpResponse<Supplier<KeycloakAuthRequestResponse>> response  = _httpClient.send(request,
 																                             HttpResponseBodyHandlerUsingMarshaller
 																                             				.using(_marshaller)
-																                             				.toMarshallTo(KeycloakAuthRequestResponse.class));
+																                             				.toMarshallTo(KeycloakAuthRequestResponse.class));*/
 
             //get response code
-            int code = response.statusCode();
-            log.warn("....response code of exchage-request op : {}" ,code );
-            //get response body
-            KeycloakAuthRequestResponse kcResponse = response.body().get();
-
+            int code = rawResponse.statusCode();
+            String rawResponseAsString  = rawResponse.body();
             //return body if code is 2xx
             if (code >= 200 && code < 300) {
+	           KeycloakAuthRequestResponse kcResponse = _marshaller.forReading()
+	            													.fromJson(rawResponseAsString, KeycloakAuthRequestResponse.class);	           
                return new KeycloakUserAuthRequestResult(realm,
             		                                    kcResponse);
             }
-             String error = response.toString();
+             String error = rawResponse.toString();
 			 return new KeycloakUserAuthRequestResult(realm,
                                                      error);
             
 	    } catch (final NotAuthorizedException e) {	     
+	    	e.printStackTrace();
 	        return _handleAuthError(exchangeRequest.getRealm(), clientIdAsString,"invalid_credentials", e);
 	    } catch (final Throwable e) {
+	    	e.printStackTrace();
 	    	return _handleAuthError(exchangeRequest.getRealm(), clientIdAsString,"Unexpected error", e);
-	    }
-		
+	    }		
 	}
-	
-	
-	
-	
 	
 	
 	public KeycloakUserAuthRequestResult _refresh(final KeycloakUserRefreshTokenRequest refreshRequest) {	

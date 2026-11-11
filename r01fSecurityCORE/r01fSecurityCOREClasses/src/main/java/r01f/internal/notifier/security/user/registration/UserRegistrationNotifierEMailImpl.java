@@ -4,10 +4,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.mail.internet.MimeMessage;
-
 import org.apache.commons.codec.Charsets;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -15,6 +11,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.mail.internet.MimeMessage;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +27,9 @@ import r01f.core.services.notifier.NotifierServiceResponse;
 import r01f.core.services.notifier.config.NotifierConfigForEMail;
 import r01f.events.security.UserRegistrationMessage;
 import r01f.internal.notifier.security.config.SecurityNotifierConfigForEMail;
+import r01f.oids.SecurityIDs.SecurityToken;
+import r01f.oids.SecurityOIDs.SecurityPrincipalOID;
 import r01f.patterns.Factory;
-import r01f.securitycontext.SecurityIDS.SecurityToken;
-import r01f.securitycontext.SecurityOIDs.UserOID;
 import r01f.types.Path;
 import r01f.types.url.Url;
 import r01f.types.url.UrlQueryString;
@@ -99,7 +98,7 @@ public class UserRegistrationNotifierEMailImpl
 	 * @return
 	 */
 	private NotifierServiceResponse<EMailRFC822Address> _sendEMailMessage(final EMailRFC822Address to,
-								                                          final UserOID userOid,final String userName,
+								                                          final SecurityPrincipalOID userOid,final String userName,
 								                                          final SecurityToken securityToken) {
 		log.info("\t-->sending email to {} using {}",
 				 to,_mailNotifier.getClass());

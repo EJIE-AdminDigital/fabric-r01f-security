@@ -69,10 +69,20 @@
 		<!-- ///////////////////////////////////////// -->
 		<!-- R01: BusinessServices:DB:EclipseLink      -->
 		<!-- ///////////////////////////////////////// -->
+		<!--
 		<dependency>
 			<groupId>r01.fabric.businessservices.core.persistence.db</groupId>
 			<artifactId>r01fDBPersistenceEclipseLinkClasses</artifactId>
 			<version>${r01f.businessservices.version}</version>
+		</dependency>
+		-->
+		<!-- ///////////////////////////////////////// -->
+		<!-- R01: BusinessServices:DB:Hibernate      -->
+		<!-- ///////////////////////////////////////// -->
+		<dependency>
+			<groupId>r01.fabric.businessservices.core.persistence.db</groupId>
+			<artifactId>r01fDBPersistenceHibernateClasses</artifactId>
+				<version>${r01f.businessservices.version}</version>
 		</dependency>
 
 		<!-- ///////////////////////////////////////// -->
@@ -133,5 +143,6 @@
 			<artifactId>freemarker</artifactId>
 			<version>2.3.32</version>
 		</dependency>
+		
 	</dependencies>
 </project>

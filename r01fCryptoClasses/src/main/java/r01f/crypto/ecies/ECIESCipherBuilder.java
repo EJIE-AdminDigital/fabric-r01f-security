@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import r01f.crypto.model.CryptoKeyPair;
+import r01f.crypto.CryptoKeyPair;
 import r01f.crypto.utils.CBCMode;
 import r01f.crypto.utils.PEMParser;
 
@@ -150,7 +150,7 @@ public class ECIESCipherBuilder {
 					throw new ECIESCipherBuilderImplException("Private Key must not be null!!");
 				}
 				
-				keyPair = new CryptoKeyPair(publicKey, privateKey);
+				keyPair = new CryptoKeyPair(publicKey,privateKey);
 			}
 			
 			return new ECIESCipherImpl(_initData.getIvLength(), keyPair);

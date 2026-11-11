@@ -29,31 +29,26 @@ public final class R01FOAuthJsonUtils {
      * @param json JSON response from introspection endpoint
      * @return true if token is marked as active
      */
-
     public static boolean containsActiveTrue(final String json) {
         if (json == null) return false;
         final String normalized = json.replaceAll("\\s+", "");
         return normalized.contains("\"active\":true");
     }
-
     /**
      * Extracts access_token value from OAuth2 token response.
      *
      * @param json JSON response from token endpoint
      * @return Access token string, or null if not found
      */
-
     public static String extractAccessToken(final String json) {
         return extractJsonString(json, "access_token");
     }
-
     /**
      * Extracts expires_in value from OAuth2 token response.
      *
      * @param json JSON response from token endpoint
      * @return Expiration time in seconds, defaults to 3600 if not found
      */
-
     public static long extractExpiresIn(final String json) {
         final String expStr = extractJsonNumber(json, "expires_in");
         if (expStr == null) return 3600;
@@ -63,7 +58,6 @@ public final class R01FOAuthJsonUtils {
             return 3600;
         }
     }
-
     private static String extractJsonString(final String json, final String key) {
         if (json == null) return null;
         final int start = json.indexOf("\"" + key + "\"");
@@ -74,7 +68,6 @@ public final class R01FOAuthJsonUtils {
         if (q1 < 0 || q2 < 0) return null;
         return json.substring(q1 + 1, q2);
     }
-
     private static String extractJsonNumber(final String json, final String key) {
         if (json == null) return null;
         final int start = json.indexOf("\"" + key + "\"");
